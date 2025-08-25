@@ -1,26 +1,54 @@
-@import "tailwindcss";
+/* src/app/globals.css */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/**
+ * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
+ * @version 1.0.0
+ * @description Global stylesheet for the Curcumin Spirulina project.
+ *              Initializes Tailwind CSS v3 directives and defines the foundational
+ *              CSS variables for theming (light/dark mode) and design tokens like border-radius.
+ */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 255 255 255; /* #FFFFFF */
+    --foreground: 23 23 23; /* #171717 */
+
+    --radius: 0.75rem; /* 12px */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 10 10 10; /* #0a0a0a */
+      --foreground: 237 237 237; /* #ededed */
+    }
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/**
+ * MEJORA CONTINUA
+ *
+ * @version 1.0.0
+ *
+ * ---
+ *
+ * @section Melhorias Futuras
+ *
+ * ((Vigente)) @priority Low - THEME VARIABLE EXPANSION: Expandir o sistema de variáveis CSS para incluir todos os tokens de cor semânticos (brand-primary, text-secondary, etc.), permitindo uma troca de temas mais granular e a aplicação de temas alternativos com facilidade.
+ *
+ * ---
+ *
+ * @section Melhorias Adicionadas
+ *
+ * ((Implementada)) @version 1.0.0 - REFACTOR A V3: O arquivo foi reescrito para usar as diretivas `@tailwind` canônicas da v3, removendo a sintaxe `@import` e `@theme` da v4.
+ * ((Implementada)) @version 1.0.0 - CSS VARIABLE SYSTEM: A definição de cores e `border-radius` foi centralizada em variáveis CSS dentro de uma camada `@layer base`, que é a prática recomendada para injetar estilos de base customizados em Tailwind CSS v3.
+ *
+ */

@@ -1,0 +1,35 @@
+
+{
+  "it-IT": {
+    "originalPriceLabel": "PREZZO ORIGINALE:",
+    "discountedPriceLabel": "PREZZO SCONTATO:",
+    "countdownTitle": "Lo sconto termina tra:",
+    "countdownOre": "ORE",
+    "countdownMinuti": "MINUTI",
+    "countdownSecondi": "SECONDI"
+  },
+  "en-US": {
+    "originalPriceLabel": "ORIGINAL PRICE:",
+    "discountedPriceLabel": "DISCOUNTED PRICE:",
+    "countdownTitle": "The discount ends in:",
+    "countdownOre": "HOURS",
+    "countdownMinuti": "MINUTES",
+    "countdownSecondi": "SECONDS"
+  },
+  "es-ES": {
+    "originalPriceLabel": "PRECIO ORIGINAL:",
+    "discountedPriceLabel": "PRECIO CON DESCUENTO:",
+    "countdownTitle": "El descuento termina en:",
+    "countdownOre": "HORAS",
+    "countdownMinuti": "MINUTOS",
+    "countdownSecondi": "SEGUNDOS"
+  },
+  "pt-BR": {
+    "originalPriceLabel": "PREÇO ORIGINAL:",
+    "discountedPriceLabel": "PREÇO COM DESCONTO:",
+    "countdownTitle": "O desconto termina em:",
+    "countdownOre": "HORAS",
+    "countdownMinuti": "MINUTOS",
+    "countdownSecondi": "SEGUNDOS"
+  }
+}

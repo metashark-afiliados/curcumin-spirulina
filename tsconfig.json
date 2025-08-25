@@ -1,3 +1,4 @@
+// tsconfig.json
 {
   "compilerOptions": {
     "target": "ES2017",
@@ -20,8 +21,28 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["@testing-library/jest-dom"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "vitest.config.mts", "next.config.mjs"],
   "exclude": ["node_modules"]
 }
+
+/**
+ * MEJORA CONTINUA
+ *
+ * @version 1.0.1
+ *
+ * ---
+ *
+ * @section Melhorias Futuras
+ *
+ * ((Vigente)) @priority Low - STRICTER TYPE CHECKING: Avaliar a ativação de flags de compilação mais estritas como `noUncheckedIndexedAccess` para aumentar ainda mais a segurança de tipos do projeto à medida que ele cresce em complexidade.
+ *
+ * ---
+ *
+ * @section Melhorias Adicionadas
+ *
+ * ((Implementada)) @version 1.0.1 - JEST-DOM TYPE DEFINITIONS: Adicionada a entrada `\"types\": [\"@testing-library/jest-dom\"]` às opções do compilador. Esta correção crítica informa ao TypeScript sobre as definições de tipo globais para os matchers do jest-dom, resolvendo os erros de tipo em todo o ambiente de teste.
+ *
+ */
