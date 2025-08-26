@@ -1,3 +1,6 @@
+// src/app/[locale]/page.tsx
+import { unstable_setRequestLocale } from "next-intl/server";
+
 import { GeoIPLocator } from "@/components/diagnostic/GeoIPLocator";
 import { BenefitsSection } from "@/components/ui/BenefitsSection";
 import { FooterSection } from "@/components/ui/FooterSection";
@@ -8,10 +11,17 @@ import { TreatmentCycleSection } from "@/components/ui/TreatmentCycleSection";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.0.0
+ * @version 2.1.0
  * @description Orquestador principal de la página de aterrizaje. Ensambla la página completa.
  */
-export default function Home() {
+export default function Home({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  // Valida y "congela" el locale para el renderizado estático
+  unstable_setRequestLocale(locale);
+
   return (
     <main className="bg-gradient-to-b from-brand-primary to-brand-primary-dark">
       <GeoIPLocator />
@@ -28,9 +38,10 @@ export default function Home() {
 /**
  * MEJORA CONTINUA
  *
- * @version 2.0.0
+ * @version 2.1.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 2.0.0 - ENSAMBLAJE COMPLETO: Todos los placeholders han sido reemplazados por los componentes de producción, completando la construcción de la estructura visual de la página.
+ * ((Implementada)) @version 2.1.0 - SUPORTE A RENDERIZAÇÃO ESTÁTICA (SSG): Adicionada a chamada a `unstable_setRequestLocale`. Esta é uma medida de conformidade necessária para garantir que a página possa ser gerada estaticamente pelo layout pai, resolvendo o erro de build em Vercel.
+ * ((Implementada)) @version 2.0.0 - ENSAMBLAJE COMPLETO.
  */
