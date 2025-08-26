@@ -6,12 +6,15 @@ import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 
 import { TestimonialCard } from "@/components/ui/TestimonialCard";
+import { AnimationWrapper } from "./AnimationWrapper";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.2.0
+ * @version 2.0.0
  * @description Componente molecular que renderiza una sección de testimonios
- *              como un carrusel interactivo, utilizando imágenes de placeholder.
+ *              como un carrusel interactivo. Ahora integra la animación de
+ *              entrada para una experiencia de usuario moderna, respetando la
+ *              arquitectura RSC.
  */
 export function TestimonialsSection() {
   const t = useTranslations("components.ui.TestimonialsSection");
@@ -36,52 +39,44 @@ export function TestimonialsSection() {
   ];
 
   return (
-    <section className="bg-white/10 py-16 backdrop-blur-md">
-      <div className="container">
-        <h2 className="mb-12 text-center text-4xl font-bold text-white">
-          {t("mainTitle")}
-        </h2>
+    <AnimationWrapper>
+      <section className="bg-white/10 py-16 backdrop-blur-md">
+        <div className="container">
+          <h2 className="mb-12 text-center text-4xl font-bold text-white">
+            {t("mainTitle")}
+          </h2>
 
-        <div className="overflow-hidden" ref={emblaRef}>
-          <div className="flex">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.author}
-                className="min-w-0 flex-shrink-0 flex-grow-0 basis-full"
-              >
-                <TestimonialCard {...testimonial} />
-              </div>
-            ))}
+          <div className="overflow-hidden" ref={emblaRef}>
+            <div className="flex">
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.author}
+                  className="min-w-0 flex-shrink-0 flex-grow-0 basis-full"
+                >
+                  <TestimonialCard {...testimonial} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 flex justify-center gap-4">
+            <button
+              onClick={scrollPrev}
+              className="rounded-full bg-white/20 p-3 text-white transition hover:bg-white/30"
+              aria-label="Anterior testimonio"
+            >
+              &#8592;
+            </button>
+            <button
+              onClick={scrollNext}
+              className="rounded-full bg-white/20 p-3 text-white transition hover:bg-white/30"
+              aria-label="Siguiente testimonio"
+            >
+              &#8594;
+            </button>
           </div>
         </div>
-
-        <div className="mt-8 flex justify-center gap-4">
-          <button
-            onClick={scrollPrev}
-            className="rounded-full bg-white/20 p-3 text-white transition hover:bg-white/30"
-            aria-label="Anterior testimonio"
-          >
-            &#8592;
-          </button>
-          <button
-            onClick={scrollNext}
-            className="rounded-full bg-white/20 p-3 text-white transition hover:bg-white/30"
-            aria-label="Siguiente testimonio"
-          >
-            &#8594;
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </AnimationWrapper>
   );
 }
-
-/**
- * MEJORA CONTINUA
- *
- * @version 1.2.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.2.0 - CORREÇÃO DE NAMESPACE CRÍTICA: A chamada `useTranslations` foi atualizada para usar o namespace aninhado completo (`components.ui.TestimonialsSection`). Esta é a correção definitiva para o erro `MISSING_MESSAGE` durante o build, alinhando o componente com a arquitetura de i18n IMAS.
- */
