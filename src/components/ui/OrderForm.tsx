@@ -1,4 +1,3 @@
-// src/components/ui/OrderForm.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,8 +34,9 @@ function SubmitButton() {
       className="w-full !mt-6 bg-red-600 hover:bg-red-700"
       disabled={pending}
       aria-disabled={pending}
+      loading={pending} // Conecta el estado 'pending' al nuevo estado 'loading'
     >
-      {pending ? t("ctaButtonLoading") : t("ctaButton")}
+      {t("ctaButton")}
     </Button>
   );
 }
@@ -81,7 +81,7 @@ export function OrderForm() {
   targetDate.setHours(targetDate.getHours() + 3);
 
   return (
-    <div className="bg-green-800 bg-opacity-80 backdrop-blur-md rounded-lg p-6 shadow-2xl border border-white/20">
+    <div className="rounded-lg border border-white/20 bg-green-800 bg-opacity-80 p-6 shadow-2xl backdrop-blur-md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <CountdownTimer targetDate={targetDate} />
         <PriceDisplay originalPrice={78} discountedPrice={39} locale="it-IT" />
@@ -92,14 +92,8 @@ export function OrderForm() {
           icon={User}
           placeholder={t("namePlaceholder")}
           {...register("name")}
-          aria-invalid={!!errors.name}
-          aria-describedby="name-error"
+          error={errors.name?.message} // Pasa el mensaje de error al componente
         />
-        {errors.name && (
-          <p id="name-error" className="text-red-300 text-sm mt-1">
-            {errors.name.message}
-          </p>
-        )}
 
         <FormInput
           id="phone"
@@ -108,14 +102,8 @@ export function OrderForm() {
           type="tel"
           placeholder={t("phonePlaceholder")}
           {...register("phone")}
-          aria-invalid={!!errors.phone}
-          aria-describedby="phone-error"
+          error={errors.phone?.message} // Pasa el mensaje de error al componente
         />
-        {errors.phone && (
-          <p id="phone-error" className="text-red-300 text-sm mt-1">
-            {errors.phone.message}
-          </p>
-        )}
 
         <SubmitButton />
 
@@ -127,13 +115,3 @@ export function OrderForm() {
     </div>
   );
 }
-
-/**
- * MEJORA CONTINUA
- *
- * @version 2.1.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 2.1.0 - CORREÇÃO DE ARQUITETURA IMAS: As chamadas `useTranslations` foram atualizadas para usar o namespace aninhado completo (`components.ui.OrderForm`). Esta padronização é crítica para a coerência arquitetônica e para resolver o erro `MISSING_MESSAGE` no build.
- */

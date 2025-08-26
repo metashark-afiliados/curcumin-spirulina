@@ -7,14 +7,10 @@ import { Toaster } from "react-hot-toast";
 import { locales } from "@/lib/navigation";
 import "@/app/globals.css";
 
-/**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.5.0
- * @description Layout específico del locale. Habilita la renderización estática
- *              y configura los proveedores de contexto, tipografía y estilos.
- */
-
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter", // Define la variable CSS para la fuente
+});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -32,7 +28,8 @@ export default function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className={inter.className}>
+      {/* Se aplica la clase de la fuente al body */}
+      <body className={`${inter.variable} font-sans`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <Toaster position="top-center" />
@@ -41,13 +38,3 @@ export default function LocaleLayout({
     </html>
   );
 }
-
-/**
- * MEJORA CONTINUA
- *
- * @version 2.5.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 2.5.0 - RESTAURAÇÃO DO PADRÃO CANÔNICO: A lógica de `pick` foi removida. O provedor `NextIntlClientProvider` agora recebe o objeto `messages` completo, conforme a implementação padrão e robusta de `next-intl`. Esta simplificação resolve a causa raiz dos erros `MISSING_MESSAGE` em Client Components durante o build.
- */

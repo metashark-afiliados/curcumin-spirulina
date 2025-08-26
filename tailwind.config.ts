@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.0.0
+ * @version 2.1.0
  * @description Manifiesto de Branding y configuración del sistema de diseño para Tailwind CSS.
  *              Define la paleta de colores, tipografía y otras variables de diseño
  *              globales del proyecto, asegurando una consistencia visual de élite.
@@ -37,11 +38,22 @@ const config: Config = {
           },
           border: "#FBBF24", // Amarillo/Dorado para bordes y acentos
         },
+        feedback: {
+          error: "#DC2626", // Rojo para errores de validación
+        },
+        on_brand: "#FFFFFF", // Color de texto para usar sobre colores de marca
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      fontFamily: {
+        sans: ["var(--font-inter)", ...fontFamily.sans],
+      },
+      animation: {
+        "infinite-scroll": "infinite-scroll 25s linear infinite",
+      },
+      keyframes: {
+        "infinite-scroll": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
+        },
       },
     },
   },
@@ -49,20 +61,3 @@ const config: Config = {
 };
 
 export default config;
-
-/**
- * MEJORA CONTINUA
- *
- * @version 2.0.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority High - TIPOGRAFÍA PERSONALIZADA: Integrar la fuente `Inter` de Google Fonts a través de `next/font` y registrarla aquí en `theme.extend.fontFamily` para que pueda ser utilizada con clases como `font-sans`.
- * ((Vigente)) @priority Medium - ANIMACIONES Y TRANSICIONES: Definir un conjunto de animaciones de entrada (`fade-in`, `slide-up`) para ser reutilizadas en los componentes, mejorando la experiencia del usuario.
- *
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 2.0.0 - MANIFIESTO DE BRANDING SEMÁNTICO: Se ha establecido una paleta de colores semántica (`brand-primary`, `brand-accent`, etc.) extraída directamente del diseño de referencia. Esto desacopla los componentes de los colores específicos, permitiendo cambios de branding globales desde un único SSoT.
- * ((Implementada)) @version 2.0.0 - CONFIGURACIÓN DE CONTENEDOR CENTRALIZADO: Se ha preconfigurado la clase `.container` para centrar el contenido automáticamente, una práctica de élite para mantener layouts consistentes.
- */
