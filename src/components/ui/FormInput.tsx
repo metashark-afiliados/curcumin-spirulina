@@ -12,7 +12,6 @@ export interface FormInputProps
   id: string;
   label: string;
   icon?: LucideIcon;
-  containerClassName?: string;
   error?: string;
 }
 
@@ -26,13 +25,14 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
         <Label htmlFor={id} className="sr-only">
           {label}
         </Label>
-        {/* Contenedor del gradiente para el efecto de borde */}
         <motion.div
           className="relative rounded-lg p-[1.5px] bg-gray-400 transition-all duration-300"
           animate={{
             background: isFocused
               ? "linear-gradient(90deg, #FBBF24, #F97316)"
-              : "linear-gradient(90deg, #9CA3AF, #9CA3AF)",
+              : error
+                ? "linear-gradient(90deg, #DC2626, #B91C1C)"
+                : "linear-gradient(90deg, #9CA3AF, #9CA3AF)",
           }}
         >
           <div className="relative flex items-center rounded-[6px] bg-white">
@@ -75,3 +75,14 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
 FormInput.displayName = "FormInput";
 
 export { FormInput };
+
+/**
+ * MEJORA CONTINUA
+ *
+ * @version 2.0.0
+ * ---
+ * @section Melhorias Adicionadas
+ *
+ * ((Implementada)) @version 2.0.0 - BORDE CON GRADIENTE INTERACTIVO: Implementa un efecto visual de vanguardia donde el borde del campo se ilumina con un gradiente al obtener el foco, y cambia a un color de error cuando hay una validación fallida, mejorando drásticamente el feedback al usuario.
+ * ((Implementada)) @version 2.0.0 - ARQUITECTURA ACCESIBLE: Mantiene la asociación entre `Label` y `input` y utiliza atributos `aria-*` para comunicar el estado de validación a las tecnologías de asistencia.
+ */
