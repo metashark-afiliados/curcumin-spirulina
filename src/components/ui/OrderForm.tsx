@@ -1,3 +1,4 @@
+// src/components/ui/OrderForm.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +25,7 @@ const OrderFormSchema = z.object({
 type OrderFormData = z.infer<typeof OrderFormSchema>;
 
 function SubmitButton() {
-  const t = useTranslations("OrderForm");
+  const t = useTranslations("components.ui.OrderForm");
   const { pending } = useFormStatus();
 
   return (
@@ -41,7 +42,7 @@ function SubmitButton() {
 }
 
 export function OrderForm() {
-  const t = useTranslations("OrderForm");
+  const t = useTranslations("components.ui.OrderForm");
   const {
     register,
     handleSubmit,
@@ -130,16 +131,9 @@ export function OrderForm() {
 /**
  * MEJORA CONTINUA
  *
- * @version 2.0.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority Medium - VALIDAÇÃO INTERNACIONALIZADA: Mover as mensagens de erro do schema Zod para os arquivos de i18n para uma internacionalização completa.
- *
+ * @version 2.1.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 2.0.0 - INTEGRAÇÃO COM SERVER ACTIONS: O formulário agora utiliza `useFormState` para invocar uma Server Action, moviendo la lógica de negocio al servidor y mejorando la seguridad.
- * ((Implementada)) @version 2.0.0 - GESTIÓN DE ESTADO DE ÉLITE: Utiliza `useFormStatus` en un componente `SubmitButton` desacoplado para manejar el estado de carga, y `useEffect` para reaccionar a la respuesta de la acción y mostrar notificaciones con `react-hot-toast`.
- * ((Implementada)) @version 2.0.0 - PROGRESSIVE ENHANCEMENT: El formulario sigue funcionando sin JavaScript (aunque sin validación de cliente) gracias al uso de `formAction`, adhiriéndose a los principios de mejora progresiva.
+ * ((Implementada)) @version 2.1.0 - CORREÇÃO DE ARQUITETURA IMAS: As chamadas `useTranslations` foram atualizadas para usar o namespace aninhado completo (`components.ui.OrderForm`). Esta padronização é crítica para a coerência arquitetônica e para resolver o erro `MISSING_MESSAGE` no build.
  */

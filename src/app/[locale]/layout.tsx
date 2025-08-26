@@ -5,12 +5,11 @@ import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 
 import { locales } from "@/lib/navigation";
-import { pick } from "@/lib/utils";
 import "@/app/globals.css";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.4.0
+ * @version 2.5.0
  * @description Layout específico del locale. Habilita la renderización estática
  *              y configura los proveedores de contexto, tipografía y estilos.
  */
@@ -31,19 +30,10 @@ export default function LocaleLayout({
   unstable_setRequestLocale(locale);
   const messages = useMessages();
 
-  // Extraer solo los mensajes para Client Components
-  const clientComponentMessages = pick(messages, [
-    "components.ui.OrderForm",
-    "components.ui.TestimonialsSection",
-  ]);
-
   return (
     <html lang={locale}>
       <body className={inter.className}>
-        <NextIntlClientProvider
-          locale={locale}
-          messages={clientComponentMessages}
-        >
+        <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <Toaster position="top-center" />
         </NextIntlClientProvider>
@@ -55,9 +45,9 @@ export default function LocaleLayout({
 /**
  * MEJORA CONTINUA
  *
- * @version 2.4.0
+ * @version 2.5.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 2.4.0 - ENTREGA DE MENSAGENS CIRÚRGICA: O layout agora utiliza um helper `pick` para extrair e passar ao `NextIntlClientProvider` apenas os namespaces de mensagens que são consumidos por Client Components. Esta é a correção arquitetônica definitiva que resolve o erro de build `MISSING_MESSAGE`, garantindo que os Client Components recebam os dados na estrutura esperada, sem sobrecarregar o payload do cliente.
+ * ((Implementada)) @version 2.5.0 - RESTAURAÇÃO DO PADRÃO CANÔNICO: A lógica de `pick` foi removida. O provedor `NextIntlClientProvider` agora recebe o objeto `messages` completo, conforme a implementação padrão e robusta de `next-intl`. Esta simplificação resolve a causa raiz dos erros `MISSING_MESSAGE` em Client Components durante o build.
  */
