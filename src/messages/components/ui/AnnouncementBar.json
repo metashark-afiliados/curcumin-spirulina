@@ -1,14 +1,14 @@
 {
   "it-IT": {
-    "message": "Spedizione gratuita in tutta Italia per un periodo di tempo limitato! Ordina ora."
+    "message": "Offerta a tempo limitato: Spedizione gratuita e pagamento alla consegna!"
   },
   "en-US": {
-    "message": "Free shipping across the US for a limited time! Order now."
+    "message": "Limited Time Offer: Free shipping and pay on delivery!"
   },
   "es-ES": {
-    "message": "¡Envío gratuito en toda España por tiempo limitado! Haz tu pedido ahora."
+    "message": "¡Oferta por tiempo limitado! Envío gratuito y pago contra entrega."
   },
   "pt-BR": {
-    "message": "Frete grátis para todo o Brasil por tempo limitado! Peça agora."
+    "message": "Oferta por tempo limitado: Frete grátis e pagamento na entrega!"
   }
 }
