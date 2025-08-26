@@ -1,15 +1,16 @@
-import { useTranslations } from "next-intl";
+// src/components/ui/TreatmentCycleSection.tsx
+import { getTranslations } from "next-intl/server";
 
 import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
+ * @version 1.1.0
  * @description Componente molecular que ensambla y muestra una cuadrícula
  *              de los diferentes ciclos de tratamiento del producto.
  */
-export function TreatmentCycleSection() {
-  const t = useTranslations("TreatmentCycleSection");
+export async function TreatmentCycleSection() {
+  const t = await getTranslations("components.ui.TreatmentCycleSection");
 
   const cycles = [
     {
@@ -30,7 +31,7 @@ export function TreatmentCycleSection() {
       description: t("cycle3.description"),
       variant: "success",
     },
-  ] as const; // `as const` para inferir `variant` como string literal
+  ] as const;
 
   return (
     <section className="py-16">
@@ -53,3 +54,13 @@ export function TreatmentCycleSection() {
     </section>
   );
 }
+
+/**
+ * MEJORA CONTINUA
+ *
+ * @version 1.1.0
+ * ---
+ * @section Melhorias Adicionadas
+ *
+ * ((Implementada)) @version 1.1.0 - ARQUITETURA DE SERVER COMPONENT DE ÉLITE: O componente foi refatorizado para ser `async` e usar `await getTranslations("components.ui.TreatmentCycleSection")`. A utilização do namespace aninhado completo é a correção definitiva para o erro `MISSING_MESSAGE` durante o build, alinhando o componente com a arquitetura de i18n IMAS.
+ */

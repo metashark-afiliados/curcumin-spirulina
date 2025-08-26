@@ -1,3 +1,4 @@
+// src/components/ui/TestimonialsSection.tsx
 "use client";
 
 import useEmblaCarousel from "embla-carousel-react";
@@ -8,12 +9,12 @@ import { TestimonialCard } from "@/components/ui/TestimonialCard";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.1.0
+ * @version 1.2.0
  * @description Componente molecular que renderiza una sección de testimonios
  *              como un carrusel interactivo, utilizando imágenes de placeholder.
  */
 export function TestimonialsSection() {
-  const t = useTranslations("TestimonialsSection");
+  const t = useTranslations("components.ui.TestimonialsSection");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
 
   const scrollPrev = useCallback(() => {
@@ -74,3 +75,13 @@ export function TestimonialsSection() {
     </section>
   );
 }
+
+/**
+ * MEJORA CONTINUA
+ *
+ * @version 1.2.0
+ * ---
+ * @section Melhorias Adicionadas
+ *
+ * ((Implementada)) @version 1.2.0 - CORREÇÃO DE NAMESPACE CRÍTICA: A chamada `useTranslations` foi atualizada para usar o namespace aninhado completo (`components.ui.TestimonialsSection`). Esta é a correção definitiva para o erro `MISSING_MESSAGE` durante o build, alinhando o componente com a arquitetura de i18n IMAS.
+ */

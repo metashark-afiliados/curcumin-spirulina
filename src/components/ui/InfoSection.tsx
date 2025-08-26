@@ -1,14 +1,15 @@
-import { useTranslations } from "next-intl";
+// src/components/ui/InfoSection.tsx
+import { getTranslations } from "next-intl/server";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
+ * @version 1.2.0
  * @description Componente molecular que renderiza una sección de contenido
  *              informativo con títulos y párrafos, diseñada para explicar
  *              aspectos clave del producto.
  */
-export function InfoSection() {
-  const t = useTranslations("InfoSection");
+export async function InfoSection() {
+  const t = await getTranslations("components.ui.InfoSection");
 
   return (
     <section className="bg-white py-16">
@@ -46,15 +47,10 @@ export function InfoSection() {
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority Low - ILUSTRACIONES O ÍCONOS: Añadir elementos visuales (íconos o pequeñas ilustraciones) junto a cada subtítulo para romper la monotonía del texto y mejorar la retención de la información.
- *
+ * @version 1.2.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.0 - JERARQUÍA VISUAL CLARA: Utiliza una estructura semántica de `h2` y `h3` y consume los colores del Manifiesto de Branding para crear una jerarquía de información fácil de escanear por el usuario.
- * ((Implementada)) @version 1.0.0 - FULL INTERNACIONALIZACIÓN: Todo el contenido textual se obtiene de la capa de i18n.
+ * ((Implementada)) @version 1.2.0 - CORREÇÃO DE NAMESPACE CRÍTICA: A chamada `getTranslations` foi atualizada para usar o namespace aninhado completo (`components.ui.InfoSection`), alinhando o componente com a arquitetura IMAS e corrigindo o erro `MISSING_MESSAGE` durante o build.
+ * ((Implementada)) @version 1.1.0 - ARQUITETURA DE SERVER COMPONENT DE ÉLITE.
  */

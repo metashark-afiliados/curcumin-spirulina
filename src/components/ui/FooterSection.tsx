@@ -1,13 +1,14 @@
-import { useTranslations } from "next-intl";
+// src/components/ui/FooterSection.tsx
+import { getTranslations } from "next-intl/server";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
+ * @version 1.2.0
  * @description Componente molecular que renderiza el pie de página de la aplicación,
  *              conteniendo la información de copyright y los descargos de responsabilidad.
  */
-export function FooterSection() {
-  const t = useTranslations("FooterSection");
+export async function FooterSection() {
+  const t = await getTranslations("components.ui.FooterSection");
   const currentYear = new Date().getFullYear();
 
   return (
@@ -25,10 +26,10 @@ export function FooterSection() {
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
+ * @version 1.2.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.0 - CÁLCULO DINÁMICO DEL AÑO: El año del copyright se calcula dinámicamente, asegurando que siempre esté actualizado sin necesidad de mantenimiento manual.
- * ((Implementada)) @version 1.0.0 - FULL INTERNACIONALIZACIÓN: Todo el contenido textual se consume desde la capa de i18n.
+ * ((Implementada)) @version 1.2.0 - CORREÇÃO DE NAMESPACE CRÍTICA: A chamada `getTranslations` foi atualizada para usar o namespace aninhado completo (`components.ui.FooterSection`), alinhando o componente com a arquitetura IMAS e corrigindo o erro `MISSING_MESSAGE` durante o build.
+ * ((Implementada)) @version 1.1.0 - ARQUITETURA DE SERVER COMPONENT DE ÉLITE.
  */

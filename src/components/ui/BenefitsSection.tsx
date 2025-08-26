@@ -1,3 +1,4 @@
+// src/components/ui/BenefitsSection.tsx
 import {
   Apple,
   BrainCircuit,
@@ -6,18 +7,18 @@ import {
   Sparkles,
   ThumbsUp,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { BenefitPill } from "@/components/ui/BenefitPill";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
+ * @version 1.2.0
  * @description Componente molecular que ensambla y muestra una cuadrícula
  *              de los beneficios clave del producto.
  */
-export function BenefitsSection() {
-  const t = useTranslations("BenefitsSection");
+export async function BenefitsSection() {
+  const t = await getTranslations("components.ui.BenefitsSection");
 
   const benefits = [
     { icon: Scale, title: t("pill1.title"), subtitle: t("pill1.subtitle") },
@@ -65,15 +66,10 @@ export function BenefitsSection() {
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority Low - ORIGEN DE DATOS CENTRALIZADO: Mover la matriz `benefits` a un archivo de configuración central para desacoplar aún más los datos de la presentación.
- *
+ * @version 1.2.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.1 ENSAMBLAJE DE COMPONENTES ATÓMICOS: Orquesta múltiples `BenefitPill` en un layout responsive (`grid`), demostrando la filosofía LEGO en acción.
- * ((Implementada)) @version 1.0.0 - FULL INTERNACIONALIZACIÓN: Todos los textos se consumen desde la capa de i18n, permitiendo una fácil traducción.
+ * ((Implementada)) @version 1.2.0 - CORREÇÃO DE NAMESPACE CRÍTICA: A chamada `getTranslations` foi atualizada para usar o namespace aninhado completo (`components.ui.BenefitsSection`). Esta é a correção definitiva para o erro `MISSING_MESSAGE` durante o build, alinhando o componente com a arquitetura de i18n IMAS.
+ * ((Implementada)) @version 1.1.0 - ARQUITETURA DE SERVER COMPONENT DE ÉLITE.
  */
