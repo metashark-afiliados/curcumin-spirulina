@@ -1,4 +1,3 @@
-
 {
   "it-IT": {
     "originalPriceLabel": "PREZZO ORIGINALE:",
@@ -6,7 +5,16 @@
     "countdownTitle": "Lo sconto termina tra:",
     "countdownOre": "ORE",
     "countdownMinuti": "MINUTI",
-    "countdownSecondi": "SECONDI"
+    "countdownSecondi": "SECONDI",
+    "ctaButton": "ORDINARE CURCUMIN SPIRULINA PIPERINE SAFFRON",
+    "ctaButtonLoading": "INVIO IN CORSO...",
+    "namePlaceholder": "Nome completo",
+    "phonePlaceholder": "Numero di telefono",
+    "contactlessDelivery": "Pagamento alla consegna",
+    "freeDelivery": "SPEDIZIONE GRATUITA",
+    "submitSuccess": "Ordine ricevuto! Ti contatteremo a breve.",
+    "submitError": "Si è verificato un errore. Riprova.",
+    "validationError": "Controlla i campi e riprova."
   },
   "en-US": {
     "originalPriceLabel": "ORIGINAL PRICE:",
@@ -14,7 +22,16 @@
     "countdownTitle": "The discount ends in:",
     "countdownOre": "HOURS",
     "countdownMinuti": "MINUTES",
-    "countdownSecondi": "SECONDS"
+    "countdownSecondi": "SECONDS",
+    "ctaButton": "ORDER CURCUMIN SPIRULINA PIPERINE SAFFRON",
+    "ctaButtonLoading": "SENDING...",
+    "namePlaceholder": "Full name",
+    "phonePlaceholder": "Phone number",
+    "contactlessDelivery": "Payment on delivery",
+    "freeDelivery": "FREE SHIPPING",
+    "submitSuccess": "Order received! We will contact you shortly.",
+    "submitError": "An error occurred. Please try again.",
+    "validationError": "Please check the fields and try again."
   },
   "es-ES": {
     "originalPriceLabel": "PRECIO ORIGINAL:",
@@ -22,7 +39,16 @@
     "countdownTitle": "El descuento termina en:",
     "countdownOre": "HORAS",
     "countdownMinuti": "MINUTOS",
-    "countdownSecondi": "SEGUNDOS"
+    "countdownSecondi": "SEGUNDOS",
+    "ctaButton": "ORDENAR CURCUMIN SPIRULINA PIPERINE SAFFRON",
+    "ctaButtonLoading": "ENVIANDO...",
+    "namePlaceholder": "Nombre completo",
+    "phonePlaceholder": "Número de teléfono",
+    "contactlessDelivery": "Pago contra entrega",
+    "freeDelivery": "ENVÍO GRATIS",
+    "submitSuccess": "¡Pedido recibido! Te contactaremos en breve.",
+    "submitError": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+    "validationError": "Por favor, revisa los campos e inténtalo de nuevo."
   },
   "pt-BR": {
     "originalPriceLabel": "PREÇO ORIGINAL:",
@@ -30,6 +56,15 @@
     "countdownTitle": "O desconto termina em:",
     "countdownOre": "HORAS",
     "countdownMinuti": "MINUTOS",
-    "countdownSecondi": "SEGUNDOS"
+    "countdownSecondi": "SEGUNDOS",
+    "ctaButton": "PEDIR CURCUMIN SPIRULINA PIPERINE SAFFRON",
+    "ctaButtonLoading": "ENVIANDO...",
+    "namePlaceholder": "Nome completo",
+    "phonePlaceholder": "Número de telefone",
+    "contactlessDelivery": "Pagamento na entrega",
+    "freeDelivery": "FRETE GRÁTIS",
+    "submitSuccess": "Pedido recebido! Entraremos em contato em breve.",
+    "submitError": "Ocorreu um erro. Por favor, tente novamente.",
+    "validationError": "Por favor, verifique os campos e tente novamente."
   }
 }

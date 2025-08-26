@@ -1,35 +1,56 @@
 // tests/setup.ts
 import "@testing-library/jest-dom";
+import { toHaveNoViolations } from "jest-axe";
+import { expect, vi } from "vitest";
+
+import type * as orderActions from "@/app/actions/order.actions";
+
+// Extiende el `expect` de Vitest con los matchers de jest-axe
+expect.extend(toHaveNoViolations);
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
+ * @version 1.3.0
  * @description Global setup file for the Vitest testing environment.
- *              This file is executed before each test suite, ensuring a consistent
- *              and well-defined testing context. Its primary responsibility is to
- *              extend the Vitest `expect` utility with DOM-specific matchers
- *              from `@testing-library/jest-dom`.
- * @see https://vitest.dev/config/#setupfiles
- * @see https://github.com/testing-library/jest-dom
+ *              Extiende el `expect` de Vitest para incluir matchers de
+ *              `@testing-library/jest-dom` y `jest-axe`, y establece mocks
+ *              globales para APIs de React no disponibles en JSDOM.
  */
+
+// --- Mock Global de Hooks de Servidor ---
+vi.mock("react-dom", async (importOriginal) => {
+  // CORRECCIÓN: Importar el módulo original para no destruir su funcionalidad interna.
+  const mod = await vi.importActual<typeof import("react-dom")>("react-dom");
+  return {
+    ...mod,
+    useFormState: (
+      action: unknown,
+      initialState: orderActions.FormState
+    ): [orderActions.FormState, (formData: FormData) => void] => [
+      initialState,
+      (formData: FormData) => {
+        // Implementación mock que no hace nada.
+      },
+    ],
+    useFormStatus: () => ({
+      pending: false,
+      data: null,
+      method: null,
+      action: null,
+    }),
+  };
+});
+// --- Fin del Mock Global ---
 
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
- *
+ * @version 1.3.0
  * ---
- *
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority High - MSW INTEGRATION: Integrar o Mock Service Worker (MSW) para interceptar e simular requisições de API de forma robusta durante os testes de integração, garantindo que os testes não dependam de um backend real.
- * ((Vigente)) @priority Medium - GLOBAL MOCKS: Implementar mocks para APIs do navegador que não são suportadas pelo JSDOM, como `localStorage` ou `matchMedia`, caso os componentes comecem a depender delas.
- *
- * ---
- *
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.0 - JEST-DOM INTEGRATION: Importação global dos matchers do `jest-dom`, que estendem o `expect` do Vitest e permitem asserções de DOM mais semânticas e legíveis (ex: `.toBeVisible()`, `.toHaveTextContent()`).
- * ((Implementada)) @version 1.0.0 - CENTRALIZED TEST SETUP: A criação deste arquivo estabelece um ponto de entrada único e centralizado para toda a configuração do ambiente de teste, aderindo ao princípio DRY.
- *
+ * ((Implementada)) @version 1.3.0 - MOCK QUIRÚRGICO NO DESTRUCTIVO: O mock de `react-dom` foi refatorizado para usar `vi.importActual`. Esta abordagem preserva a funcionalidade interna do módulo original e sobreescreve apenas os hooks específicos (`useFormState`, `useFormStatus`). Isso resolve a advertência crítica `The current testing environment is not configured to support act(...)` e restaura a integridade do ambiente de testes.
+ * ((Implementada)) @version 1.2.0 - MOCK GLOBAL DE `react-dom`.
+ * ((Implementada)) @version 1.1.0 - INTEGRAÇÃO DE `jest-axe`.
+ * ((Implementada)) @version 1.0.0 - JEST-DOM INTEGRATION.
  */

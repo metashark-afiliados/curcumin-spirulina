@@ -1,87 +1,78 @@
-// src/components/ui/CountdownTimer.tsx
-"use client";
+import { act, render, screen } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { CountdownTimer } from "@/components/ui/CountdownTimer";
+import messages from "@/messages/components/ui/OrderForm.json";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.3.0
- * @description Componente de UI atómico y de cliente que renderiza una cuenta regresiva.
- *              Gestiona su propio estado de tiempo y previene fugas de memoria.
+ * @version 1.0.0
+ * @description Suite de testes unitários para o CountdownTimer.
+ *              Valida a renderização inicial, a atualização de tempo e o
+ *              comportamento quando o tempo expira, utilizando timers falsos.
  */
+describe("UI: CountdownTimer", () => {
+  const locale = "it-IT";
 
-interface TimeLeft {
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
 
-export interface CountdownTimerProps {
-  targetDate: Date;
-}
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
-const calculateTimeLeft = (targetDate: Date): TimeLeft => {
-  const difference = +targetDate - +new Date();
-  let timeLeft: TimeLeft = { hours: 0, minutes: 0, seconds: 0 };
+  const renderComponent = (targetDate: Date) => {
+    return render(
+      <NextIntlClientProvider
+        locale={locale}
+        messages={{ OrderForm: messages[locale] }}
+      >
+        <CountdownTimer targetDate={targetDate} />
+      </NextIntlClientProvider>
+    );
+  };
 
-  if (difference > 0) {
-    // --- LÓGICA MATEMÁTICA CORRECTA Y DEFINITIVA ---
-    timeLeft = {
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
-    };
-    // --- FIN DE LÓGICA MATEMÁTICA ---
-  }
+  it("should render the initial time correctly", () => {
+    const targetDate = new Date(Date.now() + 1000 * (3600 * 2 + 60 * 5 + 10)); // 2h 5m 10s
+    renderComponent(targetDate);
 
-  return timeLeft;
-};
+    expect(screen.getByText("02")).toBeInTheDocument();
+    expect(screen.getByText("05")).toBeInTheDocument();
+    expect(screen.getByText("10")).toBeInTheDocument();
+  });
 
-const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-  <div className="flex flex-col items-center">
-    <span className="text-3xl font-bold text-white bg-white/20 rounded-md px-3 py-1">
-      {String(value).padStart(2, "0")}
-    </span>
-    <span className="text-xs font-medium text-white mt-1">{label}</span>
-  </div>
-);
+  it("should update the time after one second", () => {
+    const targetDate = new Date(Date.now() + 1000 * 5); // 5 seconds
+    renderComponent(targetDate);
 
-export function CountdownTimer({ targetDate }: CountdownTimerProps) {
-  const t = useTranslations("OrderForm");
-  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(targetDate));
+    expect(screen.getByText("05")).toBeInTheDocument();
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(targetDate));
-    }, 1000);
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
 
-    return () => clearInterval(timer);
-  }, [targetDate]);
+    expect(screen.getByText("04")).toBeInTheDocument();
+  });
 
-  return (
-    <div className="text-center">
-      <h3 className="text-sm font-semibold text-white mb-2">
-        {t("countdownTitle")}
-      </h3>
-      <div className="flex justify-center items-center space-x-3">
-        <TimeUnit value={timeLeft.hours} label={t("countdownOre")} />
-        <span className="text-3xl font-bold text-white">:</span>
-        <TimeUnit value={timeLeft.minutes} label={t("countdownMinuti")} />
-        <span className="text-3xl font-bold text-white">:</span>
-        <TimeUnit value={timeLeft.seconds} label={t("countdownSecondi")} />
-      </div>
-    </div>
-  );
-}
+  it("should display all zeros when the target date is in the past", () => {
+    const targetDate = new Date(Date.now() - 10000); // 10 seconds ago
+    renderComponent(targetDate);
+
+    const zeros = screen.getAllByText("00");
+    expect(zeros.length).toBe(3); // hours, minutes, seconds
+  });
+});
 
 /**
  * MEJORA CONTINUA
  *
- * @version 1.3.0
+ * @version 1.0.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.3.0 - CORREÇÃO DE LÓGICA DE TEMPO DEFINITIVA: A função `calculateTimeLeft` foi corrigida para usar o operador de módulo (`% 24`) para as horas, resolvendo a regressão funcional.
- * ((Implementada)) @version 1.0.0 - GERENCIAMENTO DE ESTADO ISOLADO E PREVENÇÃO DE VAZAMENTO DE MEMÓRIA.
+ * ((Implementada)) @version 1.0.0 - ARQUITETURA DE TESTES ESTÁVEIS: Utiliza `vi.useFakeTimers()` para controlar o tempo, permitindo testes determinísticos e rápidos para funcionalidades baseadas em `setInterval`, eliminando a instabilidade (`flakiness`).
+ * ((Implementada)) @version 1.0.0 - COBERTURA DE CASOS DE BORDA: O arnés valida os três estados críticos do componente: a renderização inicial, a atualização síncrona do tempo e o comportamento quando a contagem regressiva já expirou.
+ * ((Implementada)) @version 1.0.0 - MOCK DE I18N: O componente é envolvido no `NextIntlClientProvider`, seguindo o padrão de élite do projeto para testar componentes que dependem do contexto de internacionalização.
  */

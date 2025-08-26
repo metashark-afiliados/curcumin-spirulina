@@ -1,0 +1,101 @@
+
+{
+  "it-IT": {
+    "pill1": {
+      "title": "100% naturale",
+      "subtitle": "Ingredienti puri e sicuri"
+    },
+    "pill2": {
+      "title": "Non contiene ormoni",
+      "subtitle": "Sicuro per il tuo equilibrio"
+    },
+    "pill3": {
+      "title": "Riduce l'appetito",
+      "subtitle": "Aiuta a controllare le porzioni"
+    },
+    "pill4": {
+      "title": "Favorisce il dimagrimento",
+      "subtitle": "Senza perdere massa muscolare"
+    },
+    "pill5": {
+      "title": "Dona molta energia",
+      "subtitle": "Migliora le funzioni cognitive"
+    },
+    "pill6": {
+      "title": "Assolutamente sicuro",
+      "subtitle": "Testato e verificato"
+    }
+  },
+  "en-US": {
+    "pill1": {
+      "title": "100% Natural",
+      "subtitle": "Pure and safe ingredients"
+    },
+    "pill2": { "title": "Hormone-Free", "subtitle": "Safe for your balance" },
+    "pill3": {
+      "title": "Reduces Appetite",
+      "subtitle": "Helps control portions"
+    },
+    "pill4": {
+      "title": "Promotes Weight Loss",
+      "subtitle": "Without losing muscle mass"
+    },
+    "pill5": {
+      "title": "Provides High Energy",
+      "subtitle": "Improves cognitive functions"
+    },
+    "pill6": { "title": "Absolutely Safe", "subtitle": "Tested and verified" }
+  },
+  "es-ES": {
+    "pill1": {
+      "title": "100% Natural",
+      "subtitle": "Ingredientes puros y seguros"
+    },
+    "pill2": {
+      "title": "Sin Hormonas",
+      "subtitle": "Seguro para tu equilibrio"
+    },
+    "pill3": {
+      "title": "Reduce el Apetito",
+      "subtitle": "Ayuda a controlar las porciones"
+    },
+    "pill4": {
+      "title": "Promueve la Pérdida de Peso",
+      "subtitle": "Sin perder masa muscular"
+    },
+    "pill5": {
+      "title": "Proporciona Alta Energía",
+      "subtitle": "Mejora las funciones cognitivas"
+    },
+    "pill6": {
+      "title": "Absolutamente Seguro",
+      "subtitle": "Probado y verificado"
+    }
+  },
+  "pt-BR": {
+    "pill1": {
+      "title": "100% Natural",
+      "subtitle": "Ingredientes puros e seguros"
+    },
+    "pill2": {
+      "title": "Livre de Hormônios",
+      "subtitle": "Seguro para o seu equilíbrio"
+    },
+    "pill3": {
+      "title": "Reduz o Apetite",
+      "subtitle": "Ajuda a controlar as porções"
+    },
+    "pill4": {
+      "title": "Promove a Perda de Peso",
+      "subtitle": "Sem perder massa muscular"
+    },
+    "pill5": {
+      "title": "Fornece Alta Energia",
+      "subtitle": "Melhora as funções cognitivas"
+    },
+    "pill6": {
+      "title": "Absolutamente Seguro",
+      "subtitle": "Testado e verificado"
+    }
+  }
+}

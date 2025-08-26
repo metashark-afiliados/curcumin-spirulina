@@ -1,24 +1,18 @@
-// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 /**
- * @type {import('tailwindcss').Config}
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
- * @description Tailwind CSS configuration file for the Curcumin Spirulina project.
- *              Defines the core visual identity (colors, spacing, fonts) to ensure
- *              a consistent and scalable UI, following an atomic design philosophy.
- *              This configuration is tailored for Tailwind CSS v3.
- * @see https://tailwindcss.com/docs/configuration
+ * @version 2.0.0
+ * @description Manifiesto de Branding y configuración del sistema de diseño para Tailwind CSS.
+ *              Define la paleta de colores, tipografía y otras variables de diseño
+ *              globales del proyecto, asegurando una consistencia visual de élite.
  */
-const config = {
-  darkMode: ["class"],
+const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -30,67 +24,45 @@ const config = {
     extend: {
       colors: {
         brand: {
-          primary: "#FF6B00", // Main CTA Orange
-          secondary: "#2A4B3A", // Dark Green from the form
-          accent: "#F5C945", // Yellow from the bottle
-        },
-        text: {
-          primary: "#1F2937", // Almost black for body text
-          secondary: "#6B7280", // Gray for subtitles
-          on_brand: "#FFFFFF", // White text on colored backgrounds
-        },
-        background: {
-          light: "#FFFFFF", // Main background white
-          medium: "#F9FAFB", // Light gray for section backgrounds
-        },
-        feedback: {
-          error: "#EF4444", // Red for error states
+          primary: {
+            DEFAULT: "#F97316", // Naranja vibrante principal
+            dark: "#EA580C", // Naranja más oscuro para gradientes
+          },
+          accent: {
+            DEFAULT: "#DC2626", // Rojo de alta conversión para CTAs
+            hover: "#B91C1C", // Rojo más oscuro para hover
+          },
+          background: {
+            dark: "#14532D", // Verde oscuro para el contenedor del formulario
+          },
+          border: "#FBBF24", // Amarillo/Dorado para bordes y acentos
         },
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+  plugins: [],
+};
 
 export default config;
 
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
- *
+ * @version 2.0.0
  * ---
- *
  * @section Melhorias Futuras
  *
- * ((Vigente)) @priority Low - FONT INTEGRATION: Investigar e integrar a fonte exata utilizada no design original para máxima fidelidade visual. Atualmente, será utilizada a stack de fontes sans-serif padrão.
- * ((Vigente)) @priority Medium - ADVANCED ANIMATIONS: Desenvolver um conjunto de animações atômicas (fadeIn, slideUp) para serem aplicadas de forma consistente nos componentes, melhorando a UX.
+ * ((Vigente)) @priority High - TIPOGRAFÍA PERSONALIZADA: Integrar la fuente `Inter` de Google Fonts a través de `next/font` y registrarla aquí en `theme.extend.fontFamily` para que pueda ser utilizada con clases como `font-sans`.
+ * ((Vigente)) @priority Medium - ANIMACIONES Y TRANSICIONES: Definir un conjunto de animaciones de entrada (`fade-in`, `slide-up`) para ser reutilizadas en los componentes, mejorando la experiencia del usuario.
  *
  * ---
- *
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.0 - REFACTOR A V3: O arquivo foi completamente refatorizado para ser compatível com Tailwind CSS v3, removendo a sintaxe experimental da v4.
- * ((Implementada)) @version 1.0.0 - TAILWIND-ANIMATE: Integração do plugin `tailwindcss-animate` para animações de UI de alta qualidade, alinhado com as dependências de elite instaladas.
- * ((Implementada)) @version 1.0.0 - PALETA SEMÂNTICA: Criação de uma paleta de cores baseada na identidade visual do design, utilizando nomes semânticos (brand.primary, text.secondary) para desacoplar a implementação da intenção de design.
- *
+ * ((Implementada)) @version 2.0.0 - MANIFIESTO DE BRANDING SEMÁNTICO: Se ha establecido una paleta de colores semántica (`brand-primary`, `brand-accent`, etc.) extraída directamente del diseño de referencia. Esto desacopla los componentes de los colores específicos, permitiendo cambios de branding globales desde un único SSoT.
+ * ((Implementada)) @version 2.0.0 - CONFIGURACIÓN DE CONTENEDOR CENTRALIZADO: Se ha preconfigurado la clase `.container` para centrar el contenido automáticamente, una práctica de élite para mantener layouts consistentes.
  */

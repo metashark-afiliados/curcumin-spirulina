@@ -1,27 +1,38 @@
 // next.config.mjs
-/** @type {import('next').NextConfig} */
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin();
+
+/**
+ * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
+ * @version 2.1.0
+ * @description Configuración de Next.js para el proyecto. Este archivo
+ *              instrumenta la configuración base con el plugin de `next-intl`
+ *              y define la política de seguridad para dominios de imágenes externos.
+ * @type {import('next').NextConfig}
+ */
 const nextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+        port: "",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
 
 /**
  * MEJORA CONTINUA
  *
- * @version 1.1.0
- *
+ * @version 2.1.0
  * ---
- *
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority High - CONFIGURAÇÃO DE EXPORTAÇÃO ESTÁTICA: Adicionar a configuração `output: 'export'` para habilitar a geração de um site estático para o deploy no Hostinger.
- * ((Vigente)) @priority Medium - CONFIGURAÇÃO DE IMAGENS REMOTAS: Adicionar a configuração `images.remotePatterns` se a aplicação precisar otimizar imagens de domínios externos.
- *
- * ---
- *
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.1.0 - CORREÇÃO DE FORMATO DE ARQUIVO (.mjs): O arquivo foi renomeado de `next.config.ts` para `next.config.mjs` para cumprir com o contrato do Next.js e do Vercel, resolvendo um erro de build fatal.
- *
+ * ((Implementada)) @version 2.1.0 - POLÍTICA DE IMÁGENES EXTERNAS: Se ha añadido la configuración `images.remotePatterns` para autorizar explícitamente el dominio `placehold.co`. Esto resuelve un error crítico de ejecución y alinea el proyecto con las mejores prácticas de seguridad y optimización de `next/image`.
+ * ((Implementada)) @version 2.0.0 - INTEGRACIÓN DE I18N A NIVEL DE FRAMEWORK.
  */

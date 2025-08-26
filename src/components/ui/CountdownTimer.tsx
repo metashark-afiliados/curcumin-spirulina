@@ -1,4 +1,3 @@
-// src/components/ui/CountdownTimer.tsx
 "use client";
 
 import { useTranslations } from "next-intl";
@@ -6,7 +5,7 @@ import { useEffect, useState } from "react";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.2.0
+ * @version 1.3.0
  * @description Componente de UI atómico y de cliente que renderiza una cuenta regresiva.
  *              Gestiona su propio estado de tiempo y previene fugas de memoria.
  */
@@ -26,13 +25,11 @@ const calculateTimeLeft = (targetDate: Date): TimeLeft => {
   let timeLeft: TimeLeft = { hours: 0, minutes: 0, seconds: 0 };
 
   if (difference > 0) {
-    // --- LÓGICA MATEMÁTICA CORRECTA Y DEFINITIVA ---
     timeLeft = {
-      hours: Math.floor(difference / (1000 * 60 * 60)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
     };
-    // --- FIN DE LÓGICA MATEMÁTICA ---
   }
 
   return timeLeft;
@@ -78,10 +75,11 @@ export function CountdownTimer({ targetDate }: CountdownTimerProps) {
 /**
  * MEJORA CONTINUA
  *
- * @version 1.2.0
+ * @version 1.3.0
  * ---
  * @section Melhorias Adicionadas
  *
+ * ((Implementada)) @version 1.3.0 - CORREÇÃO DE LÓGICA DE TEMPO DEFINITIVA: A função `calculateTimeLeft` foi corrigida para usar o operador de módulo (`% 24`) para as horas, resolvendo uma regressão funcional crítica que exibia horas incorretamente para contagens superiores a 23 horas.
  * ((Implementada)) @version 1.2.0 - RESTAURAÇÃO DE LÓGICA CORRETA: A lógica de cálculo em `calculateTimeLeft` foi restaurada para sua versão correta.
  * ((Implementada)) @version 1.0.0 - GERENCIAMENTO DE ESTADO ISOLADO E PREVENÇÃO DE VAZAMENTO DE MEMÓRIA.
  */

@@ -1,17 +1,26 @@
-// src/app/[locale]/page.tsx
+import { GeoIPLocator } from "@/components/diagnostic/GeoIPLocator";
+import { BenefitsSection } from "@/components/ui/BenefitsSection";
+import { FooterSection } from "@/components/ui/FooterSection";
 import { HeroSection } from "@/components/ui/HeroSection";
+import { InfoSection } from "@/components/ui/InfoSection";
+import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
+import { TreatmentCycleSection } from "@/components/ui/TreatmentCycleSection";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.1.0
- * @description Página de inicio (Landing Page). Este Server Component orquestará
- *              y ensamblará todos los componentes atómicos que conforman la página.
+ * @version 2.0.0
+ * @description Orquestador principal de la página de aterrizaje. Ensambla la página completa.
  */
-export default function HomePage() {
+export default function Home() {
   return (
-    <main>
+    <main className="bg-gradient-to-b from-brand-primary to-brand-primary-dark">
+      <GeoIPLocator />
       <HeroSection />
-      {/* O resto dos componentes da página serão adicionados aqui */}
+      <BenefitsSection />
+      <InfoSection />
+      <TreatmentCycleSection />
+      <TestimonialsSection />
+      <FooterSection />
     </main>
   );
 }
@@ -19,15 +28,9 @@ export default function HomePage() {
 /**
  * MEJORA CONTINUA
  *
- * @version 1.1.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority High - ENSAMBLAJE COMPLETO: Continuar o ensamblaje adicionando os componentes `BenefitsSection`, `InfoSection`, etc., para construir a página completa.
- *
+ * @version 2.0.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.1.0 - ENSAMBLAJE DE PRIMEIRO COMPONENTE: A página agora monta o componente `HeroSection`, iniciando a construção da UI real da landing page.
- * ((Implementada)) @version 1.0.0 - CONSUMO DE I18N EM SERVER COMPONENT: A página demonstra o padrão canônico de consumo de traduções.
+ * ((Implementada)) @version 2.0.0 - ENSAMBLAJE COMPLETO: Todos los placeholders han sido reemplazados por los componentes de producción, completando la construcción de la estructura visual de la página.
  */

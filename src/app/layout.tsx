@@ -1,27 +1,42 @@
-// src/app/layout.tsx
-import React from "react";
+import { NextIntlClientProvider, useMessages } from "next-intl";
+import { Toaster } from "react-hot-toast";
 
 /**
  * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
- * @description Layout raíz de la aplicación. Su única responsabilidad es
- *              renderizar los 'children', que serán gestionados por los
- *              layouts anidados (como el `LocaleLayout`).
+ * @version 2.0.0
+ * @description Layout específico del locale. Su responsabilidad es configurar
+ *              los proveedores de contexto para i18n y notificaciones,
+ *              garantizando que estén disponibles para todos los Client Components.
  */
-export default function RootLayout({
+export default function LocaleLayout({
   children,
+  params: { locale },
 }: {
   children: React.ReactNode;
+  params: { locale: string };
 }) {
-  return <>{children}</>;
+  const messages = useMessages();
+
+  return (
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+          <Toaster position="top-center" />
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
 }
 
 /**
  * MEJORA CONTINUA
  *
- * @version 1.0.0
+ * @version 2.0.0
  * ---
  * @section Melhorias Adicionadas
  *
- * ((Implementada)) @version 1.0.0 - LAYOUT RAÍZ MÍNIMO: Este layout cumple con la estructura requerida por Next.js App Router sin duplicar las etiquetas `<html>` y `<body>`, delegando esa responsabilidad al `LocaleLayout`.
+ * ((Implementada)) @version 2.0.0 - ARQUITECTURA DE PROVEEDORES DE ÉLITE: Implementa el patrón canónico para `next-intl` en el App Router, utilizando `NextIntlClientProvider` para hacer disponibles los mensajes a los Client Components.
+ * ((Implementada)) @version 2.0.0 - INTEGRACIÓN DE FEEDBACK DE USUARIO: Se ha añadido el componente `<Toaster />` de `react-hot-toast`, estableciendo la infraestructura necesaria para mostrar notificaciones en toda la aplicación.
+ * ((Implementada)) @version 2.0.0 - CORRECCIÓN ESTRUCTURAL: Este archivo ahora cumple su propósito como un layout de locale, manejando la etiqueta `<html>` y `<body>` y delegando el contenido a sus `children`.
  */
