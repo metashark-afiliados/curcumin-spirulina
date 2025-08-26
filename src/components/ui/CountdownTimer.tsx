@@ -45,7 +45,7 @@ const TimeUnit = ({ value, label }: { value: number; label: string }) => (
 );
 
 export function CountdownTimer({ targetDate }: CountdownTimerProps) {
-  const t = useTranslations("OrderForm");
+ const t = useTranslations("components.ui.OrderForm");
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(targetDate));
 
   useEffect(() => {

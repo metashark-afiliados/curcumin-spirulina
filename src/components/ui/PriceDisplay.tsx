@@ -19,7 +19,7 @@ export function PriceDisplay({
   discountedPrice,
   locale,
 }: PriceDisplayProps) {
-  const t = useTranslations("OrderForm");
+ const t = useTranslations("components.ui.OrderForm");
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat(locale, {
