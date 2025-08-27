@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
-
+import { AnimationWrapper } from "./AnimationWrapper";
 import { OrderForm } from "@/components/ui/OrderForm";
-import { AnimationWrapper } from "./AnimationWrapper"; // Importar el wrapper
 
 export async function HeroSection() {
   const t = await getTranslations("components.ui.HeroSection");

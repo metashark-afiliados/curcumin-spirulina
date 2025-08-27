@@ -1,20 +1,9 @@
-// src/components/ui/TreatmentCycleSection.tsx
 import { getTranslations } from "next-intl/server";
-
-import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
 import { AnimationWrapper } from "./AnimationWrapper";
+import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
 
-/**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.0.0
- * @description Componente molecular que ensambla y muestra una cuadrícula
- *              de los diferentes ciclos de tratamiento del producto. Ahora
- *              integra la animación de entrada para una experiencia de
- *              usuario moderna, respetando la arquitectura RSC.
- */
 export async function TreatmentCycleSection() {
   const t = await getTranslations("components.ui.TreatmentCycleSection");
-
   const cycles = [
     {
       days: 30,
@@ -45,13 +34,7 @@ export async function TreatmentCycleSection() {
           </h2>
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
             {cycles.map((cycle) => (
-              <TreatmentCycleCard
-                key={cycle.days}
-                days={cycle.days}
-                title={cycle.title}
-                description={cycle.description}
-                variant={cycle.variant}
-              />
+              <TreatmentCycleCard key={cycle.days} {...cycle} />
             ))}
           </div>
         </div>

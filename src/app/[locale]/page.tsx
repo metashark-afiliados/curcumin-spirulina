@@ -1,7 +1,5 @@
 import { unstable_setRequestLocale } from "next-intl/server";
-
 import { AnnouncementBar } from "@/components/ui/AnnouncementBar";
-import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { BenefitsSection } from "@/components/ui/BenefitsSection";
 import { FooterSection } from "@/components/ui/FooterSection";
 import { HeroSection } from "@/components/ui/HeroSection";
@@ -21,27 +19,11 @@ export default function Home({
     <main className="overflow-x-hidden bg-gradient-to-b from-brand-primary to-brand-primary-dark">
       <AnnouncementBar />
       <GeoIPLocator />
-
-      <AnimatedSection>
-        <HeroSection />
-      </AnimatedSection>
-
-      <AnimatedSection>
-        <BenefitsSection />
-      </AnimatedSection>
-
-      <AnimatedSection>
-        <InfoSection />
-      </AnimatedSection>
-
-      <AnimatedSection>
-        <TreatmentCycleSection />
-      </AnimatedSection>
-
-      <AnimatedSection>
-        <TestimonialsSection />
-      </AnimatedSection>
-
+      <HeroSection />
+      <BenefitsSection />
+      <InfoSection />
+      <TreatmentCycleSection />
+      <TestimonialsSection />
       <FooterSection />
     </main>
   );

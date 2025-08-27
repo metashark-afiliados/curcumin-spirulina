@@ -1,21 +1,11 @@
-// src/components/ui/TestimonialsSection.tsx
 "use client";
 
 import useEmblaCarousel from "embla-carousel-react";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
-
-import { TestimonialCard } from "@/components/ui/TestimonialCard";
 import { AnimationWrapper } from "./AnimationWrapper";
+import { TestimonialCard } from "@/components/ui/TestimonialCard";
 
-/**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.0.0
- * @description Componente molecular que renderiza una sección de testimonios
- *              como un carrusel interactivo. Ahora integra la animación de
- *              entrada para una experiencia de usuario moderna, respetando la
- *              arquitectura RSC.
- */
 export function TestimonialsSection() {
   const t = useTranslations("components.ui.TestimonialsSection");
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
@@ -23,7 +13,6 @@ export function TestimonialsSection() {
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
-
   const scrollNext = useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
@@ -35,7 +24,6 @@ export function TestimonialsSection() {
       author: t("testimonial1.author"),
       text: t("testimonial1.text"),
     },
-    // Se pueden añadir más testimonios aquí
   ];
 
   return (
@@ -45,7 +33,6 @@ export function TestimonialsSection() {
           <h2 className="mb-12 text-center text-4xl font-bold text-white">
             {t("mainTitle")}
           </h2>
-
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
               {testimonials.map((testimonial) => (
@@ -58,7 +45,6 @@ export function TestimonialsSection() {
               ))}
             </div>
           </div>
-
           <div className="mt-8 flex justify-center gap-4">
             <button
               onClick={scrollPrev}
