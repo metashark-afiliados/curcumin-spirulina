@@ -1,0 +1,142 @@
+// src/components/layout/_partials/FullHeader.tsx
+/**
+ * @file FullHeader.tsx
+ * @description Subcomponente de presentación puro y de cliente. Renderiza la
+ *              variante de navegación completa del header para las páginas de
+ *              contenido (no-landing pages). Gestiona el estado y la
+ *              accesibilidad del menú de navegación móvil.
+ * @version 2.1.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/layout/_partials/FullHeader.tsx.md
+ */
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { clientLogger } from "@/lib/logger";
+import { Link, type Pathname } from "@/lib/navigation";
+
+/**
+ * @interface NavItem
+ * @description Define el contrato de datos para un único elemento de navegación estático.
+ */
+interface NavItem {
+  href: Pathname;
+  label: string;
+}
+
+/**
+ * @interface FullHeaderProps
+ * @description Define el contrato de props para el componente FullHeader.
+ */
+export interface FullHeaderProps {
+  navItems: NavItem[];
+  ctaButtonText: string;
+  brandName: string;
+}
+
+/**
+ * @public
+ * @component FullHeader
+ * @description Renderiza la cabecera completa con menú de navegación y gestiona
+ *              el estado del menú móvil.
+ * @param {FullHeaderProps} props - Las propiedades para configurar el componente.
+ * @returns {React.ReactElement}
+ */
+export const FullHeader = ({
+  navItems,
+  ctaButtonText,
+  brandName,
+}: FullHeaderProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Efecto para prevenir el scroll del body cuando el menú móvil está abierto.
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto"; // Limpieza al desmontar
+    };
+  }, [isMenuOpen]);
+
+  /**
+   * @private
+   * @function toggleMenu
+   * @description Alterna el estado de visibilidad del menú móvil.
+   */
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+    clientLogger.info(
+      `[Header] Menu mobile ${isMenuOpen ? "fechado" : "aberto"}.`
+    );
+  };
+
+  return (
+    <div className="container mx-auto flex h-full items-center justify-between">
+      <Link href="/" className="text-xl font-bold text-white">
+        {brandName}
+      </Link>
+      <nav className="hidden items-center gap-6 md:flex">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="text-white/80 transition-colors hover:text-white"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      <div className="hidden items-center md:flex">
+        <Link
+          href="/#order-form"
+          className="rounded-md bg-brand-accent px-4 py-2 text-sm font-bold text-on_brand shadow-lg transition-transform hover:scale-105 hover:bg-brand-accent-hover"
+        >
+          {ctaButtonText}
+        </Link>
+      </div>
+      <div className="md:hidden">
+        <button
+          onClick={toggleMenu}
+          className="z-50 text-white"
+          aria-label="Abrir menu de navegação"
+          aria-expanded={isMenuOpen}
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-0 top-16 z-40 bg-brand-primary-dark p-8 md:hidden"
+          >
+            <nav className="flex flex-col items-center gap-8 pt-10">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-2xl font-semibold text-white/80 transition-colors hover:text-white"
+                  onClick={toggleMenu}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <Link
+                href="/#order-form"
+                className="mt-8 rounded-md bg-brand-accent px-6 py-3 text-lg font-bold text-on_brand shadow-lg"
+                onClick={toggleMenu}
+              >
+                {ctaButtonText}
+              </Link>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+// src/components/layout/_partials/FullHeader.tsx

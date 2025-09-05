@@ -1,12 +1,13 @@
+
 {
+  "es-ES": {
+    "message": "Oferta por tiempo limitado: ¡Envío gratuito y pago contra reembolso!"
+  },
   "it-IT": {
     "message": "Offerta a tempo limitato: Spedizione gratuita e pagamento alla consegna!"
   },
   "en-US": {
-    "message": "Limited Time Offer: Free shipping and pay on delivery!"
-  },
-  "es-ES": {
-    "message": "¡Oferta por tiempo limitado! Envío gratuito y pago contra entrega."
+    "message": "Limited time offer: Free shipping and cash on delivery!"
   },
   "pt-BR": {
     "message": "Oferta por tempo limitado: Frete grátis e pagamento na entrega!"

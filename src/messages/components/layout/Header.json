@@ -1,0 +1,34 @@
+{
+  "it-IT": {
+    "brandName": "Curcumin+",
+    "ctaButtonText": "ORDINA ORA",
+    "navItems": [
+      { "href": "/", "label": "Home" },
+      { "href": "/blog", "label": "Blog" }
+    ]
+  },
+  "en-US": {
+    "brandName": "Curcumin+",
+    "ctaButtonText": "ORDER NOW",
+    "navItems": [
+      { "href": "/", "label": "Home" },
+      { "href": "/blog", "label": "Blog" }
+    ]
+  },
+  "es-ES": {
+    "brandName": "Curcumin+",
+    "ctaButtonText": "ORDENAR AHORA",
+    "navItems": [
+      { "href": "/", "label": "Inicio" },
+      { "href": "/blog", "label": "Blog" }
+    ]
+  },
+  "pt-BR": {
+    "brandName": "Curcumin+",
+    "ctaButtonText": "PEÇA AGORA",
+    "navItems": [
+      { "href": "/", "label": "Início" },
+      { "href": "/blog", "label": "Blog" }
+    ]
+  }
+}

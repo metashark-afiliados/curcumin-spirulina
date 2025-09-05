@@ -1,0 +1,22 @@
+{
+  "it-IT": {
+    "originalPriceLabel": "PREZZO ORIGINALE:",
+    "discountedPriceLabel": "PREZZO SCONTATO:",
+    "currency": "EUR"
+  },
+  "en-US": {
+    "originalPriceLabel": "ORIGINAL PRICE:",
+    "discountedPriceLabel": "DISCOUNTED PRICE:",
+    "currency": "USD"
+  },
+  "es-ES": {
+    "originalPriceLabel": "PRECIO ORIGINAL:",
+    "discountedPriceLabel": "PRECIO CON DESCUENTO:",
+    "currency": "EUR"
+  },
+  "pt-BR": {
+    "originalPriceLabel": "PREÇO ORIGINAL:",
+    "discountedPriceLabel": "PREÇO COM DESCONTO:",
+    "currency": "BRL"
+  }
+}

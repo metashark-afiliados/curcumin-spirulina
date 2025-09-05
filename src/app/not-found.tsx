@@ -1,35 +1,85 @@
 // src/app/not-found.tsx
-import { useTranslations } from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
+/**
+ * @file not-found.tsx
+ * @description Aparato soberano para la página 404 global. Gestiona tanto
+ *              el contenido del `<body>` como los metadatos del `<head>`.
+ *              Implementa un patrón de resiliencia con fallback para garantizar
+ *              que nunca falle.
+ * @version 4.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/app/not-found.tsx.md
+ */
+import "server-only";
+
+import { getTranslations } from "next-intl/server";
+import { type Metadata } from "next";
+import { TriangleAlert } from "lucide-react";
+import { Link } from "@/lib/navigation";
+import { serverLogger } from "@/lib/logger";
 
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
- * @description Página 404 estática y localizada. Utiliza un locale por defecto
- *              y `unstable_setRequestLocale` para ser compatible con la
- *              generación de sitios estáticos (SSG).
+ * @function generateMetadata
+ * @description Genera los metadatos de SEO para la página 404. Es soberana
+ *              en la obtención de sus propias traducciones.
+ * @returns {Promise<Metadata>} El objeto de metadatos para Next.js.
  */
-export default function NotFoundPage() {
-  // NOTA: Se usa 'it-IT' como locale por defecto para la página 404 estática.
-  // Esto es una decisión de diseño para el build; en una navegación normal,
-  // el middleware redirigirá al locale correcto.
-  unstable_setRequestLocale("it-IT");
-  const t = useTranslations("components.ui.OrderForm"); // Reutilizamos un namespace existente
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const t = await getTranslations("app.notFound.meta");
+    return {
+      title: t("title"),
+    };
+  } catch (error) {
+    serverLogger.error(
+      { err: error },
+      "[NotFoundPage Metadata] Falha ao carregar traduções para metadados. Usando fallback."
+    );
+    return {
+      title: "Page Not Found",
+    };
+  }
+}
+
+/**
+ * @component NotFoundPage
+ * @description El componente principal para la página 404.
+ * @returns {Promise<React.ReactElement>} A página de erro 404.
+ */
+export default async function NotFoundPage() {
+  let t;
+  const fallbackTexts = {
+    title: "Error 404",
+    description:
+      "The page you are looking for does not exist or has been moved.",
+    backToHomeButton: "Back to Home",
+  };
+
+  try {
+    t = await getTranslations("app.notFound");
+  } catch (error) {
+    serverLogger.error(
+      { err: error },
+      "[NotFoundPage] Falha ao carregar traduções. Usando textos de fallback."
+    );
+    t = (key: keyof typeof fallbackTexts) => fallbackTexts[key];
+  }
+
+  serverLogger.warn("[NotFoundPage] Renderizando página 404.");
 
   return (
-    <html lang="it-IT">
-      <body>
-        <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-brand-primary to-brand-primary-dark text-white">
-          <h1 className="text-6xl font-bold">404</h1>
-          <p className="mt-4 text-2xl">Pagina non trovata</p>
-          <a
-            href="/it-IT"
-            className="mt-8 rounded-md bg-white px-6 py-3 font-semibold text-brand-primary-dark transition hover:bg-white/90"
-          >
-            Torna alla Home
-          </a>
-        </main>
-      </body>
-    </html>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-brand-primary-dark p-8 text-center text-white">
+      <TriangleAlert className="h-24 w-24 text-yellow-400" />
+      <h1 className="mt-8 text-6xl font-extrabold tracking-tight">
+        {t("title")}
+      </h1>
+      <p className="mt-4 max-w-md text-lg text-white/80">{t("description")}</p>
+      <Link
+        href="/"
+        className="mt-12 inline-block rounded-md bg-white px-8 py-3 font-bold text-brand-primary-dark shadow-lg transition-transform hover:scale-105"
+      >
+        {t("backToHomeButton")}
+      </Link>
+    </main>
   );
 }
+// src/app/not-found.tsx

@@ -5,7 +5,7 @@
 - @description Manifiesto Canónico y Única Fuente de Verdad (SSoT) para la
 -              Arquitectura de Internacionalización "IMAS" (I18n Mirrored Atomic Structure)
 -              del proyecto Curcumin-Spirulina.
-- @author L.I.A. Legacy
+- @author RaZ Podestá - MetaShark Tech
 - @version 1.0.0
   \*/
 
@@ -78,7 +78,7 @@ Code
  * @description Manifiesto de Roadmap y SSoT para la Fase 2 del Desarrollo.
  *              Define la lógica, estructura y convenciones para la construcción
  *              de las funcionalidades restantes y la infraestructura de pruebas.
- * @author L.I.A. Legacy
+ * @author RaZ Podestá - MetaShark Tech
  * @version 1.0.0
  * @date 2025-08-26
  */

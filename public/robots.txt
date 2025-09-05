@@ -1,0 +1,18 @@
+// public/robots.txt
+
+# =====================================================================
+# Arquivo de Regras para Robôs de Busca
+# Projeto: Curcumin Spirulina Hub v2.0.0
+# Gerado por: L.E.A.C.Y.
+# =====================================================================
+
+# Permitir que todos os robôs de busca acessem todo o site.
+User-agent: *
+Allow: /
+
+# Desabilitar o acesso a caminhos internos do Next.js (boa prática)
+Disallow: /_next/
+
+# Localização do nosso mapa do site (sitemap).
+# A URL deve ser a URL absoluta e final do nosso site.
+Sitemap: ${process.env.NEXT_PUBLIC_BASE_URL}/sitemap.xml

@@ -1,101 +1,102 @@
-
 {
   "it-IT": {
-    "pill1": {
-      "title": "100% naturale",
-      "subtitle": "Ingredienti puri e sicuri"
-    },
-    "pill2": {
-      "title": "Non contiene ormoni",
-      "subtitle": "Sicuro per il tuo equilibrio"
-    },
-    "pill3": {
-      "title": "Riduce l'appetito",
-      "subtitle": "Aiuta a controllare le porzioni"
-    },
-    "pill4": {
-      "title": "Favorisce il dimagrimento",
-      "subtitle": "Senza perdere massa muscolare"
-    },
-    "pill5": {
-      "title": "Dona molta energia",
-      "subtitle": "Migliora le funzioni cognitive"
-    },
-    "pill6": {
-      "title": "Assolutamente sicuro",
-      "subtitle": "Testato e verificato"
+    "mainTitle": "Benefici Chiave per il Tuo Benessere",
+    "benefits": {
+      "benefit1": {
+        "iconName": "energy",
+        "title": "Supporto Energetico",
+        "description": "Ingredienti noti per aiutare a mantenere alti livelli di energia durante la giornata."
+      },
+      "benefit2": {
+        "iconName": "metabolism",
+        "title": "Equilibrio Metabolico",
+        "description": "Una formula progettata per supportare un metabolismo sano e funzionale."
+      },
+      "benefit3": {
+        "iconName": "mood",
+        "title": "Benessere Emotivo",
+        "description": "Componenti che contribuiscono a un umore equilibrato e a ridurre la fame nervosa."
+      },
+      "benefit4": {
+        "iconName": "natural",
+        "title": "100% Naturale",
+        "description": "Una composizione basata su ingredienti puri, senza additivi artificiali."
+      }
     }
   },
   "en-US": {
-    "pill1": {
-      "title": "100% Natural",
-      "subtitle": "Pure and safe ingredients"
-    },
-    "pill2": { "title": "Hormone-Free", "subtitle": "Safe for your balance" },
-    "pill3": {
-      "title": "Reduces Appetite",
-      "subtitle": "Helps control portions"
-    },
-    "pill4": {
-      "title": "Promotes Weight Loss",
-      "subtitle": "Without losing muscle mass"
-    },
-    "pill5": {
-      "title": "Provides High Energy",
-      "subtitle": "Improves cognitive functions"
-    },
-    "pill6": { "title": "Absolutely Safe", "subtitle": "Tested and verified" }
+    "mainTitle": "Key Benefits for Your Well-being",
+    "benefits": {
+      "benefit1": {
+        "iconName": "energy",
+        "title": "Energy Support",
+        "description": "Ingredients known to help maintain high energy levels throughout the day."
+      },
+      "benefit2": {
+        "iconName": "metabolism",
+        "title": "Metabolic Balance",
+        "description": "A formula designed to support a healthy and functional metabolism."
+      },
+      "benefit3": {
+        "iconName": "mood",
+        "title": "Emotional Well-being",
+        "description": "Components that contribute to a balanced mood and reduce stress-related eating."
+      },
+      "benefit4": {
+        "iconName": "natural",
+        "title": "100% Natural",
+        "description": "A composition based on pure ingredients, with no artificial additives."
+      }
+    }
   },
   "es-ES": {
-    "pill1": {
-      "title": "100% Natural",
-      "subtitle": "Ingredientes puros y seguros"
-    },
-    "pill2": {
-      "title": "Sin Hormonas",
-      "subtitle": "Seguro para tu equilibrio"
-    },
-    "pill3": {
-      "title": "Reduce el Apetito",
-      "subtitle": "Ayuda a controlar las porciones"
-    },
-    "pill4": {
-      "title": "Promueve la Pérdida de Peso",
-      "subtitle": "Sin perder masa muscular"
-    },
-    "pill5": {
-      "title": "Proporciona Alta Energía",
-      "subtitle": "Mejora las funciones cognitivas"
-    },
-    "pill6": {
-      "title": "Absolutamente Seguro",
-      "subtitle": "Probado y verificado"
+    "mainTitle": "Beneficios Clave para Tu Bienestar",
+    "benefits": {
+      "benefit1": {
+        "iconName": "energy",
+        "title": "Soporte Energético",
+        "description": "Ingredientes conocidos por ayudar a mantener altos niveles de energía durante el día."
+      },
+      "benefit2": {
+        "iconName": "metabolism",
+        "title": "Equilibrio Metabólico",
+        "description": "Una fórmula diseñada para apoyar un metabolismo sano y funcional."
+      },
+      "benefit3": {
+        "iconName": "mood",
+        "title": "Bienestar Emocional",
+        "description": "Componentes que contribuyen a un humor equilibrado y a reducir el hambre nerviosa."
+      },
+      "benefit4": {
+        "iconName": "natural",
+        "title": "100% Natural",
+        "description": "Una composición basada en ingredientes puros, sin aditivos artificiales."
+      }
     }
   },
   "pt-BR": {
-    "pill1": {
-      "title": "100% Natural",
-      "subtitle": "Ingredientes puros e seguros"
-    },
-    "pill2": {
-      "title": "Livre de Hormônios",
-      "subtitle": "Seguro para o seu equilíbrio"
-    },
-    "pill3": {
-      "title": "Reduz o Apetite",
-      "subtitle": "Ajuda a controlar as porções"
-    },
-    "pill4": {
-      "title": "Promove a Perda de Peso",
-      "subtitle": "Sem perder massa muscular"
-    },
-    "pill5": {
-      "title": "Fornece Alta Energia",
-      "subtitle": "Melhora as funções cognitivas"
-    },
-    "pill6": {
-      "title": "Absolutamente Seguro",
-      "subtitle": "Testado e verificado"
+    "mainTitle": "Benefícios Chave para o Seu Bem-estar",
+    "benefits": {
+      "benefit1": {
+        "iconName": "energy",
+        "title": "Suporte Energético",
+        "description": "Ingredientes conhecidos por ajudar a manter altos níveis de energia durante o dia."
+      },
+      "benefit2": {
+        "iconName": "metabolism",
+        "title": "Equilíbrio Metabólico",
+        "description": "Uma fórmula projetada para apoiar um metabolismo saudável e funcional."
+      },
+      "benefit3": {
+        "iconName": "mood",
+        "title": "Bem-estar Emocional",
+        "description": "Componentes que contribuem para um humor equilibrado e reduzem a fome por estresse."
+      },
+      "benefit4": {
+        "iconName": "natural",
+        "title": "100% Natural",
+        "description": "Uma composição baseada em ingredientes puros, sem aditivos artificiais."
+      }
     }
   }
 }

@@ -1,0 +1,38 @@
+{
+  "it-IT": {
+    "mainTitle": "Pronto a Sentire la Differenza?",
+    "subtitle": "Unisciti a migliaia di persone che hanno scelto un supporto naturale per il loro benessere.",
+    "ctaButton": "Scopri l'Offerta",
+    "image": {
+      "src": "/img/produto-curcuma-cta.png",
+      "alt": "Flacone del prodotto Curcumin Spirulina Complex"
+    }
+  },
+  "en-US": {
+    "mainTitle": "Ready to Feel the Difference?",
+    "subtitle": "Join thousands who have chosen natural support for their well-being.",
+    "ctaButton": "Discover the Offer",
+    "image": {
+      "src": "/img/produto-curcuma-cta.png",
+      "alt": "Bottle of Curcumin Spirulina Complex product"
+    }
+  },
+  "es-ES": {
+    "mainTitle": "¿Listo para Sentir la Diferencia?",
+    "subtitle": "Únete a miles de personas que han elegido un apoyo natural para su bienestar.",
+    "ctaButton": "Descubre la Oferta",
+    "image": {
+      "src": "/img/produto-curcuma-cta.png",
+      "alt": "Frasco del producto Curcumin Spirulina Complex"
+    }
+  },
+  "pt-BR": {
+    "mainTitle": "Pronto para Sentir a Diferença?",
+    "subtitle": "Junte-se a milhares de pessoas que escolheram um suporte natural para o seu bem-estar.",
+    "ctaButton": "Descubra a Oferta",
+    "image": {
+      "src": "/img/produto-curcuma-cta.png",
+      "alt": "Frasco do produto Curcumin Spirulina Complex"
+    }
+  }
+}

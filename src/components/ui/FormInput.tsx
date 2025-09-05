@@ -1,9 +1,20 @@
+// src/components/ui/FormInput.tsx
+/**
+ * @file FormInput.tsx
+ * @description Aparato de UI atómico (Molécula) de élite para campos de
+ *              entrada de formulario. Combina accesibilidad robusta con un
+ *              feedback visual de vanguardia a través de un borde con gradiente
+ *              interactivo y animado que reacciona a los estados de foco y error.
+ * @version 5.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/FormInput.tsx.md
+ */
 "use client";
 
-import { motion } from "framer-motion";
-import { type LucideIcon } from "lucide-react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { AlertCircle, type LucideIcon } from "lucide-react";
 import * as React from "react";
-
+import { clientLogger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/Label";
 
@@ -16,33 +27,46 @@ export interface FormInputProps
 }
 
 const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
-  ({ id, label, icon: Icon, error, ...props }, ref) => {
-    const errorId = `${id}-error`;
+  ({ id, label, icon: Icon, error, className, ...props }, ref) => {
+    const errorId = error ? `${id}-error` : undefined;
     const [isFocused, setIsFocused] = React.useState(false);
 
+    const currentState = error ? "error" : isFocused ? "focused" : "default";
+    clientLogger.trace(
+      { component: "FormInput", id, state: currentState },
+      "Renderizando campo de entrada."
+    );
+
+    const gradientVariants: Variants = {
+      default: {
+        background: "linear-gradient(90deg, #4B5563, #6B7280)", // Gris sutil
+      },
+      focused: {
+        background: "linear-gradient(90deg, #F97316, #FBBF24)", // Gradiente de marca
+      },
+      error: {
+        background: "linear-gradient(90deg, #DC2626, #EF4444)", // Gradiente de error
+      },
+    };
+
     return (
-      <div className="relative">
-        <Label htmlFor={id} className="sr-only">
+      <div className="relative w-full space-y-1.5">
+        <Label htmlFor={id} className="font-semibold text-white/90">
           {label}
         </Label>
         <motion.div
-          className="relative rounded-lg p-[1.5px] bg-gray-400 transition-all duration-300"
-          animate={{
-            background: isFocused
-              ? "linear-gradient(90deg, #FBBF24, #F97316)"
-              : error
-                ? "linear-gradient(90deg, #DC2626, #B91C1C)"
-                : "linear-gradient(90deg, #9CA3AF, #9CA3AF)",
-          }}
+          className="relative rounded-lg p-[1.5px] transition-all duration-300"
+          variants={gradientVariants}
+          animate={currentState}
+          initial="default"
         >
-          <div className="relative flex items-center rounded-[6px] bg-white">
+          <div className="relative flex items-center rounded-[6.5px] bg-white">
             {Icon && (
-              <div className="pointer-events-none absolute left-3">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Icon
                   className={cn(
                     "h-5 w-5 text-gray-400 transition-colors",
-                    error && "text-feedback-error",
-                    isFocused && "text-brand-primary"
+                    isFocused && "text-brand-primary-dark"
                   )}
                   aria-hidden="true"
                 />
@@ -53,21 +77,41 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
               ref={ref}
               className={cn(
                 "h-12 w-full rounded-md border-none bg-transparent px-4 py-2 text-base text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0",
-                Icon ? "pl-10" : "pl-4"
+                Icon ? "pl-10" : "pl-4",
+                error && "pr-10",
+                className
               )}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               aria-invalid={!!error}
-              aria-describedby={error ? errorId : undefined}
+              aria-describedby={errorId}
               {...props}
             />
+            {error && (
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <AlertCircle
+                  className="h-5 w-5 text-feedback-error"
+                  aria-hidden="true"
+                />
+              </div>
+            )}
           </div>
         </motion.div>
-        {error && (
-          <p id={errorId} className="mt-1 text-sm text-red-300">
-            {error}
-          </p>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.p
+              id={errorId}
+              className="pl-1 text-sm font-medium text-red-300"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.2 }}
+              role="alert"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
@@ -75,14 +119,4 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
 FormInput.displayName = "FormInput";
 
 export { FormInput };
-
-/**
- * MEJORA CONTINUA
- *
- * @version 2.0.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 2.0.0 - BORDE CON GRADIENTE INTERACTIVO: Implementa un efecto visual de vanguardia donde el borde del campo se ilumina con un gradiente al obtener el foco, y cambia a un color de error cuando hay una validación fallida, mejorando drásticamente el feedback al usuario.
- * ((Implementada)) @version 2.0.0 - ARQUITECTURA ACCESIBLE: Mantiene la asociación entre `Label` y `input` y utiliza atributos `aria-*` para comunicar el estado de validación a las tecnologías de asistencia.
- */
+// src/components/ui/FormInput.tsx

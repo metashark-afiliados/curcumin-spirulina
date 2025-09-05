@@ -1,108 +1,136 @@
 // src/components/diagnostic/GeoIPLocator.tsx
+/**
+ * @file GeoIPLocator.tsx
+ * @description Aparato de diagnóstico y proveedor de contexto de élite. Su única
+ *              responsabilidad es detectar la información de geolocalización
+ *              del usuario a través de una API de GeoIP del lado del cliente y
+ *              proveer estos datos a cualquier componente de la aplicación
+ *              que los necesite (ej. OrderForm) de una manera desacoplada y
+ *              eficiente.
+ * @version 2.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/diagnostic/GeoIPLocator.tsx.md
+ * @see .env.example (para la variable NEXT_PUBLIC_GEOIP_API_URL)
+ */
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { clientLogger } from "@/lib/logger";
 
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.1.0
- * @description Aparato de diagnóstico atómico para verificar la funcionalidad de la API
- *              de GeoIP (ip-api.com). Realiza una petición del lado del cliente para
- *              obtener y mostrar la información de geolocalización del usuario.
- *              Es robusto contra fugas de memoria.
+ * @private
+ * @constant GEOIP_API_URL
+ * @description La URL del endpoint de la API de GeoIP. Se consume desde
+ *              variables de entorno para máxima flexibilidad, con un fallback
+ *              público para desarrollo.
  */
+const GEOIP_API_URL =
+  process.env.NEXT_PUBLIC_GEOIP_API_URL || "https://ipapi.co/json/";
 
+/**
+ * @interface GeoIPData
+ * @description Define la estructura de los datos de geolocalización que se proveerán.
+ */
 interface GeoIPData {
-  query: string; // IP Address
-  country: string;
-  countryCode: string;
+  countryCode: string | null;
+  countryName: string | null;
 }
 
-interface GeoIPState {
-  data: GeoIPData | null;
-  loading: boolean;
+/**
+ * @interface GeoIPContextState
+ * @description Define el estado completo del contexto, incluyendo los datos,
+ *              el estado de carga y posibles errores.
+ */
+interface GeoIPContextState {
+  geoData: GeoIPData;
+  isLoading: boolean;
   error: string | null;
 }
 
-export function GeoIPLocator() {
-  const [state, setState] = useState<GeoIPState>({
-    data: null,
-    loading: true,
+const GeoIPContext = createContext<GeoIPContextState | undefined>(undefined);
+
+/**
+ * @component GeoIPProvider
+ * @description Componente de orden superior que obtiene los datos de GeoIP y los
+ *              hace disponibles para sus componentes hijos a través del GeoIPContext.
+ * @param {{ children: ReactNode }} props - Propiedades del componente.
+ * @returns {React.ReactElement}
+ */
+export function GeoIPProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<GeoIPContextState>({
+    geoData: { countryCode: null, countryName: null },
+    isLoading: true,
     error: null,
   });
 
   useEffect(() => {
-    let isMounted = true; // Flag para rastrear si el componente está montado.
-
-    const fetchGeoIP = async () => {
+    const fetchGeoIPData = async () => {
+      clientLogger.info(
+        "[GeoIPLocator] Iniciando obtención de datos de GeoIP."
+      );
       try {
-        const response = await fetch(
-          "http://ip-api.com/json/?fields=query,country,countryCode"
-        );
+        const response = await fetch(GEOIP_API_URL);
         if (!response.ok) {
-          throw new Error(`API Error: ${response.statusText}`);
+          throw new Error(`La API respondió con el estado: ${response.status}`);
         }
-        const result: GeoIPData = await response.json();
-        if (isMounted) {
-          setState({ data: result, loading: false, error: null });
-        }
-      } catch (err) {
+        const data = await response.json();
+
+        clientLogger.info(
+          "[GeoIPLocator] Datos de GeoIP obtenidos con éxito.",
+          { country: data.country_name }
+        );
+        setState({
+          geoData: {
+            countryCode: data.country_code || null,
+            countryName: data.country_name || null,
+          },
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
         const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        if (isMounted) {
-          setState({ data: null, loading: false, error: errorMessage });
-        }
+          error instanceof Error
+            ? error.message
+            : "Un error desconocido ocurrió";
+        clientLogger.error(
+          "[GeoIPLocator] Falla al obtener datos de GeoIP.",
+          errorMessage
+        );
+        setState({
+          geoData: { countryCode: null, countryName: null },
+          isLoading: false,
+          error: errorMessage,
+        });
       }
     };
 
-    fetchGeoIP();
-
-    // Función de limpieza: se ejecuta cuando el componente se desmonta.
-    return () => {
-      isMounted = false;
-    };
-  }, []); // El array vacío asegura que se ejecute solo una vez al montar.
+    fetchGeoIPData();
+  }, []);
 
   return (
-    <div className="container my-8 rounded-lg border border-yellow-500 bg-gray-800 p-6 text-white shadow-lg">
-      <h2 className="mb-4 text-2xl font-bold text-yellow-400">
-        Panel de Diagnóstico GeoIP
-      </h2>
-      {state.loading && (
-        <p className="text-blue-300">Cargando datos de GeoIP...</p>
-      )}
-      {state.error && (
-        <p className="font-mono text-red-400">Error: {state.error}</p>
-      )}
-      {state.data && (
-        <div className="font-mono text-lg">
-          <p>
-            <span className="font-bold text-gray-400">IP Detectada:</span>{" "}
-            {state.data.query}
-          </p>
-          <p>
-            <span className="font-bold text-gray-400">País:</span>{" "}
-            {state.data.country}
-          </p>
-          <p>
-            <span className="font-bold text-gray-400">Código de País:</span>{" "}
-            {state.data.countryCode}
-          </p>
-        </div>
-      )}
-    </div>
+    <GeoIPContext.Provider value={state}>{children}</GeoIPContext.Provider>
   );
 }
 
 /**
- * MEJORA CONTINUA
- *
- * @version 1.1.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.1.0 - PREVENCIÓN DE FUGAS DE MEMORIA: Se ha implementado el patrón de limpieza canónico en `useEffect`. La función de limpieza establece un flag `isMounted` en `false` cuando el componente se desmonta, previniendo que `setState` sea llamado después de una operación asíncrona si el componente ya no existe en el DOM. Esto elimina la advertencia de `act` en los tests y hace el componente más robusto.
- * ((Implementada)) @version 1.0.0 - GESTIÓN DE ESTADO DE ÉLITE.
- * ((Implementada)) @version 1.0.0 - HOOK DE EFECTO AISLADO.
- * ((Implementada)) @version 1.0.0 - PROPÓSITO DE DIAGNÓSTICO CLARO.
+ * @hook useGeoIP
+ * @description Hook personalizado para consumir el GeoIPContext. Proporciona una
+ *              API simple y segura para que los componentes accedan a los datos de
+ *              geolocalización.
+ * @throws {Error} Si se usa fuera de un GeoIPProvider.
+ * @returns {GeoIPContextState} El estado actual del contexto de GeoIP.
  */
+export const useGeoIP = (): GeoIPContextState => {
+  const context = useContext(GeoIPContext);
+  if (context === undefined) {
+    throw new Error("useGeoIP debe ser usado dentro de un GeoIPProvider");
+  }
+  return context;
+};
+// src/components/diagnostic/GeoIPLocator.tsx

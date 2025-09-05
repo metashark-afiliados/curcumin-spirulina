@@ -1,18 +1,23 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
+import plugin from "tailwindcss/plugin";
 
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.1.0
- * @description Manifiesto de Branding y configuración del sistema de diseño para Tailwind CSS.
- *              Define la paleta de colores, tipografía y otras variables de diseño
- *              globales del proyecto, asegurando una consistencia visual de élite.
+ * @file tailwind.config.ts
+ * @description Manifiesto de Branding y configuración de élite para el sistema de diseño
+ *              Tailwind CSS. Define la estructura de los tokens de diseño consumiendo
+ *              sus valores desde variables CSS, estableciendo `globals.css` como la SSoT
+ *              para los valores del tema.
+ * @version 4.0.0
+ * @author L.I.A. Legacy
+ * @see src/app/globals.css (SSoT de los valores de los tokens)
  */
-const config: Config = {
+const config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./content/**/*.mdx",
   ],
   theme: {
     container: {
@@ -23,41 +28,54 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)"],
+      },
       colors: {
         brand: {
-          primary: {
-            DEFAULT: "#F97316", // Naranja vibrante principal
-            dark: "#EA580C", // Naranja más oscuro para gradientes
-          },
-          accent: {
-            DEFAULT: "#DC2626", // Rojo de alta conversión para CTAs
-            hover: "#B91C1C", // Rojo más oscuro para hover
-          },
-          background: {
-            dark: "#14532D", // Verde oscuro para el contenedor del formulario
-          },
-          border: "#FBBF24", // Amarillo/Dorado para bordes y acentos
+          primary: "hsl(var(--brand-primary))",
+          "primary-dark": "hsl(var(--brand-primary-dark))",
+          accent: "hsl(var(--brand-accent))",
+          "accent-hover": "hsl(var(--brand-accent-hover))",
+          background: "hsl(var(--brand-background))",
+          border: "hsl(var(--brand-border))",
         },
         feedback: {
-          error: "#DC2626", // Rojo para errores de validación
+          error: "hsl(var(--feedback-error))",
         },
-        on_brand: "#FFFFFF", // Color de texto para usar sobre colores de marca
+        on_brand: "hsl(var(--on-brand))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
       },
-      fontFamily: {
-        sans: ["var(--font-inter)", ...fontFamily.sans],
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 4px)",
+        sm: "calc(var(--radius) - 8px)",
+      },
+      keyframes: {
+        "infinite-scroll": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
       },
       animation: {
         "infinite-scroll": "infinite-scroll 25s linear infinite",
       },
-      keyframes: {
-        "infinite-scroll": {
-          from: { transform: "translateX(0)" },
-          to: { transform: "translateX(-100%)" },
-        },
-      },
     },
   },
-  plugins: [],
-};
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    require("tailwindcss-debug-screens"),
+    plugin(function ({ addUtilities, theme }) {
+      addUtilities({
+        ".text-shadow-md": {
+          textShadow: `0 2px 4px ${theme("colors.black / 0.5")}`,
+        },
+      });
+    }),
+  ],
+} satisfies Config;
 
 export default config;
+// tailwind.config.ts

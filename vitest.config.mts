@@ -1,64 +1,73 @@
 // vitest.config.mts
+/**
+ * @file vitest.config.mts
+ * @description Manifiesto de Configuración y SSoT para Vitest. Define el entorno
+ *              de pruebas, la resolución de módulos, la preparación del entorno
+ *              y los umbrales de calidad del código para toda la aplicación.
+ * @author L.I.A. Legacy
+ * @version 1.0.0
+ * @see .docs-espejo/vitest.config.mts.md
+ */
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
-/**
- * @file vitest.config.mts
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 2.0.0
- * @description Configuración de Vitest para el entorno de pruebas.
- *              Establece la infraestructura para la ejecución de pruebas unitarias y de
- *              integración, incluyendo el entorno del DOM, archivos de setup global,
- *              y una configuración de cobertura de código de élite.
- */
+// https://vitest.dev/config/
 export default defineConfig({
-  plugins: [react(), tsconfigPaths()],
+  plugins: [
+    react(),
+    /**
+     * @plugin tsconfigPaths
+     * @description Lee la configuración de `paths` del tsconfig.json para
+     *              resolver los alias de importación (`@/*`) en las pruebas.
+     */
+    tsconfigPaths(),
+  ],
   test: {
-    globals: true,
+    /**
+     * @property environment
+     * @description Configura un entorno de navegador simulado (DOM) usando JSDOM,
+     *              esencial para probar componentes de React.
+     */
     environment: "jsdom",
+    /**
+     * @property globals
+     * @description Habilita el acceso a las APIs de Vitest (describe, it, expect)
+     *              globalmente, sin necesidad de importarlas en cada archivo.
+     */
+    globals: true,
+    /**
+     * @property setupFiles
+     * @description Lista de archivos que se ejecutan antes de cada suite de pruebas.
+     *              Se utiliza aquí para extender `expect` con matchers de jest-dom y jest-axe.
+     */
     setupFiles: ["./tests/setup.ts"],
-    exclude: ["node_modules/**", "build/**", ".next/**"],
+    /**
+     * @property coverage
+     * @description Configuración del reporte de cobertura de código.
+     */
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      include: ["src/**/*.ts", "src/**/*.tsx"],
-      exclude: [
-        // Exclusiones de configuración y tipos
-        "src/**/types.ts",
-        "src/i18n.ts",
-        "src/middleware.ts",
-        "src/lib/navigation.ts",
-        "src/messages/**",
-        "src/app/[locale]/layout.tsx",
-        "src/app/layout.tsx",
-        // Exclusión de aparatos de diagnóstico
-        "src/components/diagnostic/**",
-      ],
-      // Umbrales de calidad de élite
+      // Umbral de calidad de élite: exige un 80% de cobertura.
       thresholds: {
+        statements: 80,
         branches: 80,
         functions: 80,
         lines: 80,
-        statements: 80,
       },
+      // Excluir archivos de configuración y mocks de la cobertura.
+      exclude: [
+        "**/*.config.{js,ts,mjs,mts}",
+        "**/tests/mocks/**",
+        "**/src/middleware/**", // El middleware es difícil de probar unitariamente.
+        "**/.docs-espejo/**",
+      ],
+    },
+    // Mockea el paquete 'server-only' para que no falle en el entorno de pruebas JSDOM.
+    alias: {
+      "server-only": "./tests/mocks/server-only.ts",
     },
   },
 });
-
-/**
- * MEJORA CONTINUA
- *
- * @version 2.0.0
- * ---
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority Medium - SHARDING DE TESTES: Para projetos de grande escala, investigar a implementação de "sharding" para paralelizar a execução de testes em múltiplos workers/máquinas, reduzindo drasticamente o tempo de execução no pipeline de CI/CD.
- *
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 2.0.0 - CONFIGURAÇÃO DE COBERTURA DE ÉLITE: Implementada uma configuração de `coverage` robusta, especificando `provider`, `reporters` e, crucialmente, regras de `include`/`exclude` para garantir que as métricas reflitam a cobertura real do código da aplicação.
- * ((Implementada)) @version 2.0.0 - UMBRALES DE CALIDAD (THRESHOLDS): Foram estabelecidos umbrales de cobertura de 80% para todas as métricas. Isso transforma o relatório de cobertura em um guardião de qualidade automatizado, falhando o pipeline se a cobertura cair abaixo do padrão de élite.
- * ((Implementada)) @version 1.0.0 - CONFIGURAÇÃO DE BASE: Estrutura inicial com `jsdom`, `globals` e `setupFiles`.
- */
+// vitest.config.mts

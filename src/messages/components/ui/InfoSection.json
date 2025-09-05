@@ -1,58 +1,67 @@
+
 {
   "it-IT": {
-    "block1": {
-      "title": "Cos'è la termogenesi?",
-      "p1": "La termogenesi è il processo di produzione di calore nell'organismo. Nel contesto della perdita di peso, termogenesi significa un aumento del dispendio energetico, il che aiuta a bruciare calorie e grassi. Alcuni rimedi naturali possono stimolare la termogenesi, contribuendo ad accelerare il metabolismo e a favorire la perdita di peso."
+    "problem": {
+      "title": "Perché a Volte Ci Sentiamo Senza Energia?",
+      "paragraph1": "Con il passare del tempo e lo stress della vita moderna, è comune sentire che il nostro metabolismo non risponde più come una volta. <strong>Stanchezza, gonfiore</strong> e una sensazione generale di affaticamento possono diventare la norma.",
+      "paragraph2": "Questo non è un fallimento personale, ma spesso il risultato di un sistema che necessita di un supporto nutrizionale mirato."
     },
-    "block2": {
-      "title": "Perché è difficile attivare il processo della termogenesi?",
-      "p1": "La termogenesi può essere difficile da attivare per diversi motivi. In primo luogo, non tutti gli organismi rispondono allo stesso modo agli stimoli volti ad aumentare la produzione di calore. In secondo luogo, una termogenesi efficace richiede una combinazione di alimentazione, attività fisica e, talvolta, ulteriori stimolanti."
+    "solution": {
+      "title": "La Risposta della Scienza: Ingredienti Sinergici",
+      "paragraph1": "La ricerca moderna sta confermando la saggezza delle tradizioni antiche. Ingredienti come la <strong>Curcuma</strong> sono stati oggetto di numerosi studi per le loro potenti proprietà antiossidanti.",
+      "quote": "La Piperina, un estratto del pepe nero, ha dimostrato di aumentare significativamente la biodisponibilità della Curcumina, potenziandone l'efficacia.",
+      "sourceLink": "Leggi lo studio",
+      "sourceUrl": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5664031/",
+      "paragraph2": "Non si tratta di un singolo 'ingrediente magico', ma di una <em>formula intelligente</em> in cui ogni componente lavora in armonia per supportare il benessere generale del corpo."
     },
-    "block3": {
-      "title": "Come può aiutare il complesso Curcumin Spirulina Piperine Saffron?",
-      "p1": "Le capsule Curcumin Spirulina Piperine Saffron contengono tutti i componenti necessari per stimolare la termogenesi e massimizzare i risultati in termini di perdita di peso. Grazie alle sue proprietà antinfiammatorie e antiossidanti, la spirulina è ricca di proteine e vitamine, la piperina aumenta la biodisponibilità della curcumina e lo zafferano contribuisce a migliorare l'umore e a ridurre la fame."
-    }
+    "imageAlt": "Composizione di ingredienti naturali come curcuma, spirulina e pepe nero."
   },
   "en-US": {
-    "block1": {
-      "title": "What is thermogenesis?",
-      "p1": "Thermogenesis is the process of heat production in the body. In the context of weight loss, thermogenesis means an increase in energy expenditure, which helps burn calories and fat. Some natural remedies can stimulate thermogenesis, helping to speed up metabolism and promote weight loss."
+    "problem": {
+      "title": "Why Do We Sometimes Feel Lacking in Energy?",
+      "paragraph1": "With the passage of time and the stress of modern life, it's common to feel that our metabolism no longer responds as it used to. <strong>Tiredness, bloating</strong>, and a general feeling of fatigue can become the norm.",
+      "paragraph2": "This is not a personal failure, but often the result of a system that needs targeted nutritional support."
     },
-    "block2": {
-      "title": "Why is it difficult to activate the thermogenesis process?",
-      "p1": "Thermogenesis can be difficult to activate for several reasons. Firstly, not all organisms respond in the same way to stimuli aimed at increasing heat production. Secondly, effective thermogenesis requires a combination of diet, physical activity, and sometimes, additional stimulants."
+    "solution": {
+      "title": "The Scientific Answer: Synergistic Ingredients",
+      "paragraph1": "Modern research is confirming the wisdom of ancient traditions. Ingredients like <strong>Turmeric</strong> have been the subject of numerous studies for their potent antioxidant properties.",
+      "quote": "Piperine, an extract from black pepper, has been shown to significantly increase the bioavailability of Curcumin, enhancing its effectiveness.",
+      "sourceLink": "Read the study",
+      "sourceUrl": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5664031/",
+      "paragraph2": "It's not about a single 'magic ingredient', but an <em>intelligent formula</em> where each component works in harmony to support the body's overall well-being."
     },
-    "block3": {
-      "title": "How can the Curcumin Spirulina Piperine Saffron complex help?",
-      "p1": "Curcumin Spirulina Piperine Saffron capsules contain all the necessary components to stimulate thermogenesis and maximize weight loss results. Thanks to its anti-inflammatory and antioxidant properties, spirulina is rich in protein and vitamins, piperine increases the bioavailability of curcumin, and saffron helps improve mood and reduce hunger."
-    }
+    "imageAlt": "Composition of natural ingredients such as turmeric, spirulina, and black pepper."
   },
   "es-ES": {
-    "block1": {
-      "title": "¿Qué es la termogénesis?",
-      "p1": "La termogénesis es el proceso de producción de calor en el organismo. En el contexto de la pérdida de peso, la termogénesis significa un aumento del gasto energético, lo que ayuda a quemar calorías y grasas. Algunos remedios naturales pueden estimular la termogénesis, contribuyendo a acelerar el metabolismo y a favorecer la pérdida de peso."
+    "problem": {
+      "title": "¿Por Qué a Veces Nos Sentimos Sin Energía?",
+      "paragraph1": "Con el paso del tiempo y el estrés de la vida moderna, es común sentir que nuestro metabolismo ya no responde como antes. El <strong>cansancio, la hinchazón</strong> y una sensación general de fatiga pueden convertirse en la norma.",
+      "paragraph2": "Esto no es un fracaso personal, sino a menudo el resultado de un sistema que necesita un apoyo nutricional específico."
     },
-    "block2": {
-      "title": "¿Por qué es difícil activar el proceso de la termogénesis?",
-      "p1": "La termogénesis puede ser difícil de activar por varias razones. En primer lugar, no todos los organismos responden de la misma manera a los estímulos para aumentar la producción de calor. En segundo lugar, una termogénesis eficaz requiere una combinación de dieta, actividad física y, a veces, estimulantes adicionales."
+    "solution": {
+      "title": "La Respuesta de la Ciencia: Ingredientes Sinérgicos",
+      "paragraph1": "La investigación moderna está confirmando la sabiduría de las tradiciones antiguas. Ingredientes como la <strong>Cúrcuma</strong> han sido objeto de numerosos estudios por sus potentes propiedades antioxidantes.",
+      "quote": "La Piperina, un extracto de la pimienta negra, ha demostrado aumentar significativamente la biodisponibilidad de la Curcumina, potenciando su eficacia.",
+      "sourceLink": "Leer el estudio",
+      "sourceUrl": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5664031/",
+      "paragraph2": "No se trata de un único 'ingrediente mágico', sino de una <em>fórmula inteligente</em> en la que cada componente trabaja en armonía para apoyar el bienestar general del cuerpo."
     },
-    "block3": {
-      "title": "¿Cómo puede ayudar el complejo Curcumin Spirulina Piperine Saffron?",
-      "p1": "Las cápsulas Curcumin Spirulina Piperine Saffron contienen todos los componentes necesarios para estimular la termogénesis y maximizar los resultados de la pérdida de peso. Gracias a sus propiedades antiinflamatorias y antioxidantes, la espirulina es rica en proteínas y vitaminas, la piperina aumenta la biodisponibilidad de la curcumina y el azafrán ayuda a mejorar el estado de ánimo y a reducir el hambre."
-    }
+    "imageAlt": "Composición de ingredientes naturales como cúrcuma, espirulina y pimienta negra."
   },
   "pt-BR": {
-    "block1": {
-      "title": "O que é termogênese?",
-      "p1": "A termogênese é o processo de produção de calor no organismo. No contexto da perda de peso, termogênese significa um aumento do gasto energético, o que ajuda a queimar calorias e gorduras. Alguns remédios naturais podem estimular a termogênese, contribuindo para acelerar o metabolismo e favorecer a perda de peso."
+    "problem": {
+      "title": "Por Que às Vezes Nos Sentimos Sem Energia?",
+      "paragraph1": "Com o passar do tempo e o estresse da vida moderna, é comum sentir que nosso metabolismo não responde mais como antes. <strong>Cansaço, inchaço</strong> e uma sensação geral de fadiga podem se tornar a norma.",
+      "paragraph2": "Isso não é um fracasso pessoal, mas muitas vezes o resultado de um sistema que precisa de um suporte nutricional direcionado."
     },
-    "block2": {
-      "title": "Por que é difícil ativar o processo de termogênese?",
-      "p1": "A termogênese pode ser difícil de ativar por várias razões. Em primeiro lugar, nem todos os organismos respondem da mesma forma aos estímulos para aumentar a produção de calor. Em segundo lugar, uma termogênese eficaz requer uma combinação de dieta, atividade física e, às vezes, estimulantes adicionais."
+    "solution": {
+      "title": "A Resposta da Ciência: Ingredientes Sinérgicos",
+      "paragraph1": "A pesquisa moderna está confirmando a sabedoria das tradições antigas. Ingredientes como a <strong>Cúrcuma</strong> têm sido objeto de numerosos estudos por suas potentes propriedades antioxidantes.",
+      "quote": "A Piperina, um extrato da pimenta preta, demonstrou aumentar significativamente a biodisponibilidade da Curcumina, potencializando sua eficácia.",
+      "sourceLink": "Leia o estudo",
+      "sourceUrl": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5664031/",
+      "paragraph2": "Não se trata de um único 'ingrediente mágico', mas de uma <em>fórmula inteligente</em> em que cada componente trabalha em harmonia para apoiar o bem-estar geral do corpo."
     },
-    "block3": {
-      "title": "Como o complexo Curcumin Spirulina Piperine Saffron pode ajudar?",
-      "p1": "As cápsulas de Curcumin Spirulina Piperine Saffron contêm todos os componentes necessários para estimular a termogênese e maximizar os resultados da perda de peso. Graças às suas propriedades anti-inflamatórias e antioxidantes, a espirulina é rica em proteínas e vitaminas, a piperina aumenta a biodisponibilidade da curcumina e o açafrão ajuda a melhorar o humor e a reduzir a fome."
-    }
+    "imageAlt": "Composição de ingredientes naturais como cúrcuma, espirulina e pimenta preta."
   }
 }

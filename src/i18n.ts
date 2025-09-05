@@ -1,68 +1,82 @@
-import { getRequestConfig } from "next-intl/server";
-
-import { setNestedProperty } from "@/lib/helpers/set-nested-property.helper";
-import { logger } from "@/lib/logging";
-import { AppLocale } from "@/lib/navigation";
-import { messagesManifest } from "@/messages/manifest";
-import { ManifestModule, MessageModule } from "@/messages/types";
-
+// src/i18n.ts
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.3.1
- * @description Orquestador de configuración de i18n para el servidor.
- *              Su única responsabilidad es ensamblar los mensajes para un locale
- *              validado previamente por el middleware.
+ * @file i18n.ts
+ * @description Orquestador de Internacionalización de élite. Implementa la
+ *              arquitectura IMAS (I18n Mirrored Atomic Structure) al más alto
+ *              nivel. Su única responsabilidad es leer el manifiesto de mensajes,
+ *              cargar dinámicamente los módulos atómicos y ensamblarlos en el
+ *              objeto anidado que `next-intl` espera, garantizando una carga
+ *              perezosa y un rendimiento óptimo.
+ * @version 4.0.0
+ * @author L.I.A. Legacy
  * @see .docs/I18N_MANIFESTO_V2.md
+ * @see .docs-espejo/i18n.ts.md
  */
+import { getRequestConfig } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { setNestedProperty } from "@/lib/helpers/set-nested-property.helper";
+import { serverLogger } from "@/lib/logger";
+import { locales, type AppLocale } from "@/lib/navigation";
+import { messagesManifest } from "@/messages/manifest";
+
 export default getRequestConfig(async ({ locale }) => {
-  // Se asume que el middleware ya ha validado que el locale es uno de los
-  // soportados. Se realiza una coerción de tipo segura.
   const typedLocale = locale as AppLocale;
 
-  const namespaces = Object.keys(messagesManifest);
-
-  try {
-    const modulePromises = namespaces.map((ns) =>
-      (
-        messagesManifest[ns as keyof typeof messagesManifest] as ManifestModule
-      )()
+  // 1. Blindaje: Validar que el locale de la petición es soportado.
+  if (!locales.includes(typedLocale)) {
+    serverLogger.error(
+      { locale },
+      "[I18N Orchestrator] Tentativa de acesso com locale inválido. Retornando 404."
     );
-    const modules = await Promise.all(modulePromises);
-
-    const messages = modules.reduce(
-      (acc: Record<string, any>, module, index) => {
-        const namespace = namespaces[index];
-        const localeMessages = module.default?.[typedLocale];
-
-        if (localeMessages) {
-          setNestedProperty(acc, namespace, localeMessages);
-        } else {
-          logger.warn(
-            `[I18N] Faltan traducciones para el namespace '${namespace}' en el locale '${typedLocale}'.`
-          );
-        }
-        return acc;
-      },
-      {}
-    );
-
-    return { messages };
-  } catch (error) {
-    logger.error("[I18N] Fallo crítico al ensamblar mensajes.", {
-      locale: typedLocale,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return { messages: {} };
+    notFound();
   }
-});
 
-/**
- * MEJORA CONTINUA
- *
- * @version 1.3.1
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.3.1 - CORREÇÃO DE ARQUITETURA CRÍTICA: Se eliminó la llamada a `notFound()` dentro de `getRequestConfig`. Esta llamada violaba el contrato de la API de Next.js y era la causa raíz del error de ejecución. La responsabilidad de validar la existencia del `locale` se delega correctamente al `middleware`, restaurando la integridad arquitectónica y la funcionalidad de la aplicación.
- * ((Implementada)) @version 1.3.0 - OBSERVABILIDAD ROBUSTA: El aparato mantiene un logging verboso dentro del bloque `try/catch` para reportar fallos en su responsabilidad real: el ensamblaje de mensajes.
- */
+  const messages = {};
+  let successfulNamespaces = 0;
+  const totalNamespaces = Object.keys(messagesManifest).length;
+
+  serverLogger.trace(
+    { locale, namespaceCount: totalNamespaces },
+    "[I18N Orchestrator] Iniciando montagem de mensagens atômicas."
+  );
+
+  // 2. Orquestación: Iterar sobre el manifiesto para ensamblar los mensajes.
+  for (const [namespace, moduleLoader] of Object.entries(messagesManifest)) {
+    try {
+      const module = await moduleLoader();
+      const localeMessages = module.default[typedLocale];
+
+      // 3. Resiliencia y Observabilidad Granular:
+      if (localeMessages) {
+        setNestedProperty(messages, namespace, localeMessages);
+        serverLogger.trace(
+          { namespace },
+          "[I18N Orchestrator] Namespace carregado e montado com sucesso."
+        );
+        successfulNamespaces++;
+      } else {
+        serverLogger.warn(
+          { namespace, locale },
+          "[I18N Orchestrator] Namespace carregado, mas não contém traduções para o locale solicitado. Ignorando."
+        );
+      }
+    } catch (error) {
+      serverLogger.error(
+        { err: error, namespace },
+        `[I18N Orchestrator] Módulo de mensagens para o namespace não encontrado ou falhou ao carregar.`
+      );
+    }
+  }
+
+  serverLogger.info(
+    {
+      locale,
+      namespacesLoaded: successfulNamespaces,
+      totalNamespaces,
+    },
+    "[I18N Orchestrator] Montagem de mensagens concluída."
+  );
+
+  return { messages };
+});
+// src/i18n.ts

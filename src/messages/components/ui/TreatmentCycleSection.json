@@ -1,62 +1,87 @@
+
 {
+  "es-ES": {
+    "mainTitle": "Tu Viaje de Bienestar",
+    "subtitle": "Cada fase está diseñada para construir progresivamente tu bienestar, trabajando en armonía con tu cuerpo.",
+    "cycles": [
+      {
+        "duration": "30 Días",
+        "title": "Fase de Adaptación",
+        "description": "El cuerpo comienza a asimilar los nutrientes. Pueden empezar a manifestarse los primeros signos de mayor energía y vitalidad."
+      },
+      {
+        "duration": "90 Días",
+        "title": "Fase de Optimización",
+        "description": "El apoyo al metabolismo está en pleno efecto. Se percibe una mejora del bienestar general y un humor más estable."
+      },
+      {
+        "duration": "150 Días",
+        "title": "Fase de Mantenimiento",
+        "description": "El cuerpo ha alcanzado un nuevo equilibrio. Los beneficios se consolidan, apoyando un estilo de vida sano y activo a largo plazo."
+      }
+    ]
+  },
   "it-IT": {
-    "mainTitle": "Come agisce Curcumin Spirulina Piperine Saffron?",
-    "cycle1": {
-      "title": "Ciclo minimo di trattamento",
-      "description": "Il corpo inizia gradualmente ad entrare in uno stato di termogenesi. Viene avviato il processo di combustione dei grassi e di conversione di essi in energia."
-    },
-    "cycle2": {
-      "title": "Ciclo medio di trattamento",
-      "description": "Si hanno più energie, si avverte maggiore vitalità e migliora l'umore. Il corpo acquisisce una forma più snella senza perdere massa muscolare."
-    },
-    "cycle3": {
-      "title": "Ciclo massimo di trattamento",
-      "description": "Aumenta la resistenza allo stress fisico e mentale. Si normalizzano i livelli di zucchero e colesterolo. Migliora il benessere generale. Si arriva a perdere da 14 a 21 kg."
-    }
+    "mainTitle": "Il Tuo Percorso di Benessere",
+    "subtitle": "Ogni fase è progettata per costruire progressivamente il tuo benessere, lavorando in armonia con il tuo corpo.",
+    "cycles": [
+      {
+        "duration": "30 Giorni",
+        "title": "Fase di Adattamento",
+        "description": "Il corpo inizia ad assimilare i nutrienti. I primi segni di maggiore energia e vitalità possono iniziare a manifestarsi."
+      },
+      {
+        "duration": "90 Giorni",
+        "title": "Fase di Ottimizzazione",
+        "description": "Il supporto al metabolismo è in pieno effetto. Si avverte un miglioramento del benessere generale e un umore più stabile."
+      },
+      {
+        "duration": "150 Giorni",
+        "title": "Fase di Mantenimento",
+        "description": "Il corpo ha raggiunto un nuovo equilibrio. I benefici si consolidano, supportando uno stile di vita sano e attivo a lungo termine."
+      }
+    ]
   },
   "en-US": {
-    "mainTitle": "How does Curcumin Spirulina Piperine Saffron work?",
-    "cycle1": {
-      "title": "Minimum treatment cycle",
-      "description": "The body gradually begins to enter a state of thermogenesis. The process of fat burning and its conversion into energy is initiated."
-    },
-    "cycle2": {
-      "title": "Medium treatment cycle",
-      "description": "You have more energy, feel more vitality, and your mood improves. The body acquires a slimmer shape without losing muscle mass."
-    },
-    "cycle3": {
-      "title": "Maximum treatment cycle",
-      "description": "Increases resistance to physical and mental stress. Sugar and cholesterol levels are normalized. Overall well-being improves. You can lose from 14 to 21 kg."
-    }
-  },
-  "es-ES": {
-    "mainTitle": "¿Cómo actúa Curcumin Spirulina Piperine Saffron?",
-    "cycle1": {
-      "title": "Ciclo mínimo de tratamiento",
-      "description": "El cuerpo comienza gradualmente a entrar en un estado de termogénesis. Se inicia el proceso de quema de grasas y su conversión en energía."
-    },
-    "cycle2": {
-      "title": "Ciclo medio de tratamiento",
-      "description": "Tienes más energía, sientes más vitalidad y tu estado de ánimo mejora. El cuerpo adquiere una forma más delgada sin perder masa muscular."
-    },
-    "cycle3": {
-      "title": "Ciclo máximo de tratamiento",
-      "description": "Aumenta la resistencia al estrés físico y mental. Los niveles de azúcar y colesterol se normalizan. Mejora el bienestar general. Se pueden perder de 14 a 21 kg."
-    }
+    "mainTitle": "Your Wellness Journey",
+    "subtitle": "Each phase is designed to progressively build your well-being, working in harmony with your body.",
+    "cycles": [
+      {
+        "duration": "30 Days",
+        "title": "Adaptation Phase",
+        "description": "The body begins to assimilate the nutrients. The first signs of increased energy and vitality may begin to appear."
+      },
+      {
+        "duration": "90 Days",
+        "title": "Optimization Phase",
+        "description": "Metabolic support is in full effect. An improvement in general well-being and a more stable mood are noticeable."
+      },
+      {
+        "duration": "150 Days",
+        "title": "Maintenance Phase",
+        "description": "The body has reached a new equilibrium. The benefits are consolidated, supporting a healthy and active lifestyle in the long term."
+      }
+    ]
   },
   "pt-BR": {
-    "mainTitle": "Como atua o Curcumin Spirulina Piperine Saffron?",
-    "cycle1": {
-      "title": "Ciclo mínimo de tratamento",
-      "description": "O corpo começa gradualmente a entrar em um estado de termogênese. O processo de queima de gordura e sua conversão em energia é iniciado."
-    },
-    "cycle2": {
-      "title": "Ciclo médio de tratamento",
-      "description": "Você tem mais energia, sente mais vitalidade e seu humor melhora. O corpo adquire uma forma mais esbelta sem perder massa muscular."
-    },
-    "cycle3": {
-      "title": "Ciclo máximo de tratamento",
-      "description": "Aumenta a resistência ao estresse físico e mental. Os níveis de açúcar e colesterol são normalizados. O bem-estar geral melhora. Você pode perder de 14 a 21 kg."
-    }
+    "mainTitle": "Sua Jornada de Bem-estar",
+    "subtitle": "Cada fase é projetada para construir progressivamente seu bem-estar, trabalhando em harmonia com seu corpo.",
+    "cycles": [
+      {
+        "duration": "30 Dias",
+        "title": "Fase de Adaptação",
+        "description": "O corpo começa a assimilar os nutrientes. Os primeiros sinais de mais energia e vitalidade podem começar a se manifestar."
+      },
+      {
+        "duration": "90 Dias",
+        "title": "Fase de Otimização",
+        "description": "O suporte ao metabolismo está em pleno efeito. Sente-se uma melhoria no bem-estar geral e um humor mais estável."
+      },
+      {
+        "duration": "150 Dias",
+        "title": "Fase de Manutenção",
+        "description": "O corpo atingiu um novo equilíbrio. Os benefícios se consolidam, apoiando um estilo de vida saudável e ativo a longo prazo."
+      }
+    ]
   }
 }

@@ -1,38 +1,30 @@
 // postcss.config.mjs
 /**
- * @type {import('postcss-load-config').Config}
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
- * @description PostCSS configuration file for the Curcumin Spirulina project.
- *              Sets up the necessary plugins for processing CSS, primarily Tailwind CSS and Autoprefixer.
- *              This configuration is tailored for Tailwind CSS v3.
+ * @file postcss.config.mjs
+ * @description Manifiesto de Configuración y SSoT para PostCSS. Define el pipeline
+ *              de transformaciones que se aplican al CSS de la aplicación.
+ * @author L.I.A. Legacy
+ * @version 2.0.0
  * @see https://postcss.org/
  * @see https://tailwindcss.com/docs/using-postcss
  */
+
+/** @type {import('postcss-load-config').Config} */
 const config = {
   plugins: {
+    /**
+     * @plugin tailwindcss
+     * @description Procesa las directivas de Tailwind (`@tailwind`) y las clases de utilidad.
+     */
     tailwindcss: {},
+    /**
+     * @plugin autoprefixer
+     * @description Añade prefijos de proveedor (ej. `-webkit-`, `-moz-`) a las reglas CSS
+     *              para garantizar la compatibilidad entre diferentes navegadores.
+     */
     autoprefixer: {},
   },
 };
 
 export default config;
-
-/**
- * MEJORA CONTINUA
- *
- * @version 1.0.0
- *
- * ---
- *
- * @section Melhorias Futuras
- *
- * ((Vigente)) @priority Low - CSSNANO INTEGRATION: Em um ambiente de produção mais complexo, considerar a adição do `cssnano` para minificação avançada do CSS, embora o Next.js já realize otimizações significativas.
- *
- * ---
- *
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.0.0 - REFACTOR A V3: A configuração foi simplificada para a sintaxe padrão de plugins do PostCSS, removendo a referência `@tailwindcss/postcss` da v4 e definindo `tailwindcss` e `autoprefixer` explicitamente, que é o padrão canônico para a v3.
- *
- */
+// postcss.config.mjs

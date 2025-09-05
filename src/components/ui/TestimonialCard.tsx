@@ -1,58 +1,100 @@
+// src/components/ui/TestimonialCard.tsx
+/**
+ * @file TestimonialCard.tsx
+ * @description Aparato de UI atómico (Organismo) de presentación puro. Exibe um
+ *              único depoimento de cliente de forma autêntica e crível, focando
+ *              em uma imagem de estilo de vida, avaliação e uma história pessoal.
+ *              Enriquecido com injeção de schema.org para SEO avançado.
+ * @version 3.0.0
+ * @author RaZ Podestá - MetaShark Tech
+ * @see src/components/ui/TestimonialsSection.tsx (Consumidor)
+ * @see https://schema.org/Review
+ */
+"use client";
+
 import Image from "next/image";
+import { Star } from "lucide-react";
+import { clientLogger } from "@/lib/logger";
+import { SchemaInjector } from "@/components/ui/SchemaInjector";
+import { generateReviewSchema } from "@/lib/schema";
 
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.1.0
- * @description Componente atómico de UI que muestra un testimonio individual,
- *              incluyendo una imagen de "antes y después", el nombre del autor
- *              y el texto del testimonio. Ahora utiliza URLs para las imágenes.
+ * @interface TestimonialData
+ * @description Contrato de dados para um único depoimento.
  */
-export interface TestimonialCardProps {
-  beforeImageUrl: string;
-  afterImageUrl: string;
+export interface TestimonialData {
+  imageUrl: string;
   author: string;
+  location: string;
+  rating: number;
+  title: string;
   text: string;
 }
 
-export function TestimonialCard({
-  beforeImageUrl,
-  afterImageUrl,
-  author,
-  text,
-}: TestimonialCardProps) {
+/**
+ * @component TestimonialCard
+ * @description Renderiza um card de depoimento completo, combinando imagem,
+ *              avaliação por estrelas e o texto da citação. Injeta dados
+ *              estruturados `Review` para rich snippets nos resultados de busca.
+ * @param {TestimonialData} props - Os dados do depoimento.
+ * @returns {React.ReactElement} O componente de card de depoimento.
+ */
+export function TestimonialCard(props: TestimonialData): React.ReactElement {
+  const { imageUrl, author, location, rating, title, text } = props;
+  clientLogger.trace(
+    { component: "TestimonialCard", author },
+    "Renderizando depoimento."
+  );
+
+  const reviewSchema = generateReviewSchema({
+    authorName: author,
+    reviewBody: text,
+    ratingValue: rating,
+  });
+
   return (
-    <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
-      <div className="flex justify-center gap-2">
+    <div className="relative grid h-full grid-cols-1 items-center gap-8 rounded-xl bg-white/5 p-8 shadow-lg backdrop-blur-lg md:grid-cols-3 md:gap-12">
+      <SchemaInjector schema={reviewSchema} />
+
+      {/* Imagem do Cliente */}
+      <div className="relative h-48 w-48 justify-self-center overflow-hidden rounded-full shadow-lg md:h-56 md:w-56">
         <Image
-          src={beforeImageUrl}
-          alt={`Testimonio de ${author} - Antes`}
-          width={200}
-          height={300}
-          className="h-auto w-1/2 rounded-lg object-cover shadow-lg"
-        />
-        <Image
-          src={afterImageUrl}
-          alt={`Testimonio de ${author} - Después`}
-          width={200}
-          height={300}
-          className="h-auto w-1/2 rounded-lg object-cover shadow-lg"
+          src={imageUrl}
+          alt={`Foto de ${author}, cliente satisfeito(a).`}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 50vw, 33vw"
         />
       </div>
-      <div className="text-white">
-        <h3 className="text-2xl font-bold">{author}</h3>
-        <p className="mt-4 text-white/80">{text}</p>
+
+      {/* Conteúdo do Depoimento */}
+      <div className="md:col-span-2">
+        {/* Avaliação por Estrelas */}
+        <div className="flex items-center">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
+              key={i}
+              className={`h-5 w-5 ${
+                i < rating ? "text-yellow-400" : "text-white/30"
+              }`}
+              fill={i < rating ? "currentColor" : "none"}
+            />
+          ))}
+        </div>
+
+        {/* Citação (Blockquote para semântica) */}
+        <blockquote className="mt-4">
+          <p className="text-xl font-bold text-white">"{title}"</p>
+          <p className="mt-2 text-white/80">{text}</p>
+        </blockquote>
+
+        {/* Autor e Localização (Cite para semântica) */}
+        <cite className="mt-4 block text-right font-semibold not-italic text-white">
+          - {author},{" "}
+          <span className="font-normal text-white/70">{location}</span>
+        </cite>
       </div>
     </div>
   );
 }
-
-/**
- * MEJORA CONTINUA
- *
- * @version 1.1.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.1.0 - DESACOPLAMENTO DE ASSETS: O componente foi refatorizado para aceitar URLs de imagem (`string`) em vez de objetos `StaticImageData`. Isso resolve o erro de compilação e torna o componente mais flexível, capaz de consumir imagens de um CDN ou de placeholders.
- * ((Implementada)) @version 1.1.0 - DIMENSIONAMENTO EXPLÍCITO DE IMAGEM: Foram adicionadas as props `width` e `height` ao componente `next/image` para garantir a otimização de imagem e prevenir o Cumulative Layout Shift (CLS).
- */
+// src/components/ui/TestimonialCard.tsx

@@ -1,30 +1,131 @@
+
 {
+  "es-ES": {
+    "mainTitle": "Historias Reales de Bienestar",
+    "previousTestimonialAriaLabel": "Testimonio anterior",
+    "nextTestimonialAriaLabel": "Siguiente testimonio",
+    "imageAlt": "Foto de {author}, cliente satisfecho/a.",
+    "testimonials": [
+      {
+        "imageUrl": "/img/testimonials/depoimento-giulia.jpg",
+        "author": "Julia",
+        "location": "Madrid",
+        "rating": 5,
+        "title": "¡Me siento llena de energía de nuevo!",
+        "text": "Después del segundo ciclo, noté una diferencia real en mi vitalidad diaria. Esa sensación de fatiga por la tarde ha desaparecido. Es genial sentirse en forma y activa de nuevo."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-marco.jpg",
+        "author": "Marcos",
+        "location": "Barcelona",
+        "rating": 5,
+        "title": "Un apoyo excelente para mi estilo de vida activo.",
+        "text": "Como corredor aficionado, la recuperación es fundamental. He integrado este complejo en mi rutina y siento que me ayuda a gestionar mejor la fatiga post-entrenamiento. Un gran producto natural."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-sofia.jpg",
+        "author": "Sofía",
+        "location": "Sevilla",
+        "rating": 4,
+        "title": "Menos hinchazón y más ligereza.",
+        "text": "A menudo luchaba contra la hinchazón abdominal. Desde que uso este suplemento, he notado una mejora notable. Me siento más ligera y cómoda durante todo el día."
+      }
+    ]
+  },
   "it-IT": {
-    "mainTitle": "Recensioni e risultati reali",
-    "testimonial1": {
-      "author": "Giulia, 32 anni",
-      "text": "Sono stata attratta dal meccanismo d'azione del complesso e in particolare dal fatto che si può perdere peso senza perdere massa muscolare. Ho provato a dimagrire in vari modi, e spesso con scarso successo. Un giorno, su consiglio del mio allenatore, ho acquistato questo complesso naturale e dopo un ciclo completo di trattamento, non solo sono aumentate le energie, si è normalizzato l'appetito e anche la pelle ha iniziato a trasformarsi in meglio. Ho perso 13 kg senza smagliature o perdita di massa muscolare."
-    }
+    "mainTitle": "Storie Reali di Benessere",
+    "previousTestimonialAriaLabel": "Testimonianza precedente",
+    "nextTestimonialAriaLabel": "Prossima testimonianza",
+    "imageAlt": "Foto di {author}, cliente soddisfatto/a.",
+    "testimonials": [
+      {
+        "imageUrl": "/img/testimonials/depoimento-giulia.jpg",
+        "author": "Giulia",
+        "location": "Milano",
+        "rating": 5,
+        "title": "Mi sento di nuovo piena di energia!",
+        "text": "Dopo il secondo ciclo, ho notato una vera differenza nella mia vitalità quotidiana. Quella sensazione di affaticamento pomeridiano è scomparsa. È bello sentirsi di nuovo in forma e attivi."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-marco.jpg",
+        "author": "Marco",
+        "location": "Roma",
+        "rating": 5,
+        "title": "Un supporto eccellente per il mio stile di vita attivo.",
+        "text": "Come corridore amatoriale, il recupero è fondamentale. Ho integrato questo complesso nella mia routine e sento che mi aiuta a gestire meglio l'affaticamento post-allenamento. Un ottimo prodotto naturale."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-sofia.jpg",
+        "author": "Sofia",
+        "location": "Napoli",
+        "rating": 4,
+        "title": "Meno gonfiore e più leggerezza.",
+        "text": "Lottavo spesso con il gonfiore addominale. Da quando uso questo integratore, ho notato un netto miglioramento. Mi sento più leggera e a mio agio durante tutta la giornata."
+      }
+    ]
   },
   "en-US": {
-    "mainTitle": "Reviews and real results",
-    "testimonial1": {
-      "author": "Giulia, 32 years old",
-      "text": "I was attracted by the complex's mechanism of action and in particular by the fact that you can lose weight without losing muscle mass. I tried to lose weight in various ways, often with little success. One day, on the advice of my trainer, I purchased this natural complex and after a full course of treatment, not only did my energy increase, my appetite normalized, and my skin began to transform for the better. I lost 13 kg without stretch marks or loss of muscle mass."
-    }
-  },
-  "es-ES": {
-    "mainTitle": "Reseñas y resultados reales",
-    "testimonial1": {
-      "author": "Giulia, 32 años",
-      "text": "Me atrajo el mecanismo de acción del complejo y en particular el hecho de que se puede perder peso sin perder masa muscular. Intenté perder peso de varias maneras, a menudo con poco éxito. Un día, por consejo de mi entrenador, compré este complejo natural y después de un ciclo completo de tratamiento, no solo aumentó mi energía, mi apetito se normalizó y mi piel comenzó a transformarse para mejor. Perdí 13 kg sin estrías ni pérdida de masa muscular."
-    }
+    "mainTitle": "Real Stories of Well-being",
+    "previousTestimonialAriaLabel": "Previous testimonial",
+    "nextTestimonialAriaLabel": "Next testimonial",
+    "imageAlt": "Photo of {author}, a satisfied customer.",
+    "testimonials": [
+      {
+        "imageUrl": "/img/testimonials/depoimento-giulia.jpg",
+        "author": "Julia",
+        "location": "New York",
+        "rating": 5,
+        "title": "I feel full of energy again!",
+        "text": "After the second cycle, I noticed a real difference in my daily vitality. That feeling of afternoon fatigue has disappeared. It's great to feel fit and active again."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-marco.jpg",
+        "author": "Mark",
+        "location": "Chicago",
+        "rating": 5,
+        "title": "Excellent support for my active lifestyle.",
+        "text": "As an amateur runner, recovery is crucial. I've integrated this complex into my routine and I feel it helps me better manage post-workout fatigue. A great natural product."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-sofia.jpg",
+        "author": "Sophia",
+        "location": "Miami",
+        "rating": 4,
+        "title": "Less bloating and more lightness.",
+        "text": "I often struggled with abdominal bloating. Since using this supplement, I've noticed a significant improvement. I feel lighter and more comfortable throughout the day."
+      }
+    ]
   },
   "pt-BR": {
-    "mainTitle": "Avaliações e resultados reais",
-    "testimonial1": {
-      "author": "Giulia, 32 anos",
-      "text": "Fui atraída pelo mecanismo de ação do complexo e, em particular, pelo fato de que se pode perder peso sem perder massa muscular. Tentei perder peso de várias maneiras, muitas vezes com pouco sucesso. Um dia, por conselho do meu treinador, comprei este complexo natural e, após um ciclo completo de tratamento, não só a minha energia aumentou, como o meu apetite se normalizou e a minha pele começou a transformar-se para melhor. Perdi 13 kg sem estrias ou perda de massa muscular."
-    }
+    "mainTitle": "Histórias Reais de Bem-estar",
+    "previousTestimonialAriaLabel": "Depoimento anterior",
+    "nextTestimonialAriaLabel": "Próximo depoimento",
+    "imageAlt": "Foto de {author}, cliente satisfeito/a.",
+    "testimonials": [
+      {
+        "imageUrl": "/img/testimonials/depoimento-giulia.jpg",
+        "author": "Júlia",
+        "location": "São Paulo",
+        "rating": 5,
+        "title": "Sinto-me cheia de energia novamente!",
+        "text": "Após o segundo ciclo, notei uma diferença real na minha vitalidade diária. Aquela sensação de fadiga à tarde desapareceu. É ótimo sentir-se em forma e ativa de novo."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-marco.jpg",
+        "author": "Marcos",
+        "location": "Rio de Janeiro",
+        "rating": 5,
+        "title": "Um excelente suporte para o meu estilo de vida ativo.",
+        "text": "Como corredor amador, a recuperação é fundamental. Integrei este complexo na minha rotina e sinto que me ajuda a gerir melhor a fadiga pós-treino. Um ótimo produto natural."
+      },
+      {
+        "imageUrl": "/img/testimonials/depoimento-sofia.jpg",
+        "author": "Sofia",
+        "location": "Belo Horizonte",
+        "rating": 4,
+        "title": "Menos inchaço e mais leveza.",
+        "text": "Eu lutava frequentemente com o inchaço abdominal. Desde que uso este suplemento, notei uma melhoria acentuada. Sinto-me mais leve e confortável ao longo do dia."
+      }
+    ]
   }
 }

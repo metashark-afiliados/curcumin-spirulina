@@ -1,0 +1,46 @@
+{
+  "it-IT": {
+    "title": "Seleziona la tua lingua",
+    "countdownText": "Reindirizzamento automatico in {seconds} secondi...",
+    "selectLanguageAriaLabel": "Seleziona la lingua: {language}",
+    "languages": {
+      "it-IT": "Italiano",
+      "en-US": "Inglese (US)",
+      "es-ES": "Spagnolo",
+      "pt-BR": "Portoghese (BR)"
+    }
+  },
+  "en-US": {
+    "title": "Select Your Language",
+    "countdownText": "Redirecting automatically in {seconds} seconds...",
+    "selectLanguageAriaLabel": "Select language: {language}",
+    "languages": {
+      "it-IT": "Italian",
+      "en-US": "English (US)",
+      "es-ES": "Spanish",
+      "pt-BR": "Portuguese (BR)"
+    }
+  },
+  "es-ES": {
+    "title": "Selecciona tu idioma",
+    "countdownText": "Redireccionando automáticamente en {seconds} segundos...",
+    "selectLanguageAriaLabel": "Seleccionar idioma: {language}",
+    "languages": {
+      "it-IT": "Italiano",
+      "en-US": "Inglés (EE. UU.)",
+      "es-ES": "Español",
+      "pt-BR": "Portugués (BR)"
+    }
+  },
+  "pt-BR": {
+    "title": "Selecione seu Idioma",
+    "countdownText": "Redirecionando automaticamente em {seconds} segundos...",
+    "selectLanguageAriaLabel": "Selecionar idioma: {language}",
+    "languages": {
+      "it-IT": "Italiano",
+      "en-US": "Inglês (EUA)",
+      "es-ES": "Espanhol",
+      "pt-BR": "Português (BR)"
+    }
+  }
+}

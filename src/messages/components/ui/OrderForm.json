@@ -1,70 +1,70 @@
 {
   "it-IT": {
-    "originalPriceLabel": "PREZZO ORIGINALE:",
-    "discountedPriceLabel": "PREZZO SCONTATO:",
-    "countdownTitle": "Lo sconto termina tra:",
-    "countdownOre": "ORE",
-    "countdownMinuti": "MINUTI",
-    "countdownSecondi": "SECONDI",
-    "ctaButton": "ORDINARE CURCUMIN SPIRULINA PIPERINE SAFFRON",
-    "ctaButtonLoading": "INVIO IN CORSO...",
+    "ctaButton": "RICHIEDI L'OFFERTA SPECIALE",
     "namePlaceholder": "Nome completo",
     "phonePlaceholder": "Numero di telefono",
     "contactlessDelivery": "Pagamento alla consegna",
     "freeDelivery": "SPEDIZIONE GRATUITA",
-    "submitSuccess": "Ordine ricevuto! Ti contatteremo a breve.",
-    "submitError": "Si è verificato un errore. Riprova.",
-    "validationError": "Controlla i campi e riprova."
+    "validation": {
+      "name": {
+        "minLength": "Il nome deve avere almeno 2 caratteri.",
+        "invalidChars": "Il nome può contenere solo lettere e spazi."
+      },
+      "phone": {
+        "minLength": "Il numero di telefono sembra troppo corto.",
+        "invalidFormat": "Formato del numero di telefono non valido."
+      }
+    }
   },
   "en-US": {
-    "originalPriceLabel": "ORIGINAL PRICE:",
-    "discountedPriceLabel": "DISCOUNTED PRICE:",
-    "countdownTitle": "The discount ends in:",
-    "countdownOre": "HOURS",
-    "countdownMinuti": "MINUTES",
-    "countdownSecondi": "SECONDS",
-    "ctaButton": "ORDER CURCUMIN SPIRULINA PIPERINE SAFFRON",
-    "ctaButtonLoading": "SENDING...",
+    "ctaButton": "REQUEST THE SPECIAL OFFER",
     "namePlaceholder": "Full name",
     "phonePlaceholder": "Phone number",
     "contactlessDelivery": "Payment on delivery",
     "freeDelivery": "FREE SHIPPING",
-    "submitSuccess": "Order received! We will contact you shortly.",
-    "submitError": "An error occurred. Please try again.",
-    "validationError": "Please check the fields and try again."
+    "validation": {
+      "name": {
+        "minLength": "Name must be at least 2 characters long.",
+        "invalidChars": "Name can only contain letters and spaces."
+      },
+      "phone": {
+        "minLength": "Phone number seems too short.",
+        "invalidFormat": "Invalid phone number format."
+      }
+    }
   },
   "es-ES": {
-    "originalPriceLabel": "PRECIO ORIGINAL:",
-    "discountedPriceLabel": "PRECIO CON DESCUENTO:",
-    "countdownTitle": "El descuento termina en:",
-    "countdownOre": "HORAS",
-    "countdownMinuti": "MINUTOS",
-    "countdownSecondi": "SEGUNDOS",
-    "ctaButton": "ORDENAR CURCUMIN SPIRULINA PIPERINE SAFFRON",
-    "ctaButtonLoading": "ENVIANDO...",
+    "ctaButton": "SOLICITAR LA OFERTA ESPECIAL",
     "namePlaceholder": "Nombre completo",
     "phonePlaceholder": "Número de teléfono",
-    "contactlessDelivery": "Pago contra entrega",
-    "freeDelivery": "ENVÍO GRATIS",
-    "submitSuccess": "¡Pedido recibido! Te contactaremos en breve.",
-    "submitError": "Ocurrió un error. Por favor, inténtalo de nuevo.",
-    "validationError": "Por favor, revisa los campos e inténtalo de nuevo."
+    "contactlessDelivery": "Pago contra reembolso",
+    "freeDelivery": "ENVÍO GRATUITO",
+    "validation": {
+      "name": {
+        "minLength": "El nombre debe tener al menos 2 caracteres.",
+        "invalidChars": "El nombre solo puede contener letras y espacios."
+      },
+      "phone": {
+        "minLength": "El número de teléfono parece demasiado corto.",
+        "invalidFormat": "Formato de número de teléfono no válido."
+      }
+    }
   },
   "pt-BR": {
-    "originalPriceLabel": "PREÇO ORIGINAL:",
-    "discountedPriceLabel": "PREÇO COM DESCONTO:",
-    "countdownTitle": "O desconto termina em:",
-    "countdownOre": "HORAS",
-    "countdownMinuti": "MINUTOS",
-    "countdownSecondi": "SEGUNDOS",
-    "ctaButton": "PEDIR CURCUMIN SPIRULINA PIPERINE SAFFRON",
-    "ctaButtonLoading": "ENVIANDO...",
+    "ctaButton": "SOLICITAR A OFERTA ESPECIAL",
     "namePlaceholder": "Nome completo",
     "phonePlaceholder": "Número de telefone",
     "contactlessDelivery": "Pagamento na entrega",
     "freeDelivery": "FRETE GRÁTIS",
-    "submitSuccess": "Pedido recebido! Entraremos em contato em breve.",
-    "submitError": "Ocorreu um erro. Por favor, tente novamente.",
-    "validationError": "Por favor, verifique os campos e tente novamente."
+    "validation": {
+      "name": {
+        "minLength": "O nome deve ter pelo menos 2 caracteres.",
+        "invalidChars": "O nome pode conter apenas letras e espaços."
+      },
+      "phone": {
+        "minLength": "O número de telefone parece muito curto.",
+        "invalidFormat": "Formato de número de telefone inválido."
+      }
+    }
   }
 }

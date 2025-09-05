@@ -1,50 +1,90 @@
-import { useTranslations } from "next-intl";
-
+// src/components/ui/PriceDisplay.tsx
 /**
- * @author Raz Podestá - MetaShark Tech <raz.metashark.tech>
- * @version 1.0.0
- * @description Componente de UI atómico y de presentación puro. Muestra el precio
- *              original y el precio con descuento. Diseñado con una filosofía
- *              Mobile First.
+ * @file PriceDisplay.tsx
+ * @description Aparato de UI soberano (Molécula). Exibe o preço original e
+ *              com desconto. Obtém seu conteúdo de UI (etiquetas, moeda) de
+ *              i18n e recebe apenas os dados de negócio (preços) via props.
+ * @version 5.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/PriceDisplay.tsx.md
  */
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+import { clientLogger } from "@/lib/logger";
 
 export interface PriceDisplayProps {
   originalPrice: number;
   discountedPrice: number;
-  locale: string;
 }
 
+/**
+ * @component PriceDisplay
+ * @description Renderiza a seção de preços, formatando os valores monetários.
+ * @param {PriceDisplayProps} props - As propriedades com os dados de preço.
+ * @returns {React.ReactElement} O componente de exibição de preços.
+ */
 export function PriceDisplay({
   originalPrice,
   discountedPrice,
-  locale,
 }: PriceDisplayProps) {
- const t = useTranslations("components.ui.OrderForm");
+  const t = useTranslations("components.ui.PriceDisplay");
+  const locale = useLocale();
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: "EUR", // Moneda base, el formato se adapta al locale.
-      minimumFractionDigits: 0,
-    }).format(price);
+  const originalPriceLabel = t("originalPriceLabel");
+  const discountedPriceLabel = t("discountedPriceLabel");
+  const currency = t("currency");
+
+  clientLogger.trace(
+    { component: "PriceDisplay", locale, currency },
+    "Renderizando componente soberano."
+  );
+
+  /**
+   * @function formatPrice
+   * @description Encapsula a lógica de formatação de moeda usando a API Intl.
+   * @param {number} price - O valor numérico a ser formatado.
+   * @returns {string} O preço formatado como string.
+   */
+  const formatPrice = (price: number): string => {
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: currency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(price);
+    } catch (error) {
+      clientLogger.error(
+        {
+          component: "PriceDisplay",
+          locale,
+          currency,
+          price,
+          error,
+        },
+        "Falha ao formatar preço. Verifique se o código da moeda é válido."
+      );
+      return `${price} ${currency}`; // Fallback seguro
+    }
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between text-center md:text-left p-4">
-      {/* Precio Original */}
-      <div className="flex flex-col items-center md:items-start mb-4 md:mb-0">
-        <span className="text-sm font-medium text-gray-400">
-          {t("originalPriceLabel")}
+    <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:gap-8">
+      {/* Preço Original */}
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-white/60">
+          {originalPriceLabel}
         </span>
-        <span className="text-4xl font-light text-gray-400 line-through">
+        <span className="text-4xl font-light text-white/60 line-through">
           {formatPrice(originalPrice)}
         </span>
       </div>
 
-      {/* Precio con Descuento */}
-      <div className="flex flex-col items-center md:items-end">
-        <span className="text-sm font-medium text-gray-200">
-          {t("discountedPriceLabel")}
+      {/* Preço com Desconto */}
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-white/80">
+          {discountedPriceLabel}
         </span>
         <span className="text-6xl font-bold text-white">
           {formatPrice(discountedPrice)}
@@ -53,15 +93,4 @@ export function PriceDisplay({
     </div>
   );
 }
-
-/**
- * MEJORA CONTINUA
- *
- * @version 1.0.0
- * ---
- * @section Melhorias Adicionadas
- *
- * ((Implementada)) @version 1.0.0 - MOBILE FIRST DESIGN: O layout padrão é vertical (`flex-col`) e transita para horizontal (`md:flex-row`).
- * ((Implementada)) @version 1.0.0 - FORMATAÇÃO INTERNACIONALIZADA: Utiliza `Intl.NumberFormat` para formatar a moeda corretamente de acordo com o `locale`.
- * ((Implementada)) @version 1.0.0 - COMPONENTE PURO: 100% controlado por props para máxima reutilização.
- */
+// src/components/ui/PriceDisplay.tsx
