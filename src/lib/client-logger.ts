@@ -4,40 +4,25 @@
  * @description Aparato de Logging de Cliente Híbrido y Soberano.
  *              Implementa un logger que enruta logs a la consola, a un buffer
  *              persistente en localStorage y a Sentry para eventos críticos.
- * @version 1.0.0
+ * @version 2.1.0 (Reversión Estratégica)
  * @author L.I.A. Legacy
- * @see .docs/manifiesto-estructura-basica.md
  * @see .docs-espejo/lib/client-logger.ts.md
  */
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
 
-// =====================================================================
-//             NÚCLEO DE PERSISTENCIA LOCAL (CLIENTE)
-// =====================================================================
-
-/**
- * @interface LogEntry
- * @description Contrato de datos para una entrada de log persistente.
- */
+// --- [NÚCLEO DE PERSISTENCIA - Sin cambios] ---
 interface LogEntry {
   timestamp: string;
   level: "trace" | "info" | "warn" | "error";
   message: string;
   context?: Record<string, unknown>;
 }
-
-/**
- * @class LocalStorageLogManager
- * @description Gestor atómico para la persistencia de logs en `localStorage`.
- *              Encapsula toda la lógica de escritura, lectura y rotación.
- */
 class LocalStorageLogManager {
   private static readonly STORAGE_KEY = "app_client_logs";
   private static readonly MAX_LOGS = 100;
   private static readonly LOG_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
   private static getLogs(): LogEntry[] {
     try {
       if (typeof window === "undefined") return [];
@@ -48,7 +33,6 @@ class LocalStorageLogManager {
       return [];
     }
   }
-
   private static saveLogs(logs: LogEntry[]): void {
     try {
       if (typeof window === "undefined") return;
@@ -57,14 +41,9 @@ class LocalStorageLogManager {
       console.error("[LocalStorageLogManager] Error al guardar logs:", error);
     }
   }
-
   public static add(newLog: Omit<LogEntry, "timestamp">): void {
     const now = new Date();
-    const entry: LogEntry = {
-      timestamp: now.toISOString(),
-      ...newLog,
-    };
-
+    const entry: LogEntry = { timestamp: now.toISOString(), ...newLog };
     let logs = this.getLogs();
     logs = logs.filter(
       (log) =>
@@ -77,14 +56,14 @@ class LocalStorageLogManager {
     this.saveLogs(logs);
   }
 }
-
-// =====================================================================
-//                   LOGGER DE CLIENTE HÍBRIDO
-// =====================================================================
+// --- [FIN DEL NÚCLEO DE PERSISTENCIA] ---
 
 type LogLevel = "trace" | "info" | "warn" | "error" | "fatal";
 type LogContext = Record<string, unknown>;
 
+// REVERSÃO ESTRATÉGICA: A assinatura foi revertida para (mensagem, contexto)
+// para evitar refatoração em cascata e garantir um build estável.
+// A unificação da API está documentada em .docs/TODO.md.
 function createClientLoggerMethod(
   level: LogLevel
 ): (message: string, context?: LogContext) => void {
@@ -134,11 +113,6 @@ function createClientLoggerMethod(
   };
 }
 
-/**
- * @public
- * @constant clientLogger
- * @description Logger híbrido para el lado del cliente (navegador).
- */
 export const clientLogger = {
   trace: createClientLoggerMethod("trace"),
   info: createClientLoggerMethod("info"),

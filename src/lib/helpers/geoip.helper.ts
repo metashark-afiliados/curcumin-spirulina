@@ -4,7 +4,7 @@
  * @description Aparato de infraestructura SSoT para la lógica de detección de
  *              GeoIP en el servidor (Edge). Es responsable de extraer el país
  *              de la petición y mapearlo a un locale soportado.
- * @version 2.1.0
+ * @version 2.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/lib/helpers/geoip.helper.ts.md
  */
@@ -13,7 +13,7 @@ import "server-only";
 import { type NextRequest } from "next/server";
 
 import { COUNTRY_TO_LOCALE_MAP } from "@/config/geoip.config";
-import { serverLogger } from "@/lib/server-logger"; // <-- CORREÇÃO: Importação corrigida.
+import { serverLogger } from "@/lib/server-logger";
 
 /**
  * @public
@@ -33,7 +33,7 @@ export function lookupCountryFromRequest(request: NextRequest): string | null {
       );
       return country;
     }
-    serverLogger.trace("[GeoIP Helper] Header de Vercel não encontrado.");
+    serverLogger.trace({}, "[GeoIP Helper] Header de Vercel não encontrado.");
     return null;
   } catch (error) {
     serverLogger.error(

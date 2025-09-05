@@ -3,32 +3,34 @@
  * @file index.ts
  * @description Manejador de middleware atómico para i18n com um fluxo de
  *              detección de élite e fallback a uma página de seleção.
- * @version 2.1.0
+ * @version 2.2.0
  * @author L.I.A. Legacy
  */
 import { match } from "@formatjs/intl-localematcher";
 import Negotiator from "negotiator";
 import { NextRequest, NextResponse } from "next/server";
 import createNextIntlMiddleware from "next-intl/middleware";
-import {
-  defaultLocale,
-  locales,
-  localePrefix,
-  pathnames,
-} from "@/lib/navigation";
-import { serverLogger } from "@/lib/server-logger"; // <-- CORREÇÃO: Importação corrigida.
+
 import {
   lookupCountryFromRequest,
   mapCountryToLocale,
 } from "@/lib/helpers/geoip.helper";
+import {
+  defaultLocale,
+  localePrefix,
+  locales,
+  pathnames,
+} from "@/lib/navigation";
+import { serverLogger } from "@/lib/server-logger";
 
 function getLocaleFromRequest(request: NextRequest): string | undefined {
   // 1. Prioridad Máxima: Cookie (Elección explícita del usuario)
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (cookieLocale && locales.includes(cookieLocale as any)) {
-    serverLogger.trace("[I18nHandler] Locale detectado via cookie.", {
-      locale: cookieLocale,
-    });
+    serverLogger.trace(
+      { locale: cookieLocale },
+      "[I18nHandler] Locale detectado via cookie."
+    );
     return cookieLocale;
   }
 
@@ -38,9 +40,10 @@ function getLocaleFromRequest(request: NextRequest): string | undefined {
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages();
   try {
     const matchedLocale = match(languages, locales as any, defaultLocale);
-    serverLogger.trace("[I18nHandler] Locale detectado via Accept-Language.", {
-      locale: matchedLocale,
-    });
+    serverLogger.trace(
+      { locale: matchedLocale },
+      "[I18nHandler] Locale detectado via Accept-Language."
+    );
     return matchedLocale;
   } catch (e) {
     // Ignorar error si no hay coincidencias
@@ -50,9 +53,10 @@ function getLocaleFromRequest(request: NextRequest): string | undefined {
   const country = lookupCountryFromRequest(request);
   const geoLocale = mapCountryToLocale(country);
   if (geoLocale) {
-    serverLogger.trace("[I18nHandler] Locale detectado via GeoIP.", {
-      locale: geoLocale,
-    });
+    serverLogger.trace(
+      { locale: geoLocale },
+      "[I18nHandler] Locale detectado via GeoIP."
+    );
     return geoLocale;
   }
 
@@ -72,6 +76,7 @@ export async function handleI18n(request: NextRequest): Promise<NextResponse> {
     const url = request.nextUrl.clone();
     url.pathname = "/select-language";
     serverLogger.warn(
+      { path: pathname },
       "[I18nHandler] No se pudo determinar el locale. Redireccionando a la página de selección."
     );
     return NextResponse.redirect(url);

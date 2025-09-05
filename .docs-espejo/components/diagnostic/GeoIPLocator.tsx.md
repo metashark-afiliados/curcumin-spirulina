@@ -20,27 +20,28 @@ La arquitectura sigue el patrón "Proveedor de Contexto" de React, separando la 
 ```mermaid
 graph TD
     A[Componente `GeoIPProvider` se monta en el árbol] --> B["`useEffect` se dispara una vez"];
-    B --> C["Llama a `fetch(GEOIP_API_URL)`"];
-    C -- Éxito --> D["Actualiza estado interno con datos GeoIP"];
-    C -- Fallo --> E["Actualiza estado interno con mensaje de error"];
-    D & E --> F["Contexto provee el nuevo estado"];
-    G[Cualquier componente hijo] -- "Llama a" --> H["Hook `useGeoIP()`"];
-    H -- "Lee desde" --> F;
-    H --> G[Recibe `{ geoData, isLoading, error }`];
+    B --> C["Llama a `fetchGeoIPData()`"];
+    subgraph "Lógica de fetchGeoIPData"
+      C -- Éxito --> D["Valida la respuesta con `GeoIP.schema.ts`"];
+      D -- Éxito --> E[Retorna datos GeoIP];
+      D -- Fallo --> F[Lanza Error];
+    end
+    E --> G["Atualiza estado interno con datos GeoIP"];
+    F --> H["`catch` actualiza estado con una `ValidationErrorKey`"];
+    G & H --> I["Contexto provee el nuevo estado"];
+    
+    J[Cualquier componente hijo] -- "Llama a" --> K["Hook `useGeoIP()`"];
+    K -- "Lee desde" --> I;
+    K --> J[Recibe `{ geoData, isLoading, errorKey }`];
 3. Contrato de API
 Componente de Entrada: GeoIPProvider
 Props: { children: ReactNode }
 Hook de Salida: useGeoIP()
-Retorno: GeoIPContextState { geoData: { countryCode, countryName }, isLoading, error }
+Retorno: GeoIPContextState { geoData: { countryCode, countryName }, isLoading, errorKey }
 4. Zona de Melhorias Futuras
-CACHING EN sessionStorage: Para evitar llamadas redundantes a la API en cada navegación dentro de la misma sesión, los datos de GeoIP pueden ser almacenados en sessionStorage. El useEffect debería verificar el caché antes de hacer un fetch.
-FALLBACK A DETECCIÓN EN SERVIDOR: En plataformas como Vercel, el país está disponible en las cabeceras (x-vercel-ip-country). Se podría pasar este valor inicial desde un Server Component al GeoIPProvider para un renderizado inicial más rápido, usando el fetch del cliente como fallback.
-ABSTRACCIÓN A SERVICIO: La lógica de fetch podría ser abstraída a un servicio dedicado (/lib/services/geoip.service.ts) para una mejor separación de responsabilidades y testeabilidad.
-IMPLEMENTAR RETRY-MECHANISM: Añadir una lógica de reintentos con "exponential backoff" para el fetch en caso de fallos de red intermitentes.
-VALIDACIÓN DE RESPUESTA CON ZOD: Crear un GeoIPResponseSchema con Zod para validar la estructura de la respuesta de la API, garantizando la seguridad de tipos de los datos consumidos.
-ESTADOS DE CARGA GRANULARES: En lugar de un booleano isLoading, el estado podría ser más granular ('idle' | 'loading' | 'success' | 'error') para un control más fino de la UI.
-HOOK useGeoIPEffect PERSONALIZADO: La lógica dentro del useEffect podría ser extraída a su propio hook para facilitar pruebas unitarias aisladas de la lógica de obtención de datos.
-MENSAJES DE ERROR INTERNACIONALIZADOS: Si el fetch falla, el error podría ser una clave de i18n en lugar de un string, para mostrar mensajes de error localizados al usuario.
-RESILIENCIA CONTRA AD-BLOCKERS: Investigar y documentar estrategias de fallback para el caso en que un ad-blocker bloquee la llamada a la API de GeoIP.
-DOCUMENTACIÓN EN ESPAÑOL: Traducir este documento espejo al español para consistencia.
+ABSTRAÇÃO PARA HOOK: A lógica de fetch poderia ser abstraída para um hook dedicado (useFetchGeoIP) para melhor separação de responsabilidades e testabilidade.
+CACHING EM sessionStorage: Para evitar chamadas redundantes à API, os dados de GeoIP podem ser armazenados em sessionStorage.
+MECANISMO DE RETENTATIVAS: Adicionar uma lógica de retry com "exponential backoff" para o fetch em caso de falhas de rede intermitentes.
+UI DE ERRO TRADUZIDA: O errorKey retornado pelo hook pode ser usado com useTranslations para mostrar uma mensagem de erro localizada ao usuário.
+FALLBACK DE SERVIDOR: Passar um valor inicial de GeoIP detetado no servidor (via headers de Vercel) para o GeoIPProvider para um renderizado inicial mais rápido.
 // .docs-espejo/components/diagnostic/GeoIPLocator.tsx.md

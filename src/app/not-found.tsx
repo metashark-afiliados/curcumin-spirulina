@@ -3,7 +3,7 @@
  * @file not-found.tsx
  * @description Aparato soberano e resiliente para a página 404 global. Valida
  *              seu próprio conteúdo de i18n para garantir que nunca falhe.
- * @version 5.0.0
+ * @version 5.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/not-found.tsx.md
  */
@@ -32,6 +32,7 @@ export default async function NotFoundPage() {
   try {
     const t = await getTranslations("app.notFound");
     const rawContent = t.raw("");
+    // El schema espera `meta`, lo proporcionamos vacío ya que no se usa aquí.
     const validation = NotFoundContentSchema.safeParse({
       meta: {},
       ...rawContent,
@@ -39,9 +40,10 @@ export default async function NotFoundPage() {
     if (!validation.success) throw validation.error;
     content = validation.data;
   } catch (error) {
+    // CORRECCIÓN: Firma del logger corregida para (contexto, mensaje).
     serverLogger.error(
-      "Falha ao carregar ou validar traduções para 404. Usando fallbacks.",
-      { error }
+      { err: error },
+      "Falha ao carregar ou validar traduções para 404. Usando fallbacks."
     );
     content = fallbackTexts;
   }

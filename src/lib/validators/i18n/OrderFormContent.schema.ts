@@ -4,7 +4,7 @@
  * @description Aparato de Contrato de Datos y SSoT para el contenido del
  *              componente OrderForm. Define la estructura canónica que el
  *              componente espera de su archivo de mensajes i18n.
- * @version 1.0.0
+ * @version 2.0.0
  * @author L.I.A. Legacy
  */
 import { z } from "zod";
@@ -12,15 +12,17 @@ import { z } from "zod";
 /**
  * @public
  * @constant OrderFormContentSchema
- * @description El schema Zod que valida la totalidad del contenido que el
- *              componente OrderForm consume desde su archivo de mensajes.
+ * @description El schema Zod que valida la totalidade del contenido que el
+ *              componente OrderForm consome desde su archivo de mensajes.
  */
 export const OrderFormContentSchema = z.object({
+  formTitle: z.string().min(1), // <-- CORRECCIÓN: Clave añadida para sincronizar con el JSON.
   ctaButton: z.string().min(1),
   namePlaceholder: z.string().min(1),
   phonePlaceholder: z.string().min(1),
   contactlessDelivery: z.string().min(1),
   freeDelivery: z.string().min(1),
+  submittingText: z.string().min(1), // <-- CORRECCIÓN: Clave añadida para sincronizar con el JSON.
   validation: z.object({
     name: z.object({
       minLength: z.string().min(1),

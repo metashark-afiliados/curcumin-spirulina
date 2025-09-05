@@ -4,7 +4,7 @@
  * @description Aparato soberano, resiliente e de cliente. Orquesta a exibição
  *              das fases do tratamento, obtendo e VALIDANDO seu próprio conteúdo
  *              de i18n contra um schema Zod antes de renderizar.
- * @version 6.2.0
+ * @version 6.3.1
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
  */
@@ -15,6 +15,7 @@ import React, { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
 import { clientLogger } from "@/lib/client-logger";
+// CORREÇÃO: Extensão .ts removida do caminho de importação para resolver o erro ts(5097).
 import {
   TreatmentCycleSectionContentSchema,
   type TreatmentCycleSectionContent,
@@ -26,12 +27,7 @@ export function TreatmentCycleSection(): React.ReactElement | null {
   let content: TreatmentCycleSectionContent;
 
   try {
-    // CORREÇÃO: Tipificar explicitamente o retorno de t.raw para ajudar a inferência.
-    const rawContent = {
-      mainTitle: t("mainTitle"),
-      subtitle: t("subtitle"),
-      cycles: t.raw("cycles") as TreatmentCycleSectionContent["cycles"],
-    };
+    const rawContent = t.raw("");
     const validation = TreatmentCycleSectionContentSchema.safeParse(rawContent);
     if (!validation.success) {
       throw new Error(
@@ -42,13 +38,15 @@ export function TreatmentCycleSection(): React.ReactElement | null {
     }
     content = validation.data;
   } catch (error) {
+    // CORREÇÃO: Assinatura da chamada ao logger alinhada com a API do clientLogger (mensagem, contexto).
     clientLogger.error(
       "Erro ao obter ou validar conteúdo da TreatmentCycleSection. A seção não será renderizada.",
-      { error }
+      { err: error }
     );
     return null;
   }
 
+  // CORREÇÃO: Assinatura da chamada ao logger alinhada com a API do clientLogger (mensagem, contexto).
   clientLogger.trace(
     "Renderizando seção de ciclos de tratamento soberana e validada.",
     {

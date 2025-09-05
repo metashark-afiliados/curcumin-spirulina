@@ -3,7 +3,7 @@
  * @file Footer.tsx
  * @description Aparato de layout soberano, resiliente e de servidor. Obtém e
  *              VALIDA seu próprio conteúdo de i18n contra um schema Zod.
- * @version 5.0.0
+ * @version 5.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/layout/Footer.tsx.md
  */
@@ -11,7 +11,7 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 import { Mail, Shield } from "lucide-react";
 import { Link, type Pathname } from "@/lib/navigation";
-import { serverLogger } from "@/lib/server-logger"; // <-- CORREÇÃO: Importação corrigida.
+import { serverLogger } from "@/lib/server-logger";
 import {
   FooterContentSchema,
   type FooterContent,
@@ -27,9 +27,10 @@ export async function Footer(): Promise<React.ReactElement | null> {
     if (!validation.success) throw validation.error;
     content = validation.data;
   } catch (error) {
+    // CORRECCIÓN: Firma del logger corregida para (contexto, mensaje).
     serverLogger.error(
-      "Erro ao obter ou validar conteúdo do Footer. Não será renderizado.",
-      { error }
+      { err: error },
+      "Erro ao obter ou validar conteúdo do Footer. Não será renderizado."
     );
     return null;
   }
