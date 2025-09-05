@@ -5,7 +5,7 @@
  *              responsabilidad es obtener los datos del post, orquestar los
  *              metadatos SEO y delegar el 100% del renderizado de la UI al
  *              componente de presentación puro `ArticleLayout`.
- * @version 7.0.0
+ * @version 7.0.1
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/[locale]/blog/[slug]/page.tsx.md
  */
@@ -20,7 +20,8 @@ import { generateBlogPostingSchema } from "@/lib/schema";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CallToAction } from "@/components/blog/CallToAction";
-import { ArticleLayout } from "@/components/blog/ArticleLayout";
+// CORREÇÃO: O caminho de importação foi corrigido para refletir a localização canónica do componente.
+import { ArticleLayout } from "@/components/layout/ArticleLayout";
 
 interface BlogArticlePageProps {
   params: {
