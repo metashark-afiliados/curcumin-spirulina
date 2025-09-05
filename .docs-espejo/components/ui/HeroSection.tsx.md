@@ -3,36 +3,37 @@
  * @file .docs-espejo/components/ui/HeroSection.tsx.md
  * @description Documento Espejo y SSoT conceptual para el aparato HeroSection.
  * @author L.I.A. Legacy
- * @version 2.0.0
+ * @version 6.0.0
  */
 # Manifiesto Conceptual: Aparato `HeroSection`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **"gancho" soberano, visual y de conversión** de la landing page. Su propósito es capturar la atención del visitante en menos de 3 segundos y comunicar la propuesta de valor fundamental del producto, guiándolo directamente hacia la acción principal: el formulario de pedido.
+Este aparato es el **orquestador soberano, resiliente y configurable** de la sección "Hero". Su propósito es capturar la atención del visitante y guiarlo a la conversión.
 
-Como **orquestador de presentación soberano y asíncrono**, su responsabilidad es obtener su propio contenido de i18n y ensamblar el copywriting, la imagen del producto y el `OrderForm` en un layout de alta conversión.
+Como orquestador, sus responsabilidades son:
+1.  **Obtener Contenido:** Carga su contenido desde su archivo de mensajes i18n.
+2.  **Validar Contenido:** Valida rigurosamente el contenido contra su SSoT de schema (`HeroSection.schema.ts`), garantizando la integridad de los datos.
+3.  **Manejar Errores:** Si la validación falla, registra un error detallado y se abstiene de renderizar, previniendo fallos en producción.
+4.  **Ensamblar UI:** Orquesta la composición de subcomponentes de presentación puros (`HeroContent`, `HeroImage`) y del aparato soberano `OrderForm`.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un **Server Component asíncrono** que obtiene sus propias dependencias de contenido.
+La arquitectura sigue el patrón "Orquestador de Servidor Validado".
 
 ```mermaid
 graph TD
-    A["`HeroSection.tsx` (Componente Soberano)"] -- "Invoca `await getTranslations()`" --> B[Obtiene `mainTitle` y `subtitle` de su archivo JSON];
-    B -- "Renderiza" --> C[Layout de Grid];
-    subgraph "Contenido del Hero"
-        C -- "Compone" --> E["Textos (`mainTitle`, `subtitle`)"];
-        C -- "Compone" --> F["`HeroImage` (subcomponente optimizado)"];
-        C -- "Compone" --> G["`OrderForm` (aparato soberano)"];
-    end
-Esta arquitectura elimina el prop drilling y se alinea con el patrón canónico de obtención de datos para Server Components.
+    A["`HeroSection.tsx` (Orquestador)"] -- "1. Llama a `getTranslations()`" --> B[Contenido i18n];
+    C["`HeroSection.schema.ts` (SSoT)"] --> A;
+    A -- "2. Valida B contra C" --> D{¿Validación OK?};
+    D -- Sí --> E["Renderiza subcomponentes puros"];
+    D -- No --> F["`serverLogger.error()` y retorna `null`"];
 3. Contrato de API
-Props de Entrada: Ninguna. Este es un componente soberano y autocontenido.
+Props de Entrada: Ninguna. Es un componente soberano.
+Contrato de Datos (desde i18n): Debe cumplir la estructura definida en HeroSectionContentSchema.
 4. Zona de Melhorias Futuras
-TESTE A/B DE COPYWRITING: Integrar con un servicio de feature flags para obtener diferentes versiones de mainTitle y subtitle y probar qué titular genera más conversiones.
-IMAGEN DE FONDO DINÁMICA: Permitir pasar una backgroundImageUrl desde el CMS para añadir un fondo visualmente atractivo a la sección.
-VÍDEO EN LUGAR DE IMAGEN: Añadir una prop videoUrl que, si se proporciona, renderice un componente de vídeo en lugar de la imagen estática.
-PRUEBA SOCIAL INMEDIATA: Integrar una pequeña subsección de "logos de confianza" o una calificación por estrellas directamente debajo del subtítulo, con contenido obtenido desde i18n.
-CTA SECUNDARIO: Añadir soporte para un botón de acción secundario opcional (ej. "Leer más sobre la ciencia") junto al formulario.
+VARIANTES DE LAYOUT (cva): Extender el schema para incluir una propiedad layout: "image-left" | "image-right" y usar cva para aplicar diferentes clases de grid, permitiendo pruebas A/B del layout directamente desde el archivo de contenido.
+CONTENIDO DESDE CMS: Reemplazar getTranslations con una llamada a un Headless CMS. El schema Zod seguirá siendo la barrera de validación, haciendo el cambio de fuente de datos seguro y transparente.
+CTA SECUNDARIO: Extender el schema para permitir un objeto secondaryCta opcional que, si está presente, renderice un segundo botón (ej. "Leer más").
+IMAGEN DE FONDO CONFIGURABLE: Permitir una propiedad backgroundImage opcional en el schema para personalizar el fondo de la sección.
 // .docs-espejo/components/ui/HeroSection.tsx.md

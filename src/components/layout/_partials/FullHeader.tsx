@@ -5,7 +5,7 @@
  *              variante de navegación completa del header para las páginas de
  *              contenido (no-landing pages). Gestiona el estado y la
  *              accesibilidad del menú de navegación móvil.
- * @version 2.1.0
+ * @version 2.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/layout/_partials/FullHeader.tsx.md
  */
@@ -14,36 +14,20 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger"; // <-- CORREÇÃO: Importação corrigida.
 import { Link, type Pathname } from "@/lib/navigation";
 
-/**
- * @interface NavItem
- * @description Define el contrato de datos para un único elemento de navegación estático.
- */
 interface NavItem {
   href: Pathname;
   label: string;
 }
 
-/**
- * @interface FullHeaderProps
- * @description Define el contrato de props para el componente FullHeader.
- */
 export interface FullHeaderProps {
   navItems: NavItem[];
   ctaButtonText: string;
   brandName: string;
 }
 
-/**
- * @public
- * @component FullHeader
- * @description Renderiza la cabecera completa con menú de navegación y gestiona
- *              el estado del menú móvil.
- * @param {FullHeaderProps} props - Las propiedades para configurar el componente.
- * @returns {React.ReactElement}
- */
 export const FullHeader = ({
   navItems,
   ctaButtonText,
@@ -51,19 +35,13 @@ export const FullHeader = ({
 }: FullHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Efecto para prevenir el scroll del body cuando el menú móvil está abierto.
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "auto";
     return () => {
-      document.body.style.overflow = "auto"; // Limpieza al desmontar
+      document.body.style.overflow = "auto";
     };
   }, [isMenuOpen]);
 
-  /**
-   * @private
-   * @function toggleMenu
-   * @description Alterna el estado de visibilidad del menú móvil.
-   */
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
     clientLogger.info(

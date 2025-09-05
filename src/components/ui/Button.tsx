@@ -3,9 +3,9 @@
  * @file Button.tsx
  * @description Aparato de UI atómico de élite para botones. Es polimórfico,
  *              totalmente animado, accesible, tipo-seguro, y soporta un
- *              estado de carregamento declarativo y un conjunto extendido de
- *              variantes visuales.
- * @version 2.0.0
+ *              estado de carga declarativo y un conjunto extendido de
+ *              variantes visuales semánticas.
+ * @version 3.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/Button.tsx.md
  */
@@ -16,7 +16,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
-import { clientLogger } from "@/lib/logger";
+
+import { clientLogger } from "@/lib/client-logger";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -30,11 +31,11 @@ const buttonVariants = cva(
         outline:
           "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-brand-secondary text-on_brand hover:bg-brand-secondary/80",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-text-primary underline-offset-4 hover:underline",
+        link: "text-primary underline-offset-4 hover:underline",
         subtle: "bg-white/10 text-white/80 hover:bg-white/20",
-        premium:
+        accent:
           "bg-gradient-to-r from-brand-accent to-red-600 text-on_brand shadow-lg hover:shadow-xl",
       },
       size: {
@@ -55,19 +56,11 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends Omit<HTMLMotionProps<"button">, "children" | "color">,
     VariantProps<typeof buttonVariants> {
-  /** El contenido del botón. */
   children: React.ReactNode;
-  /**
-   * Si es `true`, el botón se renderizará como su hijo directo,
-   * aplicando todos los estilos y comportamientos a ese hijo.
-   * Ideal para envolver componentes como `<Link>`.
-   */
   asChild?: boolean;
-  /**
-   * Si es `true`, muestra un spinner, deshabilita el botón y
-   * suprime las animaciones de interacción.
-   */
   loading?: boolean;
+  /** Texto descritivo para leitores de ecrã durante o estado de carregamento. */
+  loadingText?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -78,6 +71,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       loading = false,
+      loadingText,
       children,
       ...props
     },
@@ -86,11 +80,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? motion(Slot) : motion.button;
     const isDisabled = loading || props.disabled;
 
-    if (isDisabled) {
-      clientLogger.trace(
-        { component: "Button", loading, disabled: props.disabled },
-        "Renderizando em estado desabilitado."
-      );
+    if (loading) {
+      // CORREÇÃO: A assinatura correta é (mensagem, contexto).
+      clientLogger.trace("Renderizando em estado de carregamento.", {
+        component: "Button",
+        loadingText,
+      });
     }
 
     return (
@@ -98,14 +93,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={isDisabled}
+        aria-busy={loading ? "true" : undefined}
         whileHover={{ scale: isDisabled ? 1 : 1.05 }}
         whileTap={{ scale: isDisabled ? 1 : 0.95 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
         {...props}
       >
-        {variant === "premium" && !isDisabled && (
+        {variant === "accent" && !isDisabled && (
           <motion.div
-            className="absolute inset-0 w-full h-full bg-white/20"
+            className="absolute inset-0 h-full w-full bg-white/20"
             initial={{ x: "-100%" }}
             whileHover={{ x: "100%" }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -115,8 +111,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <span className="relative z-10 flex items-center justify-center">
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+              {/* Para acessibilidade: o texto visual é mantido, mas um texto específico
+                  para leitores de ecrã é fornecido, se disponível. */}
               <span>{children}</span>
+              {loadingText && (
+                <span className="sr-only" aria-live="polite">
+                  {loadingText}
+                </span>
+              )}
             </>
           ) : (
             children

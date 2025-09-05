@@ -1,11 +1,10 @@
 // src/components/ui/BenefitsSection.tsx
 /**
  * @file BenefitsSection.tsx
- * @description Aparato de UI soberano (Organismo). Orquesta la
- *              exhibición de los principales beneficios del producto, obteniendo
- *              su propio contenido de i18n y delegando la presentación a las
- *              moléculas `BenefitPill`.
- * @version 5.0.0
+ * @description Aparato de UI soberano, resiliente e de cliente. Orquesta a
+ *              exibição dos benefícios, obtendo e VALIDANDO seu próprio conteúdo
+ *              de i18n contra um schema Zod antes de renderizar.
+ * @version 6.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/BenefitsSection.tsx.md
  */
@@ -13,16 +12,15 @@
 
 import { useTranslations } from "next-intl";
 import { Leaf, ShieldCheck, Smile, type LucideIcon, Zap } from "lucide-react";
-import React from "react";
+import React, { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { BenefitPill } from "@/components/ui/BenefitPill";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger";
+import {
+  BenefitsSectionContentSchema,
+  type BenefitsSectionContent,
+} from "@/lib/validators/i18n/BenefitsSection.schema";
 
-/**
- * @constant iconMap
- * @description SSoT para mapear chaves de string a componentes de ícone.
- *              Desacopla os dados de i18n da implementação de ícones.
- */
 const iconMap: Record<string, LucideIcon> = {
   energy: Zap,
   metabolism: ShieldCheck,
@@ -30,44 +28,54 @@ const iconMap: Record<string, LucideIcon> = {
   natural: Leaf,
 };
 
-/**
- * @interface BenefitData
- * @description Contrato de datos interno para un único benefício, garantizando
- *              a consistência de tipos dos dados obtidos de `t.raw`.
- */
-interface BenefitData {
-  iconName: keyof typeof iconMap;
-  title: string;
-  description: string;
-}
-
-/**
- * @component BenefitsSection
- * @description O orquestrador soberano da seção de benefícios. Mapeia um array de
- *              dados de benefícios obtidos via i18n para as moléculas `BenefitPill`.
- * @returns {React.ReactElement} A seção de benefícios completa.
- */
-export function BenefitsSection() {
+export function BenefitsSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.BenefitsSection");
-  const mainTitle: string = t("mainTitle");
-  const benefits: BenefitData[] = t.raw("benefits");
+  const titleId = useId();
+  let content: BenefitsSectionContent;
 
-  clientLogger.trace(
-    { component: "BenefitsSection", benefitCount: benefits.length },
-    "Renderizando seção de benefícios soberana."
-  );
+  try {
+    // CORREÇÃO: Construir explicitamente o objeto para validação.
+    const rawContent = {
+      mainTitle: t("mainTitle"),
+      benefits: t.raw("benefits"),
+    };
+    const validation = BenefitsSectionContentSchema.safeParse(rawContent);
+
+    if (!validation.success) {
+      throw new Error(
+        `Validação de conteúdo de BenefitsSection falhou: ${JSON.stringify(
+          validation.error.flatten()
+        )}`
+      );
+    }
+    content = validation.data;
+  } catch (error) {
+    clientLogger.error(
+      "Erro ao obter ou validar conteúdo da BenefitsSection. A seção não será renderizada.",
+      { error }
+    );
+    return null; // Renderização resiliente.
+  }
+
+  clientLogger.trace("Renderizando seção de benefícios soberana e validada.", {
+    component: "BenefitsSection",
+    benefitCount: content.benefits.length,
+  });
 
   return (
-    <section className="py-16 md:py-24">
+    <section aria-labelledby={titleId} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <AnimationWrapper>
-          <h2 className="mb-12 text-center text-4xl font-bold text-white">
-            {mainTitle}
+          <h2
+            id={titleId}
+            className="mb-12 text-center text-4xl font-bold text-white"
+          >
+            {content.mainTitle}
           </h2>
         </AnimationWrapper>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {benefits.map((benefit, index) => {
-            const IconComponent = iconMap[benefit.iconName] || Leaf; // Fallback seguro
+          {content.benefits.map((benefit, index) => {
+            const IconComponent = iconMap[benefit.iconName] || Leaf;
             return (
               <BenefitPill
                 key={benefit.title}

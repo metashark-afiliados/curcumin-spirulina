@@ -1,102 +1,102 @@
 {
   "it-IT": {
     "mainTitle": "Benefici Chiave per il Tuo Benessere",
-    "benefits": {
-      "benefit1": {
+    "benefits": [
+      {
         "iconName": "energy",
         "title": "Supporto Energetico",
         "description": "Ingredienti noti per aiutare a mantenere alti livelli di energia durante la giornata."
       },
-      "benefit2": {
+      {
         "iconName": "metabolism",
         "title": "Equilibrio Metabolico",
         "description": "Una formula progettata per supportare un metabolismo sano e funzionale."
       },
-      "benefit3": {
+      {
         "iconName": "mood",
         "title": "Benessere Emotivo",
         "description": "Componenti che contribuiscono a un umore equilibrato e a ridurre la fame nervosa."
       },
-      "benefit4": {
+      {
         "iconName": "natural",
         "title": "100% Naturale",
         "description": "Una composizione basata su ingredienti puri, senza additivi artificiali."
       }
-    }
+    ]
   },
   "en-US": {
     "mainTitle": "Key Benefits for Your Well-being",
-    "benefits": {
-      "benefit1": {
+    "benefits": [
+      {
         "iconName": "energy",
         "title": "Energy Support",
         "description": "Ingredients known to help maintain high energy levels throughout the day."
       },
-      "benefit2": {
+      {
         "iconName": "metabolism",
         "title": "Metabolic Balance",
         "description": "A formula designed to support a healthy and functional metabolism."
       },
-      "benefit3": {
+      {
         "iconName": "mood",
         "title": "Emotional Well-being",
         "description": "Components that contribute to a balanced mood and reduce stress-related eating."
       },
-      "benefit4": {
+      {
         "iconName": "natural",
         "title": "100% Natural",
         "description": "A composition based on pure ingredients, with no artificial additives."
       }
-    }
+    ]
   },
   "es-ES": {
     "mainTitle": "Beneficios Clave para Tu Bienestar",
-    "benefits": {
-      "benefit1": {
+    "benefits": [
+      {
         "iconName": "energy",
         "title": "Soporte Energético",
         "description": "Ingredientes conocidos por ayudar a mantener altos niveles de energía durante el día."
       },
-      "benefit2": {
+      {
         "iconName": "metabolism",
         "title": "Equilibrio Metabólico",
         "description": "Una fórmula diseñada para apoyar un metabolismo sano y funcional."
       },
-      "benefit3": {
+      {
         "iconName": "mood",
         "title": "Bienestar Emocional",
         "description": "Componentes que contribuyen a un humor equilibrado y a reducir el hambre nerviosa."
       },
-      "benefit4": {
+      {
         "iconName": "natural",
         "title": "100% Natural",
         "description": "Una composición basada en ingredientes puros, sin aditivos artificiales."
       }
-    }
+    ]
   },
   "pt-BR": {
     "mainTitle": "Benefícios Chave para o Seu Bem-estar",
-    "benefits": {
-      "benefit1": {
+    "benefits": [
+      {
         "iconName": "energy",
         "title": "Suporte Energético",
         "description": "Ingredientes conhecidos por ajudar a manter altos níveis de energia durante o dia."
       },
-      "benefit2": {
+      {
         "iconName": "metabolism",
         "title": "Equilíbrio Metabólico",
         "description": "Uma fórmula projetada para apoiar um metabolismo saudável e funcional."
       },
-      "benefit3": {
+      {
         "iconName": "mood",
         "title": "Bem-estar Emocional",
         "description": "Componentes que contribuem para um humor equilibrado e reduzem a fome por estresse."
       },
-      "benefit4": {
+      {
         "iconName": "natural",
         "title": "100% Natural",
         "description": "Uma composição baseada em ingredientes puros, sem aditivos artificiais."
       }
-    }
+    ]
   }
 }

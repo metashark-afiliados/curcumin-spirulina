@@ -1,55 +1,42 @@
 // src/components/ui/BenefitPill.tsx
 /**
  * @file BenefitPill.tsx
- * @description Aparato de UI atômico (Molécula) de apresentação puro. Exibe um
- *              único benefício chave do produto de forma concisa e visual,
- *              com um ícone, título e descrição. É animado e interativo.
- * @version 3.0.0
- * @author RaZ Podestá - MetaShark Tech
- * @see src/components/ui/BenefitsSection.tsx (Consumidor)
+ * @description Aparato de UI atómico (Molécula) de apresentação puro e acessível.
+ *              Exibe um único benefício do produto, utilizando HTML semântico
+ *              (`<article>`) e ARIA para uma experiência de utilizador de elite.
+ * @version 3.1.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/BenefitPill.tsx.md
  */
 "use client";
 
 import { motion } from "framer-motion";
 import { type LucideIcon } from "lucide-react";
-import React from "react";
-import { clientLogger } from "@/lib/logger";
+import React, { useId } from "react";
+import { clientLogger } from "@/lib/client-logger";
 
-/**
- * @interface BenefitPillProps
- * @description Contrato de propriedades para o componente BenefitPill.
- */
 export interface BenefitPillProps {
-  /** O componente de ícone (de lucide-react) a ser renderizado. */
   icon: LucideIcon;
-  /** O título do benefício. */
   title: string;
-  /** A descrição concisa do benefício. */
   description: string;
-  /** O índice do benefício na lista, usado para escalonar a animação. */
   index: number;
 }
 
-/**
- * @component BenefitPill
- * @description Renderiza um card interativo para um único benefício, com
- *              animações de entrada e de hover.
- * @param {BenefitPillProps} props - As propriedades para renderizar o benefício.
- * @returns {React.ReactElement} Um card de benefício.
- */
 export function BenefitPill({
   icon: Icon,
   title,
   description,
   index,
 }: BenefitPillProps) {
-  clientLogger.trace(
-    { component: "BenefitPill", title },
-    `Renderizando pílula de benefício.`
-  );
+  const titleId = useId();
+  clientLogger.trace("Renderizando pílula de benefício.", {
+    component: "BenefitPill",
+    title,
+  });
 
   return (
-    <motion.div
+    <motion.article
+      aria-labelledby={titleId}
       className="flex h-full flex-col items-center rounded-xl border border-white/10 bg-white/5 p-6 text-center shadow-lg backdrop-blur-lg"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -64,9 +51,11 @@ export function BenefitPill({
       <div className="mb-4 flex-shrink-0 rounded-full bg-brand-accent p-3 text-on_brand shadow-md">
         <Icon size={28} />
       </div>
-      <h3 className="mb-2 text-lg font-bold text-white">{title}</h3>
+      <h3 id={titleId} className="mb-2 text-lg font-bold text-white">
+        {title}
+      </h3>
       <p className="text-sm text-white/70">{description}</p>
-    </motion.div>
+    </motion.article>
   );
 }
 // src/components/ui/BenefitPill.tsx

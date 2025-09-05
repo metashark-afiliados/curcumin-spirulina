@@ -1,56 +1,78 @@
 // src/components/ui/TreatmentCycleSection.tsx
 /**
  * @file TreatmentCycleSection.tsx
- * @description Aparato soberano (Organismo) y de cliente. Orquesta la
- *              exhibición de las fases del programa de bem-estar, obteniendo
- *              su propio contenido vía i18n y delegando la renderización a la
- *              molécula atómica `TreatmentCycleCard`.
- * @version 5.0.0
+ * @description Aparato soberano, resiliente e de cliente. Orquesta a exibição
+ *              das fases do tratamento, obtendo e VALIDANDO seu próprio conteúdo
+ *              de i18n contra um schema Zod antes de renderizar.
+ * @version 6.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
  */
 "use client";
 
 import { useTranslations } from "next-intl";
-import React from "react";
+import React, { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
+import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
+import { clientLogger } from "@/lib/client-logger";
 import {
-  TreatmentCycleCard,
-  type TreatmentCycleCardProps,
-} from "@/components/ui/TreatmentCycleCard";
-import { clientLogger } from "@/lib/logger";
+  TreatmentCycleSectionContentSchema,
+  type TreatmentCycleSectionContent,
+} from "@/lib/validators/i18n/TreatmentCycleSection.schema";
 
-/**
- * @component TreatmentCycleSection
- * @description El orquestador soberano de la sección de ciclos de tratamiento.
- *              Obtiene sus datos de la capa de internacionalización y los
- *              renderiza en un layout de grid. No recibe props de contenido.
- * @returns {React.ReactElement} A seção de ciclos de tratamento completa.
- */
-export function TreatmentCycleSection() {
+export function TreatmentCycleSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.TreatmentCycleSection");
-  const mainTitle: string = t("mainTitle");
-  const subtitle: string = t("subtitle");
-  const cycles: Omit<TreatmentCycleCardProps, "index">[] = t.raw("cycles");
+  const titleId = useId();
+  let content: TreatmentCycleSectionContent;
+
+  try {
+    // CORREÇÃO: Tipificar explicitamente o retorno de t.raw para ajudar a inferência.
+    const rawContent = {
+      mainTitle: t("mainTitle"),
+      subtitle: t("subtitle"),
+      cycles: t.raw("cycles") as TreatmentCycleSectionContent["cycles"],
+    };
+    const validation = TreatmentCycleSectionContentSchema.safeParse(rawContent);
+    if (!validation.success) {
+      throw new Error(
+        `Validação de conteúdo de TreatmentCycleSection falhou: ${JSON.stringify(
+          validation.error.flatten()
+        )}`
+      );
+    }
+    content = validation.data;
+  } catch (error) {
+    clientLogger.error(
+      "Erro ao obter ou validar conteúdo da TreatmentCycleSection. A seção não será renderizada.",
+      { error }
+    );
+    return null;
+  }
 
   clientLogger.trace(
-    { component: "TreatmentCycleSection", cycleCount: cycles.length },
-    "Renderizando seção de ciclos de tratamento soberana."
+    "Renderizando seção de ciclos de tratamento soberana e validada.",
+    {
+      component: "TreatmentCycleSection",
+      cycleCount: content.cycles.length,
+    }
   );
 
   return (
-    <section className="py-16 md:py-24">
+    <section aria-labelledby={titleId} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         <AnimationWrapper>
-          <h2 className="mb-4 text-center text-4xl font-bold text-white">
-            {mainTitle}
+          <h2
+            id={titleId}
+            className="mb-4 text-center text-4xl font-bold text-white"
+          >
+            {content.mainTitle}
           </h2>
           <p className="mx-auto mb-16 max-w-2xl text-center text-lg text-white/80">
-            {subtitle}
+            {content.subtitle}
           </p>
         </AnimationWrapper>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {cycles.map((cycle, index) => (
+          {content.cycles.map((cycle, index) => (
             <TreatmentCycleCard key={cycle.title} {...cycle} index={index} />
           ))}
         </div>

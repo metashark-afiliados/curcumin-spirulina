@@ -5,21 +5,23 @@
  *              entre Server Actions y la UI. Define los tipos `ActionResult` y
  *              `ValidationErrorKey`, que son el núcleo de la arquitectura de
  *              errores soberanos (IMAS-E).
- * @version 1.0.0
+ * @version 1.1.0
  * @author RaZ Podestá - MetaShark Tech
- * @see LIA-SSoT-IMPLEMENTATION-GUIDE-V1 (Manifiesto de Implementación)
+ * @see .docs/manifiesto-estructura-basica.md (Sección 2)
+ * @see .docs-espejo/lib/types/actions.ts.md
  */
 import { z } from "zod";
 import { ValidationErrorsSchema } from "@/lib/validators/i18n/ValidationErrors.schema";
 
 /**
- * @public
+ * @private
  * @type NestedKeyOf
  * @description Tipo de utilidad avanzado que aplana un tipo de objeto anidado
- *              en una unión de strings con notación de punto.
+ *              en una unión de strings con notación de punto. Es el motor que
+ *              permite a `ValidationErrorKey` ser tipo-seguro.
  * @example
- * // Para: { a: { b: string } }
- * // El tipo resultante es: "a" | "a.b"
+ * // Para: { generic: { server_error: string } }
+ * // El tipo resultante es: "generic" | "generic.server_error"
  */
 type NestedKeyOf<T> = T extends object
   ? {
@@ -34,10 +36,11 @@ type NestedKeyOf<T> = T extends object
 /**
  * @public
  * @type ValidationErrorKey
- * @description Tipo soberano para todas las claves de error. Se infiere
- *              automáticamente del `ValidationErrorsSchema`, garantizando que
- *              solo se puedan usar claves de error válidas y existentes.
- *              Es la SSoT para los códigos de error.
+ * @description Tipo soberano para todas las claves de error de la aplicación.
+ *              Se infiere automáticamente del `ValidationErrorsSchema`, actuando
+ *              como la Única Fuente de Verdad para los "códigos de error".
+ *              Garantiza que las Server Actions solo puedan devolver errores
+ *              que tienen una traducción definida y un contrato validado.
  */
 export type ValidationErrorKey = NestedKeyOf<
   z.infer<typeof ValidationErrorsSchema>
@@ -47,7 +50,9 @@ export type ValidationErrorKey = NestedKeyOf<
  * @public
  * @type ActionResult
  * @description Contrato de retorno genérico y soberano para todas las Server Actions.
- *              Asegura una interfaz de comunicación predecible entre el servidor y el cliente.
+ *              Utiliza el patrón de "unión discriminada" (basado en `success`)
+ *              para asegurar una interfaz de comunicación predecible y tipo-segura
+ *              entre el servidor y el cliente.
  * @template TSuccess - El tipo de los datos en caso de éxito.
  * @template TErrorData - El tipo de datos adicionales opcionales en caso de error.
  */
@@ -58,7 +63,8 @@ export type ActionResult<TSuccess, TErrorData = unknown> =
 /**
  * @public
  * @function isActionError
- * @description Guardián de tipo que verifica si un `ActionResult` es un resultado de error.
+ * @description Guardián de tipo que verifica si un `ActionResult` es un resultado
+ *              de error. Permite a la UI hacer un "narrowing" seguro del tipo.
  * @param {unknown} result - El resultado de la acción a verificar.
  * @returns {result is { success: false; error: ValidationErrorKey; data?: unknown }}
  */
@@ -78,7 +84,9 @@ export function isActionError(
 /**
  * @public
  * @function isActionSuccess
- * @description Guardián de tipo que verifica si un `ActionResult` es un resultado de éxito.
+ * @description Guardián de tipo que verifica si un `ActionResult` es un resultado
+ *              de éxito. Permite a la UI hacer un "narrowing" seguro del tipo
+ *              y acceder a la propiedad `data` con el tipo correcto.
  * @template TSuccess - El tipo del payload de éxito esperado.
  * @param {unknown} result - El resultado de la acción a verificar.
  * @returns {result is { success: true; data: TSuccess }}

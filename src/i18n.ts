@@ -2,68 +2,80 @@
 /**
  * @file i18n.ts
  * @description Orquestador de Internacionalización de élite. Implementa la
- *              arquitectura IMAS (I18n Mirrored Atomic Structure) al más alto
- *              nivel. Su única responsabilidad es leer el manifiesto de mensajes,
- *              cargar dinámicamente los módulos atómicos y ensamblarlos en el
- *              objeto anidado que `next-intl` espera, garantizando una carga
- *              perezosa y un rendimiento óptimo.
- * @version 4.0.0
+ *              arquitectura IMAS (I18n Mirrored Atomic Structure). Su
+ *              responsabilidad es validar el locale y delegar la carga y
+ *              ensamblaje de los módulos de mensajes a un helper atómico.
+ * @version 5.2.0
  * @author L.I.A. Legacy
  * @see .docs/I18N_MANIFESTO_V2.md
  * @see .docs-espejo/i18n.ts.md
  */
 import { getRequestConfig } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { type AbstractIntlMessages } from "next-intl";
+
 import { setNestedProperty } from "@/lib/helpers/set-nested-property.helper";
-import { serverLogger } from "@/lib/logger";
-import { locales, type AppLocale } from "@/lib/navigation";
+import { defaultLocale, locales, type AppLocale } from "@/lib/navigation";
+import { serverLogger } from "@/lib/server-logger";
 import { messagesManifest } from "@/messages/manifest";
 
-export default getRequestConfig(async ({ locale }) => {
-  const typedLocale = locale as AppLocale;
-
-  // 1. Blindaje: Validar que el locale de la petición es soportado.
-  if (!locales.includes(typedLocale)) {
-    serverLogger.error(
-      { locale },
-      "[I18N Orchestrator] Tentativa de acesso com locale inválido. Retornando 404."
-    );
-    notFound();
-  }
-
+/**
+ * @private
+ * @async
+ * @function assembleMessagesFromManifest
+ * @description Ensamblador atómico y soberano. Itera sobre el manifiesto,
+ *              carga dinámicamente cada módulo de mensajes y lo ensambla en un
+ *              único objeto anidado. Implementa una estrategia de fallback a nivel
+ *              de namespace para máxima resiliencia.
+ * @param {AppLocale} locale - El locale para el cual ensamblar los mensajes.
+ * @returns {Promise<AbstractIntlMessages>} Un objeto con todos los mensajes
+ *              ensamblados, compatible con el contrato de `next-intl`.
+ */
+async function assembleMessagesFromManifest(
+  locale: AppLocale
+): Promise<AbstractIntlMessages> {
   const messages = {};
-  let successfulNamespaces = 0;
   const totalNamespaces = Object.keys(messagesManifest).length;
+  let successfulNamespaces = 0;
+  let fallbackCount = 0;
 
   serverLogger.trace(
     { locale, namespaceCount: totalNamespaces },
-    "[I18N Orchestrator] Iniciando montagem de mensagens atômicas."
+    "[I18N Assembler] Iniciando ensamblaje de mensajes atómicos."
   );
 
-  // 2. Orquestación: Iterar sobre el manifiesto para ensamblar los mensajes.
   for (const [namespace, moduleLoader] of Object.entries(messagesManifest)) {
     try {
       const module = await moduleLoader();
-      const localeMessages = module.default[typedLocale];
+      let localeMessages = module.default[locale];
 
-      // 3. Resiliencia y Observabilidad Granular:
+      if (!localeMessages && locale !== defaultLocale) {
+        serverLogger.warn(
+          { namespace, locale },
+          `[I18N Assembler] Traducción no encontrada para el locale. Intentando fallback a '${defaultLocale}'.`
+        );
+        localeMessages = module.default[defaultLocale];
+        if (localeMessages) {
+          fallbackCount++;
+        }
+      }
+
       if (localeMessages) {
         setNestedProperty(messages, namespace, localeMessages);
-        serverLogger.trace(
-          { namespace },
-          "[I18N Orchestrator] Namespace carregado e montado com sucesso."
-        );
         successfulNamespaces++;
       } else {
         serverLogger.warn(
           { namespace, locale },
-          "[I18N Orchestrator] Namespace carregado, mas não contém traduções para o locale solicitado. Ignorando."
+          "[I18N Assembler] Namespace cargado, pero no contiene traducciones para el locale solicitado o para el fallback. Omitiendo."
         );
       }
     } catch (error) {
       serverLogger.error(
-        { err: error, namespace },
-        `[I18N Orchestrator] Módulo de mensagens para o namespace não encontrado ou falhou ao carregar.`
+        {
+          err: error instanceof Error ? error.message : String(error),
+          namespace,
+        },
+        `[I18N Assembler] Módulo de mensajes para el namespace no encontrado o falló al cargar.`
       );
     }
   }
@@ -72,10 +84,27 @@ export default getRequestConfig(async ({ locale }) => {
     {
       locale,
       namespacesLoaded: successfulNamespaces,
+      fallbacksUsed: fallbackCount,
       totalNamespaces,
     },
-    "[I18N Orchestrator] Montagem de mensagens concluída."
+    "[I18N Assembler] Ensamblaje de mensajes completado."
   );
+
+  return messages as AbstractIntlMessages;
+}
+
+export default getRequestConfig(async ({ locale }) => {
+  const typedLocale = locale as AppLocale;
+
+  if (!locales.includes(typedLocale)) {
+    serverLogger.error(
+      { locale },
+      "[I18N Orchestrator] Intento de acceso con locale inválido. Retornando 404."
+    );
+    notFound();
+  }
+
+  const messages = await assembleMessagesFromManifest(typedLocale);
 
   return { messages };
 });

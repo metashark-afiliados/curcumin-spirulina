@@ -1,68 +1,29 @@
 // tsconfig.json
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    /* ========================
-     *      COMPATIBILIDAD
-     * ======================== */
-    "target": "ES2020",
-    // "lib" es gestionado por Next.js. Omitirlo previene conflictos de tipos.
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "jsx": "preserve",
-
-    /* ========================
-     *    CALIDAD DE CÓDIGO (ÉLITE)
-     * ======================== */
-    "strict": true,
     "skipLibCheck": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    /* ========================
-     *   RESOLUCIÓN DE MÓDULOS
-     * ======================== */
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-
-    /* ========================
-     *      ALIAS DE RUTA (SSoT)
-     * ======================== */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@tests/*": ["./tests/*"]
-    },
-
-    /* ========================
-     *        BUILD
-     * ======================== */
-    "noEmit": true,
+    "jsx": "preserve",
     "incremental": true,
-
-    /* ========================
-     *        PLUGINS
-     * ======================== */
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "baseUrl": "."
   },
-  /* ========================
-   *   ALCANCE DEL PROYECTO
-   * ======================== */
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.mjs",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
 // tsconfig.json

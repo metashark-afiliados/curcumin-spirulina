@@ -1,36 +1,36 @@
 // src/app/[locale]/page.tsx
 /**
  * @file page.tsx
- * @description "Mega-Orquestador" de Layout para la HomePage. Su única
- *              responsabilidad es ensamblar los aparatos de sección soberanos
- *              en el orden correcto para construir la landing page.
- * @version 4.0.0
+ * @description Mega-Orquestador de Layout Soberano para a HomePage.
+ *              Este aparato é a SSoT para a montagem da landing page. Como
+ *              Server Component, ele orquestra a obtenção de metadados,
+ *              conteúdo de i18n, e a composição sequencial de todos os
+ *              aparatos de seção que formam a página de conversão.
+ * @version 5.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/[locale]/page.tsx.md
  */
 import "server-only";
+
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { type Metadata } from "next";
+import React from "react";
 
-import { AnnouncementBar } from "@/components/ui/AnnouncementBar";
-import { BenefitsSection } from "@/components/ui/BenefitsSection";
-import { InfoSection } from "@/components/ui/InfoSection";
-import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
-import { TreatmentCycleSection } from "@/components/ui/TreatmentCycleSection";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { AnnouncementBar } from "@/components/ui/AnnouncementBar";
+import { BenefitsSection } from "@/components/ui/BenefitsSection";
 import { HeroSection } from "@/components/ui/HeroSection";
-import { serverLogger } from "@/lib/logger";
+import { InfoSection } from "@/components/ui/InfoSection";
+import {
+  TestimonialCard,
+  type TestimonialData,
+} from "@/components/ui/TestimonialCard";
+import { TestimonialsSection } from "@/components/ui/TestimonialsSection";
+import { TreatmentCycleSection } from "@/components/ui/TreatmentCycleSection";
 import { generateProductSchema } from "@/lib/schema";
+import { serverLogger } from "@/lib/server-logger";
 
-/**
- * @function generateMetadata
- * @description Genera los metadatos de SEO para la página principal.
- *              Esta función sigue siendo soberana en la obtención de sus
- *              propias traducciones para el <head>.
- * @param {{ params: { locale: string } }} props - Las propiedades de la página.
- * @returns {Promise<Metadata>} El objeto de metadatos para Next.js.
- */
 export async function generateMetadata({
   params: { locale },
 }: {
@@ -51,35 +51,46 @@ export async function generateMetadata({
   };
 }
 
-/**
- * @page HomePage
- * @description El componente de servidor que orquesta el layout de la landing page.
- * @param {{ params: { locale: string } }} props - Las propiedades de la página.
- * @returns {Promise<React.ReactElement>} El elemento de la página renderizado.
- */
 export default async function HomePage({
   params: { locale },
 }: {
   params: { locale: string };
 }) {
   unstable_setRequestLocale(locale);
-  serverLogger.info(`[HomePage] Ensamblando layout para o locale: ${locale}`);
+  serverLogger.info(
+    `[HomePage] Iniciando orquestração da landing page para o locale: ${locale}`
+  );
 
-  // El componente ahora es puramente declarativo. Cada componente hijo
-  // es soberano y obtiene sus propias dependencias.
+  // Pré-renderiza os filhos para a "casca de cliente" TestimonialsSection
+  const tTestimonials = await getTranslations(
+    "components.ui.TestimonialsSection"
+  );
+  const testimonialsData: TestimonialData[] = tTestimonials.raw("testimonials");
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
+      <AnnouncementBar />
       <Header />
-      <main className="flex-grow">
-        <AnnouncementBar />
+      <main>
         <HeroSection />
         <BenefitsSection />
         <InfoSection />
         <TreatmentCycleSection />
-        <TestimonialsSection />
+        <TestimonialsSection title={tTestimonials("mainTitle")}>
+          {testimonialsData.map((testimonial) => (
+            <div
+              key={testimonial.author}
+              className="embla__slide min-w-0 flex-[0_0_100%]"
+            >
+              <div className="p-4">
+                <TestimonialCard {...testimonial} />
+              </div>
+            </div>
+          ))}
+        </TestimonialsSection>
       </main>
       <Footer />
-    </div>
+    </>
   );
 }
 // src/app/[locale]/page.tsx

@@ -1,11 +1,10 @@
 // src/components/ui/InfoSection.tsx
 /**
  * @file InfoSection.tsx
- * @description Aparato soberano y de cliente. Renderiza un "mini-artículo"
- *              educacional dentro da landing page, seguindo a jornada de
- *              "Problema -> Agitação -> Solução". Obtiene su propio contenido
- *              de i18n y soporta la renderización de HTML enriquecido.
- * @version 5.0.0
+ * @description Aparato soberano, resiliente e de cliente. Renderiza um
+ *              "mini-artigo" educacional, obtendo e VALIDANDO seu próprio
+ *              conteúdo de i18n contra um schema Zod.
+ * @version 6.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/InfoSection.tsx.md
  */
@@ -14,78 +13,97 @@
 import { useTranslations } from "next-intl";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
+import { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger";
+import {
+  InfoSectionContentSchema,
+  type InfoSectionContent,
+} from "@/lib/validators/i18n/InfoSection.schema";
 
-/**
- * @component InfoSection
- * @description O orquestrador soberano da seção informativa. Renderiza o conteúdo
- *              textual e de imagem, utilizando `dangerouslySetInnerHTML` para
- *              permitir formatação de texto rica a partir da sua camada i18n.
- *              Não recebe props de conteúdo.
- * @returns {React.ReactElement} A seção informativa completa.
- */
-export function InfoSection() {
+export function InfoSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.InfoSection");
+  const titleId = useId();
+  let content: InfoSectionContent;
 
-  clientLogger.trace(
-    { component: "InfoSection" },
-    "Renderizando seção informativa soberana."
-  );
+  try {
+    const rawContent = t.raw(""); // Obter todo o namespace
+    const validation = InfoSectionContentSchema.safeParse(rawContent);
+    if (!validation.success) {
+      throw new Error(
+        `Validação de conteúdo de InfoSection falhou: ${JSON.stringify(
+          validation.error.flatten()
+        )}`
+      );
+    }
+    content = validation.data;
+  } catch (error) {
+    clientLogger.error(
+      "Erro ao obter ou validar conteúdo da InfoSection. A seção não será renderizada.",
+      { error }
+    );
+    return null;
+  }
+
+  clientLogger.trace("Renderizando seção informativa soberana e validada.", {
+    component: "InfoSection",
+  });
 
   return (
-    <section className="bg-brand-primary-dark/50 py-16 md:py-24">
+    <section
+      aria-labelledby={titleId}
+      className="bg-brand-primary-dark/50 py-16 md:py-24"
+    >
       <div className="container mx-auto px-4">
         <div className="mx-auto max-w-3xl">
           <AnimationWrapper>
-            {/* --- ETAPA 1: O PROBLEMA --- */}
-            <h2 className="text-3xl font-bold text-white md:text-4xl">
-              {t("problem.title")}
+            <h2
+              id={titleId}
+              className="text-3xl font-bold text-white md:text-4xl"
+            >
+              {content.problem.title}
             </h2>
             <p
               className="mt-4 text-lg text-white/80"
-              dangerouslySetInnerHTML={{ __html: t.raw("problem.paragraph1") }}
+              dangerouslySetInnerHTML={{ __html: content.problem.paragraph1 }}
             />
             <p
               className="mt-4 text-white/80"
-              dangerouslySetInnerHTML={{ __html: t.raw("problem.paragraph2") }}
+              dangerouslySetInnerHTML={{ __html: content.problem.paragraph2 }}
             />
 
             <div className="my-12 w-full overflow-hidden rounded-lg shadow-2xl">
               <Image
                 src="/img/imagem-ciencia-ingredientes.jpg"
-                alt={t("imageAlt")}
+                alt={content.imageAlt}
                 width={800}
                 height={400}
                 className="h-auto w-full object-cover"
               />
             </div>
 
-            {/* --- ETAPA 2: A SOLUÇÃO CIENTÍfica --- */}
             <h3 className="mt-12 text-2xl font-bold text-white md:text-3xl">
-              {t("solution.title")}
+              {content.solution.title}
             </h3>
             <p
               className="mt-4 text-lg text-white/80"
-              dangerouslySetInnerHTML={{ __html: t.raw("solution.paragraph1") }}
+              dangerouslySetInnerHTML={{ __html: content.solution.paragraph1 }}
             />
             <blockquote className="mt-6 border-l-4 border-brand-accent bg-white/5 p-4 italic text-white/90">
-              <p
-                dangerouslySetInnerHTML={{ __html: t.raw("solution.quote") }}
-              />
+              <p dangerouslySetInnerHTML={{ __html: content.solution.quote }} />
               <a
-                href={t("solution.sourceUrl")}
+                href={content.solution.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
                 className="mt-2 flex items-center text-sm text-brand-accent transition-colors hover:text-white hover:underline"
               >
-                {t("solution.sourceLink")}{" "}
+                {content.solution.sourceLink}{" "}
                 <ExternalLink size={14} className="ml-1.5" />
               </a>
             </blockquote>
             <p
               className="mt-6 text-white/80"
-              dangerouslySetInnerHTML={{ __html: t.raw("solution.paragraph2") }}
+              dangerouslySetInnerHTML={{ __html: content.solution.paragraph2 }}
             />
           </AnimationWrapper>
         </div>

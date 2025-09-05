@@ -5,40 +5,31 @@
  *              distinto para secciones de la página que están planificadas
  *              pero aún no han sido implementadas. Es una herramienta clave
  *              para la planificación visual y la comunicación del roadmap.
- * @version 3.0.0
+ * @version 3.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/PlaceholderSection.tsx.md
  */
 import "server-only";
 
 import { Construction } from "lucide-react";
-import { serverLogger } from "@/lib/logger";
+import { serverLogger } from "@/lib/server-logger"; // <-- CORREÇÃO: Importação corrigida.
 
-/**
- * @interface PlaceholderSectionProps
- * @description Define el contrato de props para el componente PlaceholderSection.
- */
 interface PlaceholderSectionProps {
-  /** El título de la sección en construcción. */
   title: string;
-  /** Una breve descripción del propósito o funcionalidad que tendrá esta sección. */
   description?: string;
-  /** (Opcional) La referencia a la sección correspondiente en el Blueprint & Roadmap. */
   blueprintSection?: string;
 }
 
-/**
- * @public
- * @component PlaceholderSection
- * @description Renderiza un placeholder informativo y visualmente claro.
- * @param {PlaceholderSectionProps} props - Las propiedades del componente.
- * @returns {React.ReactElement} El componente de placeholder.
- */
 export function PlaceholderSection({
   title,
   description,
   blueprintSection,
-}: PlaceholderSectionProps): React.ReactElement {
+}: PlaceholderSectionProps): React.ReactElement | null {
+  // Renderizado resiliente: não mostra placeholders em produção.
+  if (process.env.NODE_ENV === "production") {
+    return null;
+  }
+
   serverLogger.warn(
     `[PlaceholderSection] Renderizando placeholder para a seção: "${title}"`
   );

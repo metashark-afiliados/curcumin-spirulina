@@ -2,21 +2,29 @@
   "it-IT": {
     "originalPriceLabel": "PREZZO ORIGINALE:",
     "discountedPriceLabel": "PREZZO SCONTATO:",
-    "currency": "EUR"
+    "currency": "EUR",
+    "originalPriceAriaLabel": "Prezzo originale: {price}",
+    "discountedPriceAriaLabel": "Prezzo scontato: {price}"
   },
   "en-US": {
     "originalPriceLabel": "ORIGINAL PRICE:",
     "discountedPriceLabel": "DISCOUNTED PRICE:",
-    "currency": "USD"
+    "currency": "USD",
+    "originalPriceAriaLabel": "Original price: {price}",
+    "discountedPriceAriaLabel": "Discounted price: {price}"
   },
   "es-ES": {
     "originalPriceLabel": "PRECIO ORIGINAL:",
     "discountedPriceLabel": "PRECIO CON DESCUENTO:",
-    "currency": "EUR"
+    "currency": "EUR",
+    "originalPriceAriaLabel": "Precio original: {price}",
+    "discountedPriceAriaLabel": "Precio con descuento: {price}"
   },
   "pt-BR": {
     "originalPriceLabel": "PREÇO ORIGINAL:",
     "discountedPriceLabel": "PREÇO COM DESCONTO:",
-    "currency": "BRL"
+    "currency": "BRL",
+    "originalPriceAriaLabel": "Preço original: {price}",
+    "discountedPriceAriaLabel": "Preço com desconto: {price}"
   }
 }

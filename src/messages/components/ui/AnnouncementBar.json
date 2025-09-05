@@ -1,15 +1,18 @@
-
 {
   "es-ES": {
+    "mainTitle": "Anuncios importantes",
     "message": "Oferta por tiempo limitado: ¡Envío gratuito y pago contra reembolso!"
   },
   "it-IT": {
+    "mainTitle": "Annunci importanti",
     "message": "Offerta a tempo limitato: Spedizione gratuita e pagamento alla consegna!"
   },
   "en-US": {
+    "mainTitle": "Important announcements",
     "message": "Limited time offer: Free shipping and cash on delivery!"
   },
   "pt-BR": {
+    "mainTitle": "Anúncios importantes",
     "message": "Oferta por tempo limitado: Frete grátis e pagamento na entrega!"
   }
 }

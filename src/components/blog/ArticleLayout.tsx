@@ -1,24 +1,23 @@
 // src/components/blog/ArticleLayout.tsx
 /**
  * @file ArticleLayout.tsx
- * @description Aparato de layout de apresentação puro e atômico. Sua única
- *              responsabilidade é renderizar a estrutura visual completa de um
- *              artigo de blog, recebendo todo o seu conteúdo via props.
- * @version 1.0.0
- * @author RaZ Podestá - MetaShark Tech
+ * @description Aparato de layout de apresentação puro e de servidor. Sua única
+ *              responsabilidade é renderizar a estrutura visual de um
+ *              artigo de blog, com uma estrutura semântica de topo.
+ * @version 4.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/blog/ArticleLayout.tsx.md
  */
-"use client";
+import "server-only";
 
 import Image from "next/image";
 import { Calendar, User } from "lucide-react";
-import { type MDXRemoteProps } from "next-mdx-remote/rsc";
-import { Link } from "@/lib/navigation";
-import { clientLogger } from "@/lib/logger";
+import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
+import React from "react";
 
-/**
- * @interface ArticleLayoutProps
- * @description Contrato de propriedades para o layout do artigo.
- */
+import { Link } from "@/lib/navigation";
+import { serverLogger } from "@/lib/server-logger";
+
 export interface ArticleLayoutProps {
   post: {
     title: string;
@@ -27,31 +26,27 @@ export interface ArticleLayoutProps {
     date: string;
     formattedDate: string;
     featuredImage: string;
-    content: string;
   };
+  source: string;
   components: MDXRemoteProps["components"];
   t: {
     backToBlogLink: string;
   };
 }
 
-/**
- * @component ArticleLayout
- * @description Renderiza o layout completo de um artigo de blog.
- * @param {ArticleLayoutProps} props - As propriedades para configurar o layout.
- * @returns {React.ReactElement}
- */
-export function ArticleLayout({ post, components, t }: ArticleLayoutProps) {
-  // `MDXRemote` precisa ser importado dinamicamente no cliente.
-  const MDXRemote = require("next-mdx-remote/rsc").MDXRemote;
-
-  clientLogger.trace(
+export async function ArticleLayout({
+  post,
+  source,
+  components,
+  t,
+}: ArticleLayoutProps): Promise<React.ReactElement> {
+  serverLogger.trace(
     { component: "ArticleLayout", title: post.title },
-    "Renderizando layout do artigo."
+    "Renderizando layout de apresentação de artigo em servidor."
   );
 
   return (
-    <article className="py-16 md:py-24">
+    <div className="py-16 md:py-24">
       <header className="container mx-auto max-w-3xl px-4 text-center">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-sm text-white/70">
           {post.tags.map((tag) => (
@@ -74,23 +69,23 @@ export function ArticleLayout({ post, components, t }: ArticleLayoutProps) {
         </div>
       </header>
 
-      <div className="container mx-auto mt-12 max-w-5xl px-4">
-        <div className="relative h-64 w-full overflow-hidden rounded-lg shadow-2xl md:h-[500px]">
-          <Image
-            src={post.featuredImage}
-            alt={`Imagem de destaque para o artigo: ${post.title}`}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-      </div>
+      <main className="container mx-auto mt-12 max-w-5xl px-4">
+        <article>
+          <div className="relative h-64 w-full overflow-hidden rounded-lg shadow-2xl md:h-[500px]">
+            <Image
+              src={post.featuredImage}
+              alt={`Imagem de destaque para o artigo: ${post.title}`}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
 
-      <div className="container mx-auto max-w-3xl px-4">
-        <div className="prose prose-invert mx-auto mt-12 max-w-none prose-lg prose-p:text-white/80 prose-headings:text-white prose-strong:text-white prose-a:text-brand-accent hover:prose-a:text-brand-accent-hover">
-          <MDXRemote source={post.content} components={components} />
-        </div>
-      </div>
+          <div className="prose prose-invert mx-auto mt-12 max-w-3xl prose-lg prose-p:text-white/80 prose-headings:text-white prose-strong:text-white prose-a:text-brand-accent hover:prose-a:text-brand-accent-hover">
+            <MDXRemote source={source} components={components} />
+          </div>
+        </article>
+      </main>
 
       <footer className="container mx-auto mt-16 max-w-3xl px-4 border-t border-white/10 pt-8 text-center">
         <p className="text-white/70">
@@ -102,7 +97,7 @@ export function ArticleLayout({ post, components, t }: ArticleLayoutProps) {
           </Link>
         </p>
       </footer>
-    </article>
+    </div>
   );
 }
 // src/components/blog/ArticleLayout.tsx

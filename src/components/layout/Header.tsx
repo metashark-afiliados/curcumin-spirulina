@@ -6,7 +6,7 @@
  *              renderiza condicionalmente una variante de cabecera basada en
  *              la ruta actual, garantizando la experiencia de navegação ideal
  *              para cada contexto.
- * @version 2.1.0
+ * @version 2.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/layout/Header.tsx.md
  */
@@ -15,34 +15,23 @@
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { usePathname } from "@/lib/navigation";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger"; // <-- CORREÇÃO: Importação corrigida.
 import { FullHeader } from "./_partials/FullHeader";
 import { MinimalHeader } from "./_partials/MinimalHeader";
 
-/**
- * @component Header
- * @description El orquestrador soberano del cabecera. No recibe props de
- *              contenido. Utiliza `usePathname` para determinar la variante visual
- *              y `useTranslations` para obtener todo su contenido textual.
- * @returns {React.ReactElement} El componente de cabecera renderizado.
- */
 export function Header(): React.ReactElement {
   const pathname = usePathname();
   const isLandingPage = pathname === "/";
   const t = useTranslations("components.layout.Header");
 
   useEffect(() => {
-    clientLogger.trace(
-      {
-        component: "Header",
-        path: pathname,
-        variant: isLandingPage ? "Minimal" : "Full",
-      },
-      "Renderizando orquestrador soberano de Header."
-    );
+    clientLogger.trace("Renderizando orquestrador soberano de Header.", {
+      component: "Header",
+      path: pathname,
+      variant: isLandingPage ? "Minimal" : "Full",
+    });
   }, [pathname, isLandingPage]);
 
-  // Construcción de props para los subcomponentes de presentación puros.
   const headerContent = {
     navItems: t.raw("navItems"),
     ctaButtonText: t("ctaButtonText"),

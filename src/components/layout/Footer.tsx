@@ -1,10 +1,9 @@
 // src/components/layout/Footer.tsx
 /**
  * @file Footer.tsx
- * @description Aparato de layout soberano y de servidor. Actúa como un
- *              "Pie de Página de Confianza", obteniendo su propio contenido de i18n
- *              de forma asíncrona y renderizándolo de forma consistente.
- * @version 4.0.0
+ * @description Aparato de layout soberano, resiliente e de servidor. Obtém e
+ *              VALIDA seu próprio conteúdo de i18n contra um schema Zod.
+ * @version 5.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/layout/Footer.tsx.md
  */
@@ -12,29 +11,30 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 import { Mail, Shield } from "lucide-react";
 import { Link, type Pathname } from "@/lib/navigation";
-import { serverLogger } from "@/lib/logger";
+import { serverLogger } from "@/lib/server-logger"; // <-- CORREÇÃO: Importação corrigida.
+import {
+  FooterContentSchema,
+  type FooterContent,
+} from "@/lib/validators/i18n/Footer.schema";
 
-interface FooterLink {
-  href: Pathname;
-  label: string;
-}
-
-/**
- * @component Footer
- * @description Renderiza el pie de página completo de la aplicación. Es un
- *              componente soberano que obtiene todas sus traducciones internamente.
- * @returns {Promise<React.ReactElement>} El componente de pie de página.
- */
-export async function Footer(): Promise<React.ReactElement> {
+export async function Footer(): Promise<React.ReactElement | null> {
   const t = await getTranslations("components.layout.Footer");
+  let content: FooterContent;
+
+  try {
+    const rawContent = t.raw("");
+    const validation = FooterContentSchema.safeParse(rawContent);
+    if (!validation.success) throw validation.error;
+    content = validation.data;
+  } catch (error) {
+    serverLogger.error(
+      "Erro ao obter ou validar conteúdo do Footer. Não será renderizado.",
+      { error }
+    );
+    return null;
+  }
+
   const currentYear = new Date().getFullYear();
-
-  serverLogger.trace(
-    { component: "Footer" },
-    "Renderizando pie de página soberano de servidor."
-  );
-
-  const legalLinks: FooterLink[] = t.raw("legalLinks");
 
   return (
     <footer className="bg-brand-primary-dark/80 text-white/70">
@@ -42,27 +42,31 @@ export async function Footer(): Promise<React.ReactElement> {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Coluna de Contato e Marca */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white">{t("brandName")}</h3>
-            <p className="text-sm">{t("brandDescription")}</p>
+            <h3 className="text-lg font-bold text-white">
+              {content.brandName}
+            </h3>
+            <p className="text-sm">{content.brandDescription}</p>
             <div>
               <a
-                href={`mailto:${t("contact.email")}`}
+                href={`mailto:${content.contact.email}`}
                 className="inline-flex items-center gap-2 transition-colors hover:text-white"
               >
                 <Mail size={16} />
-                <span>{t("contact.email")}</span>
+                <span>{content.contact.email}</span>
               </a>
             </div>
           </div>
 
           {/* Coluna de Links Legais */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white">{t("legalTitle")}</h3>
+            <h3 className="text-lg font-bold text-white">
+              {content.legalTitle}
+            </h3>
             <ul className="space-y-2">
-              {legalLinks.map((link) => (
+              {content.legalLinks.map((link) => (
                 <li key={link.href}>
                   <Link
-                    href={link.href}
+                    href={link.href as Pathname}
                     className="text-sm transition-colors hover:text-white hover:underline"
                   >
                     {link.label}
@@ -75,7 +79,7 @@ export async function Footer(): Promise<React.ReactElement> {
           {/* Coluna de Disclaimers */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">
-              {t("disclaimerTitle")}
+              {content.disclaimerTitle}
             </h3>
             <div className="flex items-start gap-2 rounded-lg bg-white/5 p-3 text-xs">
               <Shield
@@ -83,8 +87,8 @@ export async function Footer(): Promise<React.ReactElement> {
                 className="mt-1 flex-shrink-0 text-brand-accent"
               />
               <div>
-                <p className="font-bold">{t("affiliateDisclaimer.title")}</p>
-                <p>{t("affiliateDisclaimer.text")}</p>
+                <p className="font-bold">{content.affiliateDisclaimer.title}</p>
+                <p>{content.affiliateDisclaimer.text}</p>
               </div>
             </div>
           </div>
@@ -92,7 +96,7 @@ export async function Footer(): Promise<React.ReactElement> {
 
         {/* Linha de Copyright e Disclaimer Científico */}
         <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs">
-          <p className="mb-2">{t("scientificDisclaimer")}</p>
+          <p className="mb-2">{content.scientificDisclaimer}</p>
           <p>{t("copyright", { year: currentYear })}</p>
         </div>
       </div>

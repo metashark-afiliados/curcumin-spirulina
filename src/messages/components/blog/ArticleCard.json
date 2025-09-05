@@ -1,0 +1,14 @@
+{
+  "it-IT": {
+    "imageAltText": "Immagine di primo piano per l'articolo: {title}"
+  },
+  "en-US": {
+    "imageAltText": "Featured image for the article: {title}"
+  },
+  "es-ES": {
+    "imageAltText": "Imagen destacada para el artículo: {title}"
+  },
+  "pt-BR": {
+    "imageAltText": "Imagem de destaque para o artigo: {title}"
+  }
+}

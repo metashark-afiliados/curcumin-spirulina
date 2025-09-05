@@ -4,13 +4,13 @@
  * @description Orquestador soberano para la página de listado del blog.
  *              Obtiene los datos de los posts y su propio contenido de i18n,
  *              y ensambla los componentes de layout y de UI soberanos.
- * @version 3.1.0
+ * @version 3.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/[locale]/blog/page.tsx.md
  */
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { type Metadata } from "next";
-import { serverLogger } from "@/lib/logger";
+import { serverLogger } from "@/lib/server-logger"; // <-- RUTA CORREGIDA
 import { getPostsData, type PostFrontmatter } from "@/lib/blog";
 import { ArticleCard } from "@/components/blog/ArticleCard";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
@@ -38,7 +38,7 @@ export default async function BlogIndexPage({
   serverLogger.info(`[BlogIndexPage] Ensamblando para o locale: ${locale}`);
 
   const t = await getTranslations("pages.blog");
-  const posts = await getPostsData(locale); // <-- CORRECCIÓN: await añadido
+  const posts = await getPostsData(locale);
 
   return (
     <div className="flex min-h-screen flex-col bg-brand-background text-white">
@@ -55,10 +55,7 @@ export default async function BlogIndexPage({
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {posts.map(
-            (
-              post: PostFrontmatter & { slug: string },
-              index: number // <-- CORRECCIÓN: Tipado explícito
-            ) => (
+            (post: PostFrontmatter & { slug: string }, index: number) => (
               <AnimationWrapper
                 key={post.slug}
                 transition={{ delay: index * 0.1 }}

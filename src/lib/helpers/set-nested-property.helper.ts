@@ -1,22 +1,24 @@
 // src/lib/helpers/set-nested-property.helper.ts
 /**
  * @file set-nested-property.helper.ts
- * @description Helper atómico y puro para la asignación de propiedades anidadas.
- *              Es una utilidad de propósito general, compatible con cualquier
- *              entorno de JavaScript (cliente, servidor, Edge).
- * @version 2.0.0
+ * @description Helper atómico, puro y de propósito general para la asignación
+ *              de propiedades anidadas. Es el motor de ensamblaje de la
+ *              arquitectura de internacionalización IMAS.
+ * @version 2.1.0
  * @author RaZ Podestá - MetaShark Tech
+ * @see src/i18n.ts (Consumidor Principal)
+ * @see .docs-espejo/lib/helpers/set-nested-property.helper.ts.md
  */
 
 /**
  * @public
  * @function setNestedProperty
  * @description Asigna un valor a una propiedad anidada dentro de un objeto,
- *              mutando el objeto original. Crea las rutas de objetos intermediarios
- *              si no existen.
- * @param {Record<string, any>} obj - El objeto a modificar.
- * @param {string} path - La ruta de la propiedad en notación de punto (ej. "a.b.c").
- * @param {any} value - El valor a asignar.
+ *              **mutando el objeto original** para un rendimiento óptimo. Crea las
+ *              rutas de objetos intermediarios si no existen.
+ * @param {Record<string, any>} obj El objeto a modificar directamente.
+ * @param {string} path La ruta de la propiedad en notación de punto (ej. "a.b.c").
+ * @param {any} value El valor a asignar en la ruta especificada.
  * @returns {Record<string, any>} La referencia al objeto original modificado.
  */
 export function setNestedProperty(
@@ -29,6 +31,8 @@ export function setNestedProperty(
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    // Si la clave no existe o no es un objeto, se crea un objeto vacío.
+    // Esto sobrescribirá valores primitivos si un path entra en conflicto.
     if (typeof current[key] !== "object" || current[key] === null) {
       current[key] = {};
     }

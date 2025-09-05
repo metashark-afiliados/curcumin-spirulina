@@ -1,11 +1,12 @@
-// next.config.mjs
+// src/next.config.mjs
 /**
  * @file next.config.mjs
- * @description Manifiesto de configuración de Next.js de élite. Instrumenta el framework
+ * @description Manifiesto de Configuración de Next.js de élite. Instrumenta el framework
  *              con internacionalización, políticas de seguridad de contenido (CSP),
- *              y la integración de Sentry.
+ *              y la integración consolidada de Sentry.
+ * @version 5.0.0
  * @author L.I.A. Legacy
- * @version 4.0.0
+ * @see .docs-espejo/next.config.mjs.md
  */
 import crypto from "crypto";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -13,12 +14,11 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
-/** @type {import('next').NextConfig} */
+/**
+ * @type {import('next').NextConfig}
+ * @description Configuración base de Next.js. Define las políticas de imágenes y seguridad.
+ */
 const nextConfig = {
-  // NOTA ARQUITECTÓNICA: La directiva `output: "export"` ha sido eliminada
-  // para soportar renderizado dinámico (SSR/ISR), requerido por el middleware
-  // y los Route Handlers dinámicos como sitemap.xml.
-
   // Política de Seguridad de Imágenes: Lista blanca de dominios permitidos.
   images: {
     remotePatterns: [
@@ -39,6 +39,7 @@ const nextConfig = {
 
   // Generación de Cabeceras de Seguridad
   async headers() {
+    // Nonce para la Política de Seguridad de Contenido (CSP)
     const nonce = crypto.randomBytes(16).toString("base64");
 
     const cspDirectives = {
@@ -58,7 +59,7 @@ const nextConfig = {
       "connect-src": [
         "'self'",
         "https://*.sentry.io",
-        "https://ipapi.co", // Para GeoIP
+        process.env.NEXT_PUBLIC_GEOIP_API_URL || "https://ipapi.co", // Origen de GeoIP
       ],
       "frame-src": ["'self'"],
       "object-src": ["'none'"],
@@ -90,24 +91,32 @@ const nextConfig = {
   },
 };
 
-// Configuración para el plugin de Sentry
-const sentryWebpackPluginOptions = {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  silent: true, // Suprime el output detallado en el build
-};
+/**
+ * @description Ensamblaje final de la configuración, envolviendo la configuración base
+ *              con los plugins de `next-intl` y `Sentry` en el orden correcto.
+ */
+const finalConfig = withNextIntl(nextConfig);
 
-// Ensamblaje final de la configuración, envolviendo con los plugins.
-const finalConfig = withSentryConfig(
-  withNextIntl(nextConfig),
-  sentryWebpackPluginOptions,
+/**
+ * @description Opciones de Sentry consolidadas en una única SSoT.
+ * @see https://www.npmjs.com/package/@sentry/webpack-plugin#options
+ * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+ */
+export default withSentryConfig(
+  finalConfig,
   {
-    hideSourceMaps: true,
-    disableLogger: true,
-    automaticVercelMonitors: true,
+    // Opciones del Webpack Plugin
+    org: process.env.SENTRY_ORG || "metashark-tech",
+    project: process.env.SENTRY_PROJECT || "javascript-nextjs",
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.CI, // Suprime logs de subida de sourcemaps excepto en CI
+  },
+  {
+    // Opciones del SDK de Sentry
+    widenClientFileUpload: true, // Sube más sourcemaps para mejor trazabilidad
+    hideSourceMaps: true, // Oculta sourcemaps de los navegadores de los usuarios
+    disableLogger: true, // Desactiva logs de Sentry para reducir el tamaño del bundle
+    automaticVercelMonitors: true, // Instrumenta automáticamente los Cron Jobs de Vercel
   }
 );
-
-export default finalConfig;
-// next.config.mjs
+// src/next.config.mjs

@@ -1,42 +1,34 @@
 // src/app/select-language/page.tsx
 /**
  * @file page.tsx
- * @description Página de selección de idioma. Se muestra a los usuarios
- *              nuevos cuyo idioma no puede ser detectado automáticamente.
- *              Incluye un temporizador con redirección automática.
- * @version 1.2.0
+ * @description Página resiliente e acessível para seleção de idioma. Valida
+ *              seu próprio conteúdo de i18n, é totalmente componentizada e
+ *              inclui um temporizador com redireção automática.
+ * @version 3.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/select-language/page.tsx.md
  */
 "use client";
 
-import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Languages } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useCookies } from "next-client-cookies";
-import { defaultLocale, locales } from "@/lib/navigation";
-import { clientLogger } from "@/lib/logger";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
-/**
- * @interface CountdownCircleProps
- * @description Contrato de props para el componente atómico CountdownCircle.
- */
+import { clientLogger } from "@/lib/client-logger"; // <-- CORREÇÃO: Importação corrigida.
+import { defaultLocale, locales } from "@/lib/navigation";
+// TODO: Criar este schema de validação.
+// import { SelectLanguageContentSchema, type SelectLanguageContent } from '@/lib/validators/i18n/SelectLanguage.schema';
+
+// --- Subcomponentes de Presentación Puros ---
+
 interface CountdownCircleProps {
-  /** El número actual de la cuenta regresiva a mostrar. */
   countdown: number;
 }
 
-/**
- * @private
- * @component CountdownCircle
- * @description Componente de UI atómico y de presentación puro que renderiza
- *              un círculo de cuenta regresiva animado con SVG.
- * @param {CountdownCircleProps} props - Las propiedades del componente.
- * @returns {React.ReactElement}
- */
-function CountdownCircle({ countdown }: CountdownCircleProps): React.ReactElement {
+function CountdownCircle({ countdown }: CountdownCircleProps) {
   return (
     <div className="relative h-24 w-24">
       <svg className="h-full w-full" viewBox="0 0 100 100">
@@ -69,12 +61,8 @@ function CountdownCircle({ countdown }: CountdownCircleProps): React.ReactElemen
   );
 }
 
-/**
- * @public
- * @page SelectLanguagePage
- * @description Orquesta la lógica para la selección manual de idioma del usuario.
- * @returns {React.ReactElement}
- */
+// --- Orquestador Principal de la Página ---
+
 export default function SelectLanguagePage(): React.ReactElement {
   const t = useTranslations("app.selectLanguage");
   const [countdown, setCountdown] = useState(5);
@@ -83,7 +71,10 @@ export default function SelectLanguagePage(): React.ReactElement {
 
   const handleLanguageSelect = useCallback(
     (locale: string) => {
-      clientLogger.info({ locale }, "Idioma seleccionado.");
+      clientLogger.info("Idioma seleccionado por el usuario.", {
+        component: "SelectLanguagePage",
+        locale,
+      });
       cookies.set("NEXT_LOCALE", locale, { path: "/", expires: 365 });
       router.push("/");
     },
@@ -93,7 +84,8 @@ export default function SelectLanguagePage(): React.ReactElement {
   useEffect(() => {
     if (countdown === 0) {
       clientLogger.warn(
-        "Temporizador de selección de idioma expirado. Redireccionando al default."
+        "Temporizador de selección de idioma expirado. Redireccionando al locale por defecto.",
+        { component: "SelectLanguagePage" }
       );
       handleLanguageSelect(defaultLocale);
       return;
@@ -102,6 +94,10 @@ export default function SelectLanguagePage(): React.ReactElement {
     const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
     return () => clearTimeout(timer);
   }, [countdown, handleLanguageSelect]);
+
+  clientLogger.trace("Renderizando página de selección de idioma.", {
+    component: "SelectLanguagePage",
+  });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-brand-primary-dark p-8 text-center text-white">

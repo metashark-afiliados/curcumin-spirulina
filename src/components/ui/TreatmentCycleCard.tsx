@@ -1,53 +1,41 @@
 // src/components/ui/TreatmentCycleCard.tsx
 /**
  * @file TreatmentCycleCard.tsx
- * @description Aparato de UI atômico (Molécula) de apresentação puro. Exibe uma
- *              fase do programa de bem-estar, com duração, título e descrição.
- *              Projetado para ser informativo, visualmente atraente e interativo.
- * @version 4.0.0
- * @author RaZ Podestá - MetaShark Tech
- * @see src/components/ui/TreatmentCycleSection.tsx (Consumidor)
+ * @description Aparato de UI atómico (Molécula) de apresentação puro e acessível.
+ *              Exibe uma fase do programa de bem-estar, utilizando HTML semântico
+ *              e ARIA para uma experiência de utilizador de elite.
+ * @version 4.1.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/TreatmentCycleCard.tsx.md
  */
 "use client";
 
 import { motion } from "framer-motion";
-import React from "react";
-import { clientLogger } from "@/lib/logger";
+import React, { useId } from "react";
+import { clientLogger } from "@/lib/client-logger";
 
-/**
- * @interface TreatmentCycleCardProps
- * @description Contrato de propriedades para o componente TreatmentCycleCard.
- */
 export interface TreatmentCycleCardProps {
-  /** A duração do ciclo (ex: "30 Dias"). */
   duration: string;
-  /** O título da fase do ciclo. */
   title: string;
-  /** A descrição dos efeitos esperados nesta fase. */
   description: string;
-  /** O índice do card na lista, usado para escalonar a animação. */
   index: number;
 }
 
-/**
- * @component TreatmentCycleCard
- * @description Renderiza um card informativo para uma fase do tratamento.
- * @param {TreatmentCycleCardProps} props - As propriedades para renderizar o card.
- * @returns {React.ReactElement} Um card de fase do tratamento.
- */
 export function TreatmentCycleCard({
   duration,
   title,
   description,
   index,
 }: TreatmentCycleCardProps) {
-  clientLogger.trace(
-    { component: "TreatmentCycleCard", title },
-    "Renderizando card de ciclo de tratamento."
-  );
+  const titleId = useId();
+  clientLogger.trace("Renderizando card de ciclo de tratamento.", {
+    component: "TreatmentCycleCard",
+    title,
+  });
 
   return (
-    <motion.div
+    <motion.section
+      aria-labelledby={titleId}
       className="h-full rounded-xl border border-white/10 bg-white/5 p-8 text-left shadow-lg backdrop-blur-lg"
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -62,9 +50,11 @@ export function TreatmentCycleCard({
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-brand-accent bg-brand-primary-dark text-xl font-bold text-brand-accent shadow-inner">
         {duration}
       </div>
-      <h3 className="mb-3 text-xl font-bold text-white">{title}</h3>
+      <h3 id={titleId} className="mb-3 text-xl font-bold text-white">
+        {title}
+      </h3>
       <p className="text-white/70">{description}</p>
-    </motion.div>
+    </motion.section>
   );
 }
 // src/components/ui/TreatmentCycleCard.tsx

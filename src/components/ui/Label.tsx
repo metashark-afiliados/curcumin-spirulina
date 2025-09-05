@@ -1,20 +1,20 @@
 // src/components/ui/Label.tsx
 /**
  * @file Label.tsx
- * @description Aparato de UI atómico y de presentación puro para etiquetas de
- *              formulario. Es la fundación de la accesibilidad (A11Y) y la
- *              claridad visual en nuestros formularios. Enriquecido con variantes
- *              de estado y un indicador de campo requerido.
- * @version 4.0.0
- * @author RaZ Podestá - MetaShark Tech
- * @see LIA-SSoT-IMPLEMENTATION-GUIDE-V1
+ * @description Aparato de UI atómico y soberano para etiquetas de formulario.
+ *              Obtiene su propio contenido de i18n para la accesibilidad
+ *              y proporciona variantes de estado visual.
+ * @version 5.0.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/Label.tsx.md
  */
 "use client";
 
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import * as React from "react";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
@@ -35,29 +35,20 @@ const labelVariants = cva(
 export interface LabelProps
   extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>,
     VariantProps<typeof labelVariants> {
-  /**
-   * Si es `true`, renderiza un asterisco visual para indicar que el campo es
-   * obligatorio, mejorando la UX y la claridad del formulario.
-   */
   required?: boolean;
 }
 
-/**
- * @component Label
- * @description Renderiza una etiqueta de formulário accesible. Construído sobre
- *              Radix UI para garantir a conformidade com as diretrizes da WAI-ARIA.
- *              A associação com um input é feita através da prop `htmlFor`.
- * @param {LabelProps} props - As propriedades do componente.
- * @returns {React.ReactElement} O componente de etiqueta.
- */
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   LabelProps
 >(({ className, variant, required, children, ...props }, ref) => {
-  clientLogger.trace(
-    { component: "Label", for: props.htmlFor, variant, required },
-    "Renderizando componente de etiqueta."
-  );
+  const t = useTranslations("components.ui.Label");
+  clientLogger.trace("Renderizando componente de etiqueta.", {
+    component: "Label",
+    for: props.htmlFor,
+    variant,
+    required,
+  });
 
   return (
     <LabelPrimitive.Root
@@ -68,8 +59,8 @@ const Label = React.forwardRef<
       {children}
       {required && (
         <span
-          className="ml-1 text-destructive font-semibold"
-          aria-hidden="true"
+          className="ml-1 text-feedback-error font-semibold"
+          aria-label={t("requiredIndicatorAriaLabel")}
         >
           *
         </span>

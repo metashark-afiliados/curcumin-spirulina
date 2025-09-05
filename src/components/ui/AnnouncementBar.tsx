@@ -1,11 +1,10 @@
 // src/components/ui/AnnouncementBar.tsx
 /**
  * @file AnnouncementBar.tsx
- * @description Aparato de UI soberano para la barra de anuncios. Es un
- *              componente de cliente que obtiene su propio contenido de i18n.
- *              Utiliza una animación de scroll infinito basada en CSS que pausa
- *              al pasar el mouse para una UX y accesibilidad superiores.
- * @version 2.0.0
+ * @description Aparato de UI soberano, resiliente e acessível. Obtém e VALIDA
+ *              seu próprio conteúdo de i18n, e implementa uma animação de
+ *              scroll que pode ser pausada com rato e teclado.
+ * @version 3.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/AnnouncementBar.tsx.md
  */
@@ -13,56 +12,77 @@
 
 import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
-import { clientLogger } from "@/lib/logger";
+import { useId } from "react";
+import { clientLogger } from "@/lib/client-logger";
+import {
+  AnnouncementBarContentSchema,
+  type AnnouncementBarContent,
+} from "@/lib/validators/i18n/AnnouncementBar.schema";
 
-/**
- * @component AnnouncementBar
- * @description Renderiza una barra de anuncios con scroll infinito que pausa
- *              al recibir foco del mouse. Es un componente soberano que no
- *              recibe props de contenido.
- * @returns {React.ReactElement} El componente da barra de anuncios.
- */
-export function AnnouncementBar(): React.ReactElement {
+export function AnnouncementBar(): React.ReactElement | null {
   const t = useTranslations("components.ui.AnnouncementBar");
-  const message = t("message");
+  const titleId = useId();
+  let content: AnnouncementBarContent;
 
-  clientLogger.trace(
-    { component: "AnnouncementBar" },
-    "Renderizando barra de anúncios soberana."
-  );
+  try {
+    const rawContent = {
+      mainTitle: t("mainTitle"),
+      message: t("message"),
+    };
+    const validation = AnnouncementBarContentSchema.safeParse(rawContent);
+    if (!validation.success) {
+      throw new Error(
+        `Validação de conteúdo de AnnouncementBar falhou: ${JSON.stringify(
+          validation.error.flatten()
+        )}`
+      );
+    }
+    content = validation.data;
+  } catch (error) {
+    clientLogger.error(
+      "Erro ao obter ou validar conteúdo da AnnouncementBar. A seção não será renderizada.",
+      { error }
+    );
+    return null;
+  }
 
   return (
-    <div className="group w-full overflow-hidden bg-gradient-to-r from-brand-accent to-red-800 py-3 text-sm font-medium italic text-white shadow-lg">
-      <div className="flex whitespace-nowrap">
-        {/*
-          El contenido se duplica para garantizar un preenchimento
-          contínuo y sin fallos na animação de loop infinito.
-        */}
-        <div className="flex animate-infinite-scroll group-hover:[animation-play-state:paused]">
+    <section
+      aria-labelledby={titleId}
+      className="w-full overflow-hidden bg-gradient-to-r from-brand-accent to-red-800 text-sm font-medium italic text-white shadow-lg"
+    >
+      <h2 id={titleId} className="sr-only">
+        {content.mainTitle}
+      </h2>
+      <div
+        className="group flex whitespace-nowrap py-3 outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-brand-accent"
+        tabIndex={0}
+      >
+        <div className="flex animate-infinite-scroll group-hover:[animation-play-state:paused] group-focus:[animation-play-state:paused]">
           <div className="mx-6 flex items-center">
             <Flame className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-300" />
-            <p className="text-shadow-md">{message}</p>
+            <p className="text-shadow-md">{content.message}</p>
           </div>
           <div className="mx-6 flex items-center">
             <Flame className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-300" />
-            <p className="text-shadow-md">{message}</p>
+            <p className="text-shadow-md">{content.message}</p>
           </div>
         </div>
         <div
-          className="flex animate-infinite-scroll group-hover:[animation-play-state:paused]"
+          className="flex animate-infinite-scroll group-hover:[animation-play-state:paused] group-focus:[animation-play-state:paused]"
           aria-hidden="true"
         >
           <div className="mx-6 flex items-center">
             <Flame className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-300" />
-            <p className="text-shadow-md">{message}</p>
+            <p className="text-shadow-md">{content.message}</p>
           </div>
           <div className="mx-6 flex items-center">
             <Flame className="mr-3 h-4 w-4 flex-shrink-0 text-yellow-300" />
-            <p className="text-shadow-md">{message}</p>
+            <p className="text-shadow-md">{content.message}</p>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 // src/components/ui/AnnouncementBar.tsx

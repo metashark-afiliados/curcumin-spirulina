@@ -1,11 +1,10 @@
 // .docs-espejo/middleware.ts.md
-/\*\*
-
-- @file .docs-espejo/middleware.ts.md
-- @description Documento Espejo y SSoT conceptual para el orquestador de middleware.
-- @author RaZ Podestá - MetaShark Tech
-- @version 1.0.0
-  \*/
+/**
+ * @file .docs-espejo/middleware.ts.md
+ * @description Documento Espejo y SSoT conceptual para el orquestador de middleware.
+ * @author RaZ Podestá - MetaShark Tech
+ * @version 5.1.0
+ */
 
 # Manifiesto Conceptual: Aparato `middleware.ts`
 
@@ -33,16 +32,10 @@ graph TD
 3. Contrato de API
 middleware(request: NextRequest): Promise<NextResponse>: La función principal exportada que cumple con la API de Middleware de Next.js.
 config: { matcher: string[] }: La configuración que define a qué rutas se aplica el middleware.
-4. Zona de Mejoras Futuras
-Pipeline Dinámico: Hacer que el pipeline de manejadores se construya dinámicamente a partir de un archivo de configuración, permitiendo reordenar o deshabilitar manejadores sin tocar el código.
-Manejo de Errores por Manejador: Implementar una lógica en el orquestador que pueda manejar errores específicos de un manejador de forma diferente (ej. si handleAuth falla, redirigir a /login; si handleI18n falla, usar un locale de emergencia).
-Métricas de Performance por Manejador: Medir el tiempo de ejecución de cada manejador individualmente y registrarlo para identificar cuellos de botella en el pipeline.
-Documentación en Español: Traducir este documento espejo al español.
-Bypass de Pipeline para Rutas Específicas: Añadir una lógica al inicio que, para ciertas rutas (ej. /health), pueda saltarse todo el pipeline y retornar una respuesta inmediata.
-Inyección de Dependencias: Refactorizar para que los manejadores sean clases que puedan recibir dependencias (como un cliente de base de datos mockeado) para facilitar las pruebas.
-Soporte para Múltiples Pipelines: Implementar una lógica que, basándose en el pathname de la petición, pueda seleccionar y ejecutar diferentes pipelines (ej. un pipeline para /api/* y otro para el resto de la app).
-Integración con Feature Flags: El orquestador podría consultar un servicio de feature flags para habilitar o deshabilitar manejadores dinámicamente en producción.
-Contexto Compartido entre Manejadores: Crear un objeto de contexto (ctx) que se pase de un manejador al siguiente, permitiéndoles compartir datos de forma segura sin depender de cabeceras.
-Pruebas de Integración del Pipeline: Crear un arnés de pruebas que ejecute el pipeline completo con mocks de cada manejador para validar la lógica de orquestación, el control de flujo y el manejo de errores.
+4. Zona de Melhorias Futuras
+PIPELINE DINÁMICO: Hacer que el pipeline de manejadores se construya dinámicamente a partir de un archivo de configuración, permitiendo reordenar o deshabilitar manejadores sin tocar el código.
+MANEJO DE ERRORES POR MANEJADOR: Implementar una lógica en el orquestador que pueda manejar errores específicos de un manejador de forma diferente (ej. si handleAuth falla, redirigir a /login; si handleI18n falla, usar un locale de emergencia).
+MÉTRICAS DE RENDIMIENTO POR MANEJADOR: Medir el tiempo de ejecución de cada manejador individualmente y registrarlo para identificar cuellos de botella en el pipeline.
+INYECCIÓN DE DEPENDENCIAS: Refactorizar para que los manejadores sean clases que puedan recibir dependencias (como un cliente de base de datos mockeado) para facilitar las pruebas.
+CONTEXTO COMPARTIDO ENTRE MANEJADORES: Crear un objeto de contexto (ctx) que se pase de un manejador al siguiente, permitiéndoles compartir datos de forma segura sin depender de cabeceras.
 // .docs-espejo/middleware.ts.md
-```

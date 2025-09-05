@@ -3,7 +3,7 @@
  * @file .docs-espejo/lib/utils.ts.md
  * @description Documento Espejo y SSoT conceptual para el módulo de utilidades.
  * @author L.I.A. Legacy
- * @version 2.0.0
+ * @version 2.1.0
  */
 # Manifiesto Conceptual: Aparato `lib/utils.ts`
 
@@ -27,9 +27,9 @@ cn(...inputs: ClassValue[]): string:
 Entrada: Una secuencia de clases de CSS en varios formatos (strings, objetos, arrays).
 Salida: Una única cadena de texto con las clases fusionadas y sin conflictos.
 4. Zona de Melhorias Futuras
-HELPER DE CAPITALIZACIÓN: Crear una función capitalize(string) que ponga en mayúscula la primera letra de una cadena de texto.
-HELPER DE TRUNCAMIENTO: Crear una función truncate(string, maxLength) que corte un texto a una longitud máxima y añada puntos suspensivos.
-HELPER sleep: Crear una función sleep(ms) que devuelva una promesa que se resuelve después de un tiempo determinado, útil para simular latencia en desarrollo.
-HELPER getErrorMessage: Crear una utilidad getErrorMessage(error: unknown): string que extraiga de forma segura un mensaje de error de cualquier tipo de error capturado.
-HELPER isBrowser: Crear una constante isBrowser = typeof window !== "undefined" para verificar de forma segura si el código se está ejecutando en el navegador.
+HELPER DE CAPITALIZAÇÃO: Criar uma função capitalize(string) que coloque em maiúscula a primeira letra de uma cadeia de texto.
+HELPER DE TRUNCAMENTO: Criar uma função truncate(string, maxLength) que corte um texto a um comprimento máximo e adicione reticências.
+HELPER sleep: Criar uma função sleep(ms) que devolva uma promessa que se resolve após um tempo determinado, útil para simular latência no desenvolvimento.
+HELPER getErrorMessage: Criar uma utilidade getErrorMessage(error: unknown): string que extraia de forma segura uma mensagem de erro de qualquer tipo de erro capturado.
+HELPER isBrowser: Criar uma constante isBrowser = typeof window !== "undefined" para verificar de forma segura se o código está sendo executado no navegador.
 // .docs-espejo/lib/utils.ts.md

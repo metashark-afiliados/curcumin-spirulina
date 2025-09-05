@@ -34,8 +34,10 @@ graph TD
     E & H --> J[Renderiza UI con textos traducidos];
     F & I --> J;
 3. Contrato de API
-Props de Entrada: Ninguna. Es invocado por el framework.
-Salida: El JSX.Element que representa la página 404 completa.
+Props de Entrada:
+Ninguna. Es invocado por el framework.
+Salida:
+El JSX.Element que representa la página 404 completa.
 4. Zona de Melhorias Futuras
 SUGERENCIAS DE PÁGINAS: Implementar una lógica que sugiera páginas relevantes basadas en la URL mal escrita, utilizando un algoritmo de coincidencia difusa (fuzzy matching).
 LOGGING DE 404: Implementar una lógica en el middleware para registrar las URLs que generan errores 404. Esto es una mina de oro para el SEO.

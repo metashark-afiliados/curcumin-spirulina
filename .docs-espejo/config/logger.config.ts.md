@@ -3,7 +3,7 @@
  * @file .docs-espejo/config/logger.config.ts.md
  * @description Documento Espejo y SSoT conceptual para la configuración del logger.
  * @author L.I.A. Legacy
- * @version 1.0.0
+ * @version 1.1.0
  */
 # Manifiesto Conceptual: Aparato `logger.config.ts`
 
@@ -26,14 +26,9 @@ graph TD
 3. Contrato de API
 Exportación: export const REDACTED_PATHS: readonly string[]
 4. Zona de Melhorias Futuras
-Configuración por Entorno: Permitir que la lista REDACTED_PATHS se extienda con variables de entorno, para poder añadir claves de censura específicas para producción sin exponerlas en el código.
-Integración con Gestor de Secretos: Para configuraciones de máxima seguridad, las claves a censurar podrían ser cargadas desde un servicio como HashiCorp Vault o AWS Secrets Manager.
-Documentación en Español: Traducir este documento espejo al español para consistencia.
-Validación de Formato: Añadir un script de "linting" en el CI/CD que verifique que las rutas en REDACTED_PATHS siguen un formato válido para pino-redact.
-Comentarios en Línea: Añadir comentarios a cada clave en la lista explicando por qué es sensible y dónde podría aparecer en los logs.
-Niveles de Censura: Extender la configuración para permitir diferentes niveles de censura (ej. censura completa vs. parcial) si pino lo soporta en el futuro.
-Generación Automática: Crear un script que analice el código en busca de patrones de datos sensibles (ej. user.password) y sugiera añadirlos a esta lista para reducir omisiones.
-Sincronización con Tipos: Investigar si es posible usar TypeScript para generar estas rutas a partir de los tipos de datos de la aplicación (ej. keyof User), garantizando que siempre estén sincronizadas.
-Recarga en Caliente (Hot-reloading): Para aplicaciones de larga duración (no serverless), implementar un mecanismo que permita recargar esta configuración sin reiniciar el servidor.
-Logging de Censura: Configurar pino para que emita un log de nivel debug cada vez que una clave es censurada, facilitando la auditoría de seguridad.
+Configuração por Ambiente: Permitir que a lista REDACTED_PATHS seja estendida com variáveis de ambiente, para poder adicionar chaves de censura específicas para produção sem expô-las no código.
+Integração com Gestor de Segredos: Para configurações de máxima segurança, as chaves a serem censuradas poderiam ser carregadas de um serviço como HashiCorp Vault ou AWS Secrets Manager.
+Validação de Formato: Adicionar um script de "linting" no CI/CD que verifique se os caminhos em REDACTED_PATHS seguem um formato válido para pino-redact.
+Geração Automática: Criar um script que analise o código em busca de padrões de dados sensíveis (ex: user.password) e sugira adicioná-los a esta lista para reduzir omissões.
+Sincronização com Tipos: Investigar se é possível usar TypeScript para gerar esses caminhos a partir dos tipos de dados da aplicação (ex: keyof User), garantindo que estejam sempre sincronizados.
 // .docs-espejo/config/logger.config.ts.md

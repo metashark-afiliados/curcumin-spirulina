@@ -3,10 +3,10 @@
  * @file AnimationWrapper.tsx
  * @description Aparato de UI utilitário de elite. Atua como um wrapper de animação
  *              de alta ordem que oferece uma biblioteca de animações pré-definidas
- *              e a flexibilidade de sobrescrevê-las com props customizadas,
- *              incluindo a transição.
- * @version 5.0.0
- * @author RaZ Podestá - MetaShark Tech
+ *              e a flexibilidade de sobrescrevê-las com props customizadas.
+ * @version 5.2.0
+ * @author L.I.A. Legacy
+ * @see .docs-espejo/components/ui/AnimationWrapper.tsx.md
  */
 "use client";
 
@@ -17,14 +17,8 @@ import {
   type Variants,
 } from "framer-motion";
 import type { ReactNode } from "react";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger";
 
-/**
- * @private
- * @constant animationVariants
- * @description SSoT para as animações pré-configuradas. Centraliza as definições
- *              de animação para consistência e fácil manutenção.
- */
 const animationVariants: Record<string, Variants> = {
   fadeInUp: {
     hidden: { opacity: 0, y: 20 },
@@ -40,35 +34,24 @@ const animationVariants: Record<string, Variants> = {
   },
 };
 
-/**
- * @interface AnimationWrapperProps
- * @description Contrato de propriedades para o AnimationWrapper.
- */
 export interface AnimationWrapperProps
   extends Omit<HTMLMotionProps<"div">, "transition"> {
   children: ReactNode;
   variant?: keyof typeof animationVariants;
-  /** Permite sobrescrever a transição padrão de forma explícita. */
   transition?: Transition;
 }
 
-/**
- * @component AnimationWrapper
- * @description Envolve seus filhos em um `motion.div`, aplicando uma animação
- *              baseada em uma variante nomeada ou em props customizadas.
- * @param {AnimationWrapperProps} props - As propriedades do componente.
- * @returns {React.ReactElement} O wrapper de animação.
- */
 export function AnimationWrapper({
   children,
   variant = "fadeInUp",
   transition,
   ...restProps
 }: AnimationWrapperProps) {
-  clientLogger.trace(
-    { component: "AnimationWrapper", variant },
-    "Renderizando wrapper de animação."
-  );
+  // CORREÇÃO: Assinatura do logger corrigida para (mensagem, contexto).
+  clientLogger.trace("Renderizando wrapper de animação.", {
+    component: "AnimationWrapper",
+    variant,
+  });
 
   const defaultTransition: Transition = { duration: 0.6, ease: "easeOut" };
 
@@ -77,7 +60,7 @@ export function AnimationWrapper({
     whileInView: "visible",
     viewport: { once: true, amount: 0.2 },
     variants: animationVariants[variant],
-    transition: { ...defaultTransition, ...transition }, // A transição customizada sobrescreve a padrão
+    transition: { ...defaultTransition, ...transition },
     ...restProps,
   };
 

@@ -1,51 +1,51 @@
 // src/components/ui/SchemaInjector.tsx
 /**
  * @file SchemaInjector.tsx
- * @description Aparato de UI de servidor, atómico y puro. Su única
+ * @description Aparato de UI de cliente, atómico y puro. Su única
  *              responsabilidad es inyectar de forma segura un objeto de schema
- *              JSON-LD en el `<head>` de la página. Es un pilar fundamental de
- *              la estrategia de SEO Técnico.
+ *              JSON-LD en el `<head>` de la página utilizando un `useEffect`.
  * @version 2.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/SchemaInjector.tsx.md
  */
-import "server-only";
+"use client";
 
-import { serverLogger } from "@/lib/logger";
+import { useEffect } from "react";
+import { clientLogger } from "@/lib/client-logger";
 
-/**
- * @interface SchemaInjectorProps
- * @description Define el contrato de props para el componente SchemaInjector.
- */
 interface SchemaInjectorProps {
-  /**
-   * El objeto de schema (JSON-LD) a ser inyectado. Debe ser un objeto
-   * serializable a JSON.
-   */
   schema: Record<string, unknown>;
 }
 
-/**
- * @public
- * @component SchemaInjector
- * @description Renderiza una etiqueta `<script>` del tipo `application/ld+json`,
- *              inyectando de forma segura los datos estructurados en el documento.
- * @param {SchemaInjectorProps} props - Las propiedades del componente.
- * @returns {React.ReactElement} La etiqueta de script con el JSON-LD.
- */
-export function SchemaInjector({
-  schema,
-}: SchemaInjectorProps): React.ReactElement {
-  serverLogger.trace(
-    { schemaType: schema["@type"] },
-    "[SchemaInjector] Injetando schema JSON-LD na página."
-  );
+export function SchemaInjector({ schema }: SchemaInjectorProps): null {
+  const schemaId = `schema-ld-${schema["@type"]?.toString().toLowerCase()}`;
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema, null, 2) }}
-    />
-  );
+  useEffect(() => {
+    // Evita duplicados se o componente se re-renderizar.
+    if (document.getElementById(schemaId)) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = schemaId;
+    script.type = "application/ld+json";
+    script.innerHTML = JSON.stringify(schema, null, 2);
+    document.head.appendChild(script);
+
+    clientLogger.trace("Schema JSON-LD injetado no head.", {
+      component: "SchemaInjector",
+      schemaType: schema["@type"],
+    });
+
+    return () => {
+      // Limpeza: remove o script quando o componente é desmontado.
+      const existingScript = document.getElementById(schemaId);
+      if (existingScript) {
+        document.head.removeChild(existingScript);
+      }
+    };
+  }, [schema, schemaId]);
+
+  return null; // Este componente não renderiza nada visualmente.
 }
 // src/components/ui/SchemaInjector.tsx

@@ -1,19 +1,34 @@
-
 {
   "it-IT": {
     "mainTitle": "Ritrova la Tua Vitalità Naturale",
-    "subtitle": "Il supporto sinergico di Curcuma e Spirulina per i tuoi obiettivi di benessere."
+    "subtitle": "Il supporto sinergico di Curcuma e Spirulina per i tuoi obiettivi di benessere.",
+    "image": {
+      "src": "/img/produto-curcuma-hero.png",
+      "alt": "Flacone del prodotto Curcumin Spirulina Complex in primo piano."
+    }
   },
   "en-US": {
     "mainTitle": "Rediscover Your Natural Vitality",
-    "subtitle": "The synergistic support of Turmeric and Spirulina for your wellness goals."
+    "subtitle": "The synergistic support of Turmeric and Spirulina for your wellness goals.",
+    "image": {
+      "src": "/img/produto-curcuma-hero.png",
+      "alt": "Bottle of the Curcumin Spirulina Complex product featured."
+    }
   },
   "es-ES": {
     "mainTitle": "Redescubre Tu Vitalidad Natural",
-    "subtitle": "El apoyo sinérgico de Cúrcuma y Espirulina para tus objetivos de bienestar."
+    "subtitle": "El apoyo sinérgico de Cúrcuma y Espirulina para tus objetivos de bienestar.",
+    "image": {
+      "src": "/img/produto-curcuma-hero.png",
+      "alt": "Frasco del producto Curcumin Spirulina Complex en primer plano."
+    }
   },
   "pt-BR": {
     "mainTitle": "Redescubra Sua Vitalidade Natural",
-    "subtitle": "O suporte sinérgico de Cúrcuma e Spirulina para seus objetivos de bem-estar."
+    "subtitle": "O suporte sinérgico de Cúrcuma e Spirulina para seus objetivos de bem-estar.",
+    "image": {
+      "src": "/img/produto-curcuma-hero.png",
+      "alt": "Frasco do produto Curcumin Spirulina Complex em destaque."
+    }
   }
 }

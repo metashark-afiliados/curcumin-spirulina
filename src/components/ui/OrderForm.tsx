@@ -1,10 +1,11 @@
 // src/components/ui/OrderForm.tsx
 /**
  * @file OrderForm.tsx
- * @description Aparato de conversión de élite y soberano. Orquesta la captura,
- *              validación (con errores internacionalizados vía IMAS-E),
- *              enriquecimiento de datos (GeoIP) y submissão de leads.
- * @version 8.0.0
+ * @description Aparato de conversión de élite, soberano y resiliente. Orquesta
+ *              la validación de su propio contenido, la captura de datos del
+ *              usuario, la validación de entrada, el enriquecimiento de datos
+ *              (GeoIP) y la subida de leads.
+ * @version 9.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/OrderForm.tsx.md
  */
@@ -13,27 +14,49 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useId } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+
 import { useGeoIP } from "@/components/diagnostic/GeoIPLocator";
 import { Button } from "@/components/ui/Button";
 import { FormInput } from "@/components/ui/FormInput";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger";
 import {
   getOrderFormSchema,
   type OrderFormData,
 } from "@/lib/validators/OrderForm.schema";
+import {
+  OrderFormContentSchema,
+  type OrderFormContent,
+} from "@/lib/validators/i18n/OrderFormContent.schema";
 
-export function OrderForm() {
+export function OrderForm(): React.ReactElement | null {
   const t = useTranslations("components.ui.OrderForm");
   const locale = useLocale();
+  const formTitleId = useId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const geoInputRef = useRef<HTMLInputElement>(null);
   const { geoData, isLoading: isGeoLoading } = useGeoIP();
 
-  const formSchema = useMemo(() => getOrderFormSchema(t), [t]);
+  let content: OrderFormContent;
 
+  try {
+    const rawContent = t.raw("");
+    const validation = OrderFormContentSchema.safeParse(rawContent);
+    if (!validation.success) throw validation.error;
+    content = validation.data;
+  } catch (error) {
+    clientLogger.error("Erro ao obter ou validar conteúdo do OrderForm.", {
+      error,
+    });
+    return null;
+  }
+
+  const formSchema = useMemo(
+    () => getOrderFormSchema(content.validation),
+    [content.validation]
+  );
   const {
     register,
     handleSubmit,
@@ -48,61 +71,53 @@ export function OrderForm() {
   useEffect(() => {
     if (!isGeoLoading && geoData.countryCode && geoInputRef.current) {
       geoInputRef.current.value = geoData.countryCode;
-      clientLogger.info(
-        { geo: geoData.countryCode },
-        "GeoIP detectado y campo oculto actualizado."
-      );
     }
   }, [geoData, isGeoLoading]);
 
-  const onValidSubmit: SubmitHandler<OrderFormData> = (data) => {
-    clientLogger.info(
-      { component: "OrderForm", data },
-      "Validación de cliente exitosa. Iniciando submissão nativa del formulario."
-    );
+  const onValidSubmit: SubmitHandler<OrderFormData> = (data, event) => {
+    clientLogger.info("Validação de cliente exitosa. Submetendo formulário.", {
+      data,
+    });
     setIsSubmitting(true);
-  };
-
-  const onInvalidSubmit = (errors: any) => {
-    clientLogger.warn(
-      { component: "OrderForm", errors },
-      "Tentativa de submissão do formulário falhou na validação do cliente."
-    );
+    event?.target.submit();
   };
 
   return (
-    <div className="rounded-lg border border-white/20 bg-green-800 bg-opacity-80 p-6 shadow-2xl backdrop-blur-md">
+    <section
+      aria-labelledby={formTitleId}
+      className="rounded-lg border border-white/20 bg-green-800 bg-opacity-80 p-6 shadow-2xl backdrop-blur-md"
+    >
+      <h2 id={formTitleId} className="sr-only">
+        {content.formTitle}
+      </h2>
       <form
-        onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
+        onSubmit={handleSubmit(onValidSubmit)}
         action={producerFormActionUrl}
         method="POST"
         className="space-y-4 wv_order-form"
         noValidate
       >
         <PriceDisplay originalPrice={78} discountedPrice={39} />
-
         <FormInput
           id="name"
-          label={t("namePlaceholder")}
+          label={content.namePlaceholder}
           icon={User}
-          placeholder={t("namePlaceholder")}
           {...register("name")}
           error={errors.name?.message}
           autoComplete="name"
+          required
         />
-
         <FormInput
           id="phone"
-          label={t("phonePlaceholder")}
+          label={content.phonePlaceholder}
           icon={Phone}
           type="tel"
-          placeholder={t("phonePlaceholder")}
           {...register("phone")}
           error={errors.phone?.message}
           autoComplete="tel"
+          required
         />
 
-        {/* --- CAMPOS OCULTOS PARA ATRIBUIÇÃO E TRACKING --- */}
         <input name="lang" type="hidden" defaultValue={locale.split("-")[0]} />
         <input ref={geoInputRef} name="geo" type="hidden" />
         <input name="landing_id" type="hidden" defaultValue="12157" />
@@ -112,19 +127,20 @@ export function OrderForm() {
         <Button
           type="submit"
           size="lg"
-          className="!mt-6 w-full bg-red-600 hover:bg-red-700"
-          disabled={isSubmitting}
+          variant="accent"
+          className="!mt-6 w-full"
           loading={isSubmitting}
+          loadingText={content.submittingText}
         >
-          {t("ctaButton")}
+          {content.ctaButton}
         </Button>
 
         <div className="text-center text-xs text-white/80">
-          <p>{t("contactlessDelivery")}</p>
-          <p className="font-bold">{t("freeDelivery")}</p>
+          <p>{content.contactlessDelivery}</p>
+          <p className="font-bold">{content.freeDelivery}</p>
         </div>
       </form>
-    </div>
+    </section>
   );
 }
 // src/components/ui/OrderForm.tsx

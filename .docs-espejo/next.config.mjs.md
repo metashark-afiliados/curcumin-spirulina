@@ -3,7 +3,7 @@
  * @file .docs-espejo/next.config.mjs.md
  * @description Documento Espejo y SSoT conceptual para la configuración de Next.js.
  * @author L.I.A. Legacy
- * @version 1.0.0
+ * @version 2.0.0
  */
 # Manifiesto Conceptual: Aparato `next.config.mjs`
 
@@ -17,28 +17,23 @@ Este aparato es el **Manifiesto de Configuración del Framework**. Su única res
 
 ## 2. Arquitectura de la Configuración
 
-La configuración es un objeto JavaScript que se exporta y es consumido por la CLI de Next.js. La arquitectura clave se basa en la **composición de configuraciones** a través de funciones de orden superior (wrappers):
+La arquitectura se basa en la **composición de configuraciones** a través de funciones de orden superior (wrappers), garantizando un orden de ejecución predecible y una SSoT para cada integración.
 
 ```mermaid
 graph TD
     A[Objeto `nextConfig` base] --> B["`withNextIntl()`"];
     B --> C["`withSentryConfig()`"];
     C --> D[Configuración Final Exportada];
-nextConfig: Contiene las directivas nativas de Next.js (images, headers).
-withNextIntl(nextConfig): Envuelve la configuración base, inyectando la lógica necesaria para el enrutamiento y renderizado internacionalizado.
-withSentryConfig(...): Envuelve la configuración ya internacionalizada, inyectando la lógica para la subida de sourcemaps y la instrumentación de Sentry.
+nextConfig: Contiene las directivas nativas de Next.js (imágenes, cabeceras, etc.).
+withNextIntl(nextConfig): Envuelve la configuración base, inyectando la lógica para el enrutamiento y renderizado internacionalizado.
+withSentryConfig(...): Envuelve la configuración ya internacionalizada con la lógica para la subida de sourcemaps y la instrumentación de Sentry, consolidando todas las opciones de Sentry en una única invocación.
 3. Contrato de API
 Entrada: Variables de entorno (process.env) para configurar dinámicamente la CSP, Sentry, etc.
 Salida: Un objeto de configuración final que la CLI de next utiliza para los comandos dev, build, y start.
 4. Zona de Melhorias Futuras
-Análisis de Bundle: Integrar @next/bundle-analyzer para generar un reporte visual del tamaño de los paquetes de JavaScript, ayudando a identificar oportunidades de optimización.
-Redirecciones SEO: Implementar la función redirects() para configurar redirecciones 301 permanentes para rutas antiguas o URLs canónicas.
-Manejo de CSP más Granular: Extraer la configuración de la CSP a un archivo separado (csp.config.mjs) para mejorar la mantenibilidad y permitir reglas más complejas por ruta.
-Documentación en Español: Traducir este documento espejo al español.
-Optimización de Fuentes: Configurar la opción fontLoaders si se utilizan fuentes locales de una manera que requiera optimización específica de Webpack.
-Configuración de rewrites: Utilizar la función rewrites() para actuar como un proxy inverso, útil para integrar servicios externos bajo la misma URL del dominio.
-Soporte para PWA: Integrar @ducanh2912/next-pwa para añadir capacidades de Progressive Web App.
-Variables de Entorno Públicas Estrictas: Utilizar env en la configuración para validar que todas las variables de entorno necesarias estén presentes durante el build, previniendo fallos en producción.
-Build Experimental Flags: Explorar y probar flags experimentales de Next.js (ej. para optimizaciones de compilador) en un entorno de staging.
-Soporte para Múltiples Dominios: Implementar una lógica en la configuración que adapte las remotePatterns o la CSP basándose en el HOSTNAME del entorno, para soportar dominios de staging y producción.
+ANÁLISE DE BUNDLE: Integrar @next/bundle-analyzer para gerar um relatório visual do tamanho dos pacotes de JavaScript, ajudando a identificar oportunidades de otimização.
+REDIRECIONAMENTOS SEO: Implementar a função redirects() para configurar redirecionamentos 301 permanentes para rotas antigas ou URLs canônicas.
+MANEJO DE CSP MAIS GRANULAR: Extrair a configuração da CSP para um arquivo separado (csp.config.mjs) para melhorar a manutenibilidade e permitir regras mais complexas por rota.
+SUPORTE PARA PWA: Integrar @ducanh2912/next-pwa para adicionar capacidades de Progressive Web App.
+VALIDAÇÃO DE VARIÁVEIS DE AMBIENTE: Utilizar env na configuração para validar que todas as variáveis de entorno necessárias estejam presentes durante o build, prevenindo falhas em produção.
 // .docs-espejo/next.config.mjs.md

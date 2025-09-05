@@ -5,7 +5,7 @@
  *              entrada de formulario. Combina accesibilidad robusta con un
  *              feedback visual de vanguardia a través de un borde con gradiente
  *              interactivo y animado que reacciona a los estados de foco y error.
- * @version 5.0.0
+ * @version 5.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/FormInput.tsx.md
  */
@@ -14,7 +14,7 @@
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { AlertCircle, type LucideIcon } from "lucide-react";
 import * as React from "react";
-import { clientLogger } from "@/lib/logger";
+import { clientLogger } from "@/lib/client-logger"; // <-- CORREÇÃO: Caminho correto do logger.
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/Label";
 
@@ -32,26 +32,32 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     const [isFocused, setIsFocused] = React.useState(false);
 
     const currentState = error ? "error" : isFocused ? "focused" : "default";
-    clientLogger.trace(
-      { component: "FormInput", id, state: currentState },
-      "Renderizando campo de entrada."
-    );
+    clientLogger.trace("Renderizando campo de entrada.", {
+      component: "FormInput",
+      id,
+      state: currentState,
+    });
 
     const gradientVariants: Variants = {
       default: {
-        background: "linear-gradient(90deg, #4B5563, #6B7280)", // Gris sutil
+        background: "linear-gradient(90deg, #4B5563, #6B7280)",
       },
       focused: {
-        background: "linear-gradient(90deg, #F97316, #FBBF24)", // Gradiente de marca
+        background: "linear-gradient(90deg, #F97316, #FBBF24)",
       },
       error: {
-        background: "linear-gradient(90deg, #DC2626, #EF4444)", // Gradiente de error
+        background: "linear-gradient(90deg, #DC2626, #EF4444)",
       },
     };
 
     return (
       <div className="relative w-full space-y-1.5">
-        <Label htmlFor={id} className="font-semibold text-white/90">
+        <Label
+          htmlFor={id}
+          className="font-semibold"
+          variant={error ? "error" : "default"}
+          required={props.required}
+        >
           {label}
         </Label>
         <motion.div

@@ -3,34 +3,32 @@
  * @file .docs-espejo/components/ui/BenefitsSection.tsx.md
  * @description Documento Espejo y SSoT conceptual para el aparato BenefitsSection.
  * @author L.I.A. Legacy
- * @version 2.0.0
+ * @version 6.1.0
  */
 # Manifiesto Conceptual: Aparato `BenefitsSection`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es un **organismo de UI soberano de alta persuasión**. Su propósito estratégico es comunicar de forma rápida, clara y visualmente atractiva los principales beneficios del producto. Actúa como una prueba social tangible, transformando afirmaciones de marketing en puntos de valor concretos.
+Este aparato es un **organismo de UI soberano, resiliente y de alta persuasión**. Su propósito estratégico es comunicar los beneficios clave del producto, actuando como um pilar de confiança.
 
-Como componente soberano, **obtiene su propio contenido de i18n**, eliminando la dependencia de `props` y garantizando su reutilización y consistencia visual en toda la aplicación.
+Como componente soberano, **obtiene y VALIDA su propio contenido de i18n** contra un contrato de datos Zod, garantizando que una alteración en el contenido nunca rompa la UI.
 
-## 2. Arquitectura y Flujo de Ejecución
+## 2. Arquitectura de Élite
 
-Es un **Componente de Cliente (`"use client"`) soberano**. Su lógica interna se centra en obtener sus traducciones y mapear un array de datos a componentes `BenefitPill`.
+Es un **Componente de Cliente (`"use client"`) soberano y resiliente**.
+*   **Responsabilidad de Validación:** Este componente implementa el "Escudo de Resiliencia". Antes de renderizar, construye un objeto con su contenido a partir de la capa de i18n (`t`) y lo valida contra el `BenefitsSectionContentSchema`. Si la validación falla, registra un error y renderiza `null`.
+*   **Composición:** Orquesta la renderización de las moléculas de presentación puras `BenefitPill`.
+*   **Semántica y Accesibilidad:** Utiliza la etiqueta `<section>` y `aria-labelledby` para una estructura semántica y accesible.
 
-```mermaid
-graph TD
-    A["`BenefitsSection.tsx`"] -- "Invoca `useTranslations()`" --> B[Obtiene `mainTitle` y `benefits[]` de su archivo JSON];
-    B -- "Mapea `benefits[]`" --> C{Loop de Renderizado};
-    C -- "Para cada `benefit`" --> D["Renderiza `<BenefitPill />`"];
-    A -- "Usa `iconMap` para resolver" --> E[Icono de Lucide];
-    E -- "Pasa como prop a" --> D;
-La arquitectura desacopla completamente el componente de sus padres, convirtiéndolo en un aparato "plug-and-play".
-3. Contrato de API
-Props de Entrada: Ninguna. Este es un componente soberano y autocontenido.
-4. Zona de Melhorias Futuras
-MODAL DE DETALLES CIENTÍFICOS: Al hacer clic en un BenefitPill, abrir un modal que muestre información detallada y citas del informe científico relacionadas con ese beneficio.
-CONTENIDO DE BENEFICIOS VÍA CMS: Obtener los datos de los beneficios desde un Headless CMS, permitiendo a marketing realizar pruebas A/B de los beneficios sin un deploy.
-VARIANTES DE LAYOUT: Implementar variantes (grid, carousel, list) a través de una prop y cva para permitir diferentes visualizaciones.
-ICONOS PERSONALIZADOS SVG: Reemplazar el iconMap con la capacidad de renderizar iconos SVG personalizados y animados para un branding más fuerte.
-PRUEBAS DE INTEGRACIÓN: Crear un arnés de pruebas que renderice el componente y verifique que el número correcto de BenefitPills se muestra con el contenido esperado de los archivos de traducción.
+## 3. Contrato de API
+### Props de Entrada:
+*   Ninguna. Este es un componente soberano y autocontenido.
+
+### Contrato de Datos (desde `lib/validators`):
+*   Debe cumplir la estructura definida en `BenefitsSectionContentSchema`.
+
+## 4. Zona de Melhorias Futuras
+*   **BADGE DE BENEFICIO:** Extender el contrato de datos para incluir una propiedad opcional `badge?: string` (ej. "Nuevo") que el `BenefitPill` pueda renderizar para destacar beneficios específicos.
+*   **CONTENIDO ENRIQUECIDO:** Permitir que el campo `description` sea interpretado como Markdown para incluir enlaces o texto en negrita.
+*   **ORDENAMIENTO DINÁMICO:** Permitir que el orden de los beneficios sea controlado por una propiedad en un CMS para facilitar las pruebas A/B.
 // .docs-espejo/components/ui/BenefitsSection.tsx.md
