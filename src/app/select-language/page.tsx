@@ -8,7 +8,11 @@
  *              con Zod para garantizar la integridad y resiliencia de la UI.
  *              Se adhiere a la API de logging del cliente unificada para una
  *              observabilidad completa.
- * @version 4.0.0
+ *              **Configurada explícitamente como dinámica (`force-dynamic`) debido a
+ *              su uso de `useCookies` y `useRouter`, lo que impide su prerrenderizado
+ *              estático. El reporte de que no puede ser estática es el comportamiento
+ *              esperado por el proceso de `build` de Next.js (`output: 'export'`).**
+ * @version 4.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/select-language/page.tsx.md
  * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
@@ -25,14 +29,20 @@ import { useCookies } from "next-client-cookies";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, useId } from "react";
 
-// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
 import { defaultLocale, locales } from "@/lib/navigation";
 import {
   SelectLanguageContentSchema,
   type SelectLanguageContent,
-} from "@/lib/validators/i18n/SelectLanguage.schema"; // Importar schema y tipo
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
+} from "@/lib/validators/i18n/SelectLanguage.schema";
+import { type LogContext } from "@/lib/types/logging";
+
+// IMPORTANTE: Para marcar explícitamente esta ruta como dinámica.
+// Es necesaria debido al uso de `useCookies` y `useRouter`, que acceden
+// a información dinámica de la petición. Next.js reportará que no puede
+// ser estática, lo cual es el comportamiento esperado para una página
+// `force-dynamic` cuando se intenta un `output: 'export'`.
+export const dynamic = "force-dynamic";
 
 // --- Subcomponentes de Presentación Puros ---
 
@@ -56,7 +66,6 @@ interface CountdownCircleProps {
 function CountdownCircle({
   countdown,
 }: CountdownCircleProps): React.ReactElement {
-  // USO DE CLIENTLOGGER: (context, message)
   clientLogger.trace(
     { component: "CountdownCircle", countdown },
     `Renderizando círculo de cuenta regresiva: ${countdown}.`
@@ -105,7 +114,7 @@ function CountdownCircle({
  */
 export default function SelectLanguagePage(): React.ReactElement | null {
   const t = useTranslations("app.selectLanguage");
-  const pageTitleId = useId(); // ID para la accesibilidad del título de la página.
+  const pageTitleId = useId();
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
   const cookies = useCookies();
@@ -124,10 +133,9 @@ export default function SelectLanguagePage(): React.ReactElement | null {
   };
 
   try {
-    const rawContent = t.raw(""); // Obtenemos todo el namespace para validación.
+    const rawContent = t.raw("");
     const validation = SelectLanguageContentSchema.safeParse(rawContent);
     if (!validation.success) {
-      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
       clientLogger.error(
         {
           component: "SelectLanguagePage",
@@ -136,29 +144,20 @@ export default function SelectLanguagePage(): React.ReactElement | null {
         },
         "Validação de conteúdo de SelectLanguagePage falhou. Usando fallbacks."
       );
-      content = fallbackContent; // Usa contenido de fallback si la validación falla.
+      content = fallbackContent;
     } else {
       content = validation.data;
     }
   } catch (error) {
-    // USO DE CLIENTLOGGER CORREGIDO: (context, message)
     clientLogger.error(
-      { error, component: "SelectLanguagePage" } as LogContext, // Aserción de tipo para LogContext
+      { error, component: "SelectLanguagePage" } as LogContext,
       "Erro ao obter conteúdo de SelectLanguagePage. Usando fallbacks."
     );
-    content = fallbackContent; // Fallback en caso de errores inesperados de i18n.
+    content = fallbackContent;
   }
 
-  /**
-   * @private
-   * @function handleLanguageSelect
-   * @description Manejador para la selección de idioma del usuario.
-   *              Establece la cookie de locale y redirige a la página principal.
-   * @param {string} locale - El código de locale seleccionado (ej. "en-US").
-   */
   const handleLanguageSelect = useCallback(
     (locale: string) => {
-      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
       clientLogger.info(
         { component: "SelectLanguagePage", selectedLocale: locale },
         "Idioma seleccionado por el usuario. Estableciendo cookie y redirigiendo."
@@ -169,10 +168,8 @@ export default function SelectLanguagePage(): React.ReactElement | null {
     [cookies, router]
   );
 
-  // Efecto para gestionar el contador regresivo y la redirección automática.
   useEffect(() => {
     if (countdown === 0) {
-      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
       clientLogger.warn(
         { component: "SelectLanguagePage", defaultLocale },
         "Temporizador de selección de idioma expirado. Redireccionando al locale por defecto."
@@ -185,7 +182,6 @@ export default function SelectLanguagePage(): React.ReactElement | null {
     return () => clearTimeout(timer);
   }, [countdown, handleLanguageSelect]);
 
-  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
   clientLogger.trace(
     { component: "SelectLanguagePage", currentCountdown: countdown },
     "Renderizando página de selección de idioma."

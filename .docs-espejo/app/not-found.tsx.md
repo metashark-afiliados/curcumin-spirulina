@@ -3,7 +3,7 @@
  * @file .docs-espejo/app/not-found.tsx.md
  * @description Documento Espejo y SSoT conceptual para la página 404 global.
  * @author L.I.A. Legacy
- * @version 5.2.0
+ * @version 5.3.0
  */
 # Manifiesto Conceptual: Aparato `not-found.tsx` (Página 404 Global)
 
@@ -15,7 +15,7 @@ Como aparato soberano (Server Component), es responsable de toda la respuesta:
 1.  **Metadatos (`<head>`):** Exporta `generateMetadata` para definir el título de la página, contribuyendo al SEO y la UX.
 2.  **Contenido (`<body>`):** Renderiza el cuerpo de la página con un mensaje de error y una opción para volver al inicio.
 3.  **Resiliencia:** Implementa un patrón de `try/catch` con textos de `fallback` para garantizar que la página 404 se renderice siempre, incluso si el sistema de i18n falla.
-4.  **Optimización de Prerrenderizado:** **Configurado explícitamente para forzar la estaticidad (`export const dynamic = 'force-static';`)** para optimizar el rendimiento del build y el despliegue.
+4.  **Naturaleza Dinámica:** Esta ruta se considera **intrínsecamente dinámica** debido a la implementación subyacente de `notFound()` de Next.js, la cual puede hacer uso de `headers` para construir la respuesta HTTP 404. Por lo tanto, no se fuerza su estaticidad.
 5.  **Observabilidad de Élite:** Utiliza `serverLogger` (con la API unificada `(context, message)`) para registrar la generación de metadatos, errores de validación de contenido y el renderizado de la página, asegurando la trazabilidad.
 
 ## 2. Arquitectura y Flujo de Ejecución
@@ -25,7 +25,7 @@ Es un **Server Component** especial, invocado por Next.js cuando una ruta no es 
 ```mermaid
 graph TD
     A[Request a /ruta-inexistente] --> B{Next.js};
-    B -- "1. Renderiza `not-found.tsx`" --> C["`export const dynamic = 'force-static';`"];
+    B -- "1. Renderiza `not-found.tsx`" --> C["(Next.js lo infiere como Dinámico)"];
     C --> D["`generateMetadata()`"];
     D -- "Llama a `getTranslations()`" --> E{Capa de i18n};
     E -- Éxito --> F[Obtiene título];

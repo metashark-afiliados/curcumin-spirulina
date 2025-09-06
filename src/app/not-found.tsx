@@ -6,8 +6,10 @@
  *              una página de error 404 clara, útil e internacionalizada.
  *              Valida su propio contenido de i18n para garantizar que nunca
  *              falle, utilizando textos de fallback.
- *              **Configurado para forzar la estaticidad para optimizar el prerrenderizado.**
- * @version 5.2.0
+ *              **Esta ruta se considera intrínsecamente dinámica debido a la
+ *              implementación subyacente de `notFound()` de Next.js, la cual
+ *              puede hacer uso de `headers` para construir la respuesta.**
+ * @version 5.3.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/not-found.tsx.md
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/not-found
@@ -25,11 +27,11 @@ import { serverLogger } from "@/lib/logger";
 import { NotFoundContentSchema } from "@/lib/validators/i18n/NotFound.schema";
 import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
-// IMPORTANTE: Para forzar la estaticidad de la página 404.
-// Next.js intentará prerrenderizar esta página en tiempo de build,
-// lo que es ideal para un error 404 estático y eficiente.
-// Si hay alguna dependencia dinámica irresoluble, Next.js lo reportará.
-export const dynamic = "force-static";
+// IMPORTANTE: Se remueve la directiva `export const dynamic = 'force-static';`.
+// La función `notFound()` de Next.js, por su naturaleza, puede implicar el uso
+// de `headers()` o `cookies()` internamente para generar la respuesta 404,
+// lo que la marca como dinámica. Es más pragmático dejar que Next.js infiera
+// su naturaleza dinámica en este caso, ya que forzar la estaticidad no funciona.
 
 /**
  * @public
@@ -39,9 +41,8 @@ export const dynamic = "force-static";
  */
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("app.notFound.meta");
-  // USO DE SERVERLOGGER: (context, message)
   serverLogger.trace(
-    { component: "NotFoundPage", action: "generateMetadata" } as LogContext, // Aserción de tipo
+    { component: "NotFoundPage", action: "generateMetadata" } as LogContext,
     "Generando metadatos para la página 404."
   );
   return { title: t("title") };
@@ -66,13 +67,12 @@ export default async function NotFoundPage(): Promise<JSX.Element> {
   let content;
   try {
     const t = await getTranslations("app.notFound");
-    const rawContent = t.raw(""); // Obtenemos todo el namespace para validación.
+    const rawContent = t.raw("");
     const validation = NotFoundContentSchema.safeParse({
-      meta: {}, // El schema espera meta, lo proporcionamos vacío ya que generateMetadata lo maneja.
+      meta: {},
       ...rawContent,
     });
     if (!validation.success) {
-      // USO DE SERVERLOGGER: (context, message)
       serverLogger.error(
         {
           component: "NotFoundPage",
@@ -89,15 +89,13 @@ export default async function NotFoundPage(): Promise<JSX.Element> {
     }
     content = validation.data;
   } catch (error) {
-    // USO DE SERVERLOGGER: (context, message)
     serverLogger.error(
-      { error, component: "NotFoundPage" } as LogContext, // Aserción de tipo
+      { error, component: "NotFoundPage" } as LogContext,
       "Error fatal al cargar o validar traducciones para 404. Usando fallbacks."
     );
-    content = fallbackTexts; // Asegura que siempre haya contenido.
+    content = fallbackTexts;
   }
 
-  // USO DE SERVERLOGGER: (context, message)
   serverLogger.trace(
     { component: "NotFoundPage", title: content.title },
     "Renderizando página 404."

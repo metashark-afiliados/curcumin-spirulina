@@ -6,8 +6,9 @@
  *              etiquetas `<xhtml:link alternate>`, y está blindado con un
  *              manejo de errores robusto y logging completo.
  *              **Configurado para forzar la estaticidad para permitir SSG,
- *              evitando el uso de `request.url` en contextos dinámicos.**
- * @version 5.2.0
+ *              y no acepta el objeto `request` en su firma para evitar
+ *              que Next.js lo marque como dinámico.**
+ * @version 5.3.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/sitemap.xml/route.ts.md
  * @see src/lib/blog.ts (SSoT para obtener datos de posts)
@@ -23,11 +24,9 @@ import { serverLogger } from "@/lib/logger";
 import { type LogContext } from "@/lib/types/logging";
 
 // IMPORTANTE: Para forzar la estaticidad de este Route Handler para SSG.
-// Si se usa `request.url` o `request.headers` de una manera que Next.js no puede
-// determinar como estática en tiempo de build, la ruta se marca como dinámica.
-// Al declararlo explícitamente, indicamos que se debe prerrenderizar.
-// Para el sitemap, `BASE_URL` debe ser una variable de entorno definida en tiempo de build.
-export const dynamic = 'force-static';
+// Al declararlo explícitamente y **no aceptar el objeto `request` en la firma de GET**,
+// indicamos a Next.js que debe prerrenderizar esta ruta.
+export const dynamic = "force-static";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
@@ -106,13 +105,22 @@ async function generateBlogEntries(): Promise<SitemapEntry[]> {
         postsBySlug[post.slug].paths.add(
           `${BASE_URL}/${locale}/blog/${post.slug}`
         );
-        if (new Date(post.date) > new Date(postsBySlug[post.slug].lastModified)) {
-          postsBySlug[post.slug].lastModified = new Date(post.date).toISOString();
+        if (
+          new Date(post.date) > new Date(postsBySlug[post.slug].lastModified)
+        ) {
+          postsBySlug[post.slug].lastModified = new Date(
+            post.date
+          ).toISOString();
         }
       }
     } catch (error) {
       serverLogger.error(
-        { component: "SitemapRoute", action: "generateBlogEntries", locale, err: error } as LogContext,
+        {
+          component: "SitemapRoute",
+          action: "generateBlogEntries",
+          locale,
+          err: error,
+        } as LogContext,
         `Error al obtener posts para el locale '${locale}' al generar el sitemap. Se ignorará este locale.`
       );
     }
@@ -140,7 +148,11 @@ async function generateBlogEntries(): Promise<SitemapEntry[]> {
  */
 function renderSitemap(entries: SitemapEntry[]): string {
   serverLogger.trace(
-    { component: "SitemapRoute", action: "renderSitemap", entryCount: entries.length },
+    {
+      component: "SitemapRoute",
+      action: "renderSitemap",
+      entryCount: entries.length,
+    },
     "Renderizando sitemap en formato XML."
   );
   const urlsXml = entries
@@ -182,17 +194,17 @@ ${alternatesXml}
  * @function GET
  * @description Route Handler principal para la ruta `/sitemap.xml`.
  *              Genera y devuelve el sitemap completo en formato XML.
+ *              No acepta el objeto `request` para forzar la estaticidad.
  *              Incluye un manejo de errores robusto para prevenir que un sitemap
  *              corrupto o fallido sea servido.
- * @param {Request} request - El objeto de la petición.
  * @returns {Promise<Response>} Una promesa que resuelve a una `Response` con el sitemap XML
  *          o un error 500 si la generación falla.
  */
-export async function GET(request: Request): Promise<Response> {
+export async function GET(): Promise<Response> {
+  // <-- FIRMA CORREGIDA: No acepta `request: Request`
   try {
-    // CORRECCIÓN: Usar BASE_URL en lugar de request.url para la estaticidad
     serverLogger.info(
-      { component: "SitemapRoute", requestUrl: BASE_URL },
+      { component: "SitemapRoute", requestUrl: BASE_URL }, // `requestUrl` ahora usa BASE_URL
       "[Sitemap] Iniciando generación del sitemap.xml."
     );
 
@@ -215,7 +227,9 @@ export async function GET(request: Request): Promise<Response> {
       { component: "SitemapRoute", err: error } as LogContext,
       "[Sitemap] Error crítico durante la generación del sitemap."
     );
-    return new Response("Error interno del servidor al generar sitemap", { status: 500 });
+    return new Response("Error interno del servidor al generar sitemap", {
+      status: 500,
+    });
   }
 }
 // src/app/sitemap.xml/route.ts

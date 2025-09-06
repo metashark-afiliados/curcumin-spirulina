@@ -3,7 +3,7 @@
  * @file .docs-espejo/app/sitemap.xml/route.ts.md
  * @description Documento Espejo y SSoT conceptual para el generador de sitemap.xml.
  * @author L.I.A. Legacy
- * @version 5.2.0
+ * @version 5.3.0
  */
 
 # Manifiesto Conceptual: Aparato `sitemap.xml/route.ts` (Route Handler)
@@ -12,7 +12,7 @@
 
 Este aparato es un **pilar fundamental de la estrategia de SEO técnico multilingüe**. Su única responsabilidad es generar dinámicamente un archivo `sitemap.xml` de élite, que informa a los motores de búsqueda sobre todas las URLs canónicas y sus traducciones disponibles.
 
-La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto. Además, su robusto sistema de logging (`serverLogger`) proporciona una observabilidad completa del proceso de generación. **Se ha configurado explícitamente para forzar la estaticidad (`export const dynamic = 'force-static';`) para optimizar el prerrenderizado durante el build, evitando dependencias dinámicas innecesarias.**
+La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto. Además, su robusto sistema de logging (`serverLogger`) proporciona una observabilidad completa del proceso de generación. **Se ha configurado explícitamente para forzar la estaticidad (`export const dynamic = 'force-static';`) y no acepta el objeto `request` en su firma `GET()` para asegurar que Next.js lo prerrenderice estáticamente.**
 
 ## 2. Arquitectura y Flujo de Ejecución
 

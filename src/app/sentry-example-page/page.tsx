@@ -7,8 +7,9 @@
  *              y los reporta correctamente.
  *              **Configurada explícitamente como dinámica (`force-dynamic`) debido a
  *              su uso de `fetch` a una ruta de API interna y su naturaleza de "ejemplo"
- *              con interacción dinámica.**
- * @version 1.1.0
+ *              con interacción dinámica. El reporte de que no puede ser estática
+ *              es el comportamiento esperado.**
+ * @version 1.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/sentry-example-page/page.tsx.md
  * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/
@@ -21,7 +22,9 @@ import * as Sentry from "@sentry/nextjs";
 import { useState, useEffect } from "react";
 
 // IMPORTANTE: Para marcar explícitamente esta ruta como dinámica.
-// Es necesaria debido al `fetch` a una API interna, que impide el prerrenderizado estático.
+// Es necesaria debido al `fetch` a una API interna y a su naturaleza interactiva,
+// lo que impide el prerrenderizado estático. Next.js reportará que no puede ser
+// estática, lo cual es el comportamiento esperado para una página `force-dynamic`.
 export const dynamic = "force-dynamic";
 
 /**

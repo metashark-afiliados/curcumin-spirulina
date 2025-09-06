@@ -11,7 +11,7 @@
  *              evitar `TypeError: Invalid value used as weak map key` en el entorno
  *              de Next.js durante el SSR/SSG.**
  * @author L.I.A. Legacy
- * @version 5.4.1
+ * @version 5.5.0
  * @see .docs-espejo/lib/logger.ts.md
  * @see src/config/logger.config.ts (SSoT para `REDACTED_PATHS`)
  * @see src/lib/helpers/correlation-id.helper.ts (SSoT para `getCorrelationId`)
@@ -38,6 +38,12 @@ type PinoInstance = pino.Logger | null;
  */
 let _loggerInstance: PinoInstance = null;
 
+// Variables de entorno para detectar el entorno de ejecución de Next.js
+const isMainNodeJsRuntime =
+  typeof process !== "undefined" &&
+  typeof process.env.NEXT_RUNTIME === "undefined"; // Main Node.js thread (e.g. `next dev` server)
+const isTestEnvironment = process.env.NODE_ENV === "test";
+
 /**
  * @private
  * @function initializePino
@@ -49,7 +55,10 @@ let _loggerInstance: PinoInstance = null;
 function initializePino(): pino.Logger {
   // Opciones de configuración para la instancia de Pino.
   const pinoConfig: pino.LoggerOptions = {
-    level: process.env.NODE_ENV === "development" ? "trace" : "info",
+    level:
+      isTestEnvironment || process.env.NODE_ENV === "development"
+        ? "trace"
+        : "info",
     base: {
       service: "curcumin-spirulina-hub", // Nombre canónico del servicio
     },
@@ -84,13 +93,38 @@ function initializePino(): pino.Logger {
  * @private
  * @function getPinoInstance
  * @description Retorna la instancia singleton de Pino, inicializándola si es necesario.
- * @returns {pino.Logger} La instancia de Pino.
+ *              **Incluye una comprobación de entorno para evitar la inicialización
+ *              en worker threads problemáticos (ej., durante la fase de build/prerrenderizado de RSC).**
+ *              Si el entorno no es compatible con la inicialización completa de Pino,
+ *              devuelve una instancia de logger dummy que usa `console`.
+ * @returns {pino.Logger} La instancia de Pino (real o dummy).
  */
 function getPinoInstance(): pino.Logger {
   if (!_loggerInstance) {
-    _loggerInstance = initializePino();
-    // No logueamos la inicialización aquí para evitar recursión
-    // o intentos de logging durante una fase de build donde los logs no están listos.
+    // Si estamos en el entorno principal de Node.js (servidor real) y no en un entorno de prueba,
+    // inicializamos la instancia real de Pino.
+    if (isMainNodeJsRuntime && !isTestEnvironment) {
+      _loggerInstance = initializePino();
+      // No logueamos la inicialización aquí para evitar recursión
+      // o intentos de logging durante una fase de build donde los logs no están listos.
+    } else {
+      // En entornos de worker de build (RSC/SSG), Edge (donde tenemos edgeLogger) o tests,
+      // usamos un logger dummy para evitar errores como `WeakMap key` o fallos de `worker thread`.
+      _loggerInstance = {
+        trace: (context, message) => {
+          /* console.debug("[DUMMY_LOGGER_TRACE]", message, context); */
+        },
+        info: (context, message) => {
+          /* console.info("[DUMMY_LOGGER_INFO]", message, context); */
+        },
+        warn: (context, message) => {
+          /* console.warn("[DUMMY_LOGGER_WARN]", message, context); */
+        },
+        error: (context, message) => {
+          console.error("[DUMMY_LOGGER_ERROR]", message, context);
+        }, // Los errores críticos se loguean a console.error.
+      } as pino.Logger; // Aserción para compatibilidad de tipo con pino.Logger.
+    }
   }
   return _loggerInstance;
 }
@@ -98,11 +132,11 @@ function getPinoInstance(): pino.Logger {
 /**
  * @public
  * @constant serverLogger
- * @description La instancia explícita del logger de servidor. Emite logs JSON
- *              estructurados de forma síncrona a `stdout`.
+ * @description La instancia explícita del logger de servidor. Provee una API de logging
+ *              que delega las llamadas a una instancia de Pino (real o dummy) obtenida
+ *              de forma lazy. Emite logs JSON estructurados de forma síncrona a `stdout`
+ *              (o a la consola en modo dummy).
  *              Implementa la interfaz `ILogger` para una API tipo-segura y unificada.
- *              **La instancia de Pino se inicializa de forma lazy la primera vez que se accede
- *              a `serverLogger` para evitar conflictos en entornos RSC.**
  */
 export const serverLogger: ILogger = {
   trace: (context, message) => getPinoInstance().trace(context, message),
