@@ -1,7 +1,7 @@
 // src/app/not-found.tsx
 /**
  * @file not-found.tsx
- * @description Aparato soberano e resiliente para a página 404 global. Valida
+ * @description Aparato soberano e resiliente para la página 404 global. Valida
  *              seu próprio conteúdo de i18n para garantir que nunca falhe.
  * @version 5.1.0
  * @author L.I.A. Legacy
@@ -13,7 +13,7 @@ import { getTranslations } from "next-intl/server";
 import { type Metadata } from "next";
 import { TriangleAlert } from "lucide-react";
 import { Link } from "@/lib/navigation";
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 import { NotFoundContentSchema } from "@/lib/validators/i18n/NotFound.schema";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,7 +40,6 @@ export default async function NotFoundPage() {
     if (!validation.success) throw validation.error;
     content = validation.data;
   } catch (error) {
-    // CORRECCIÓN: Firma del logger corregida para (contexto, mensaje).
     serverLogger.error(
       { err: error },
       "Falha ao carregar ou validar traduções para 404. Usando fallbacks."

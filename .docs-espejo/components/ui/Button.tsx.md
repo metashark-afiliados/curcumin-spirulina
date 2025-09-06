@@ -1,9 +1,9 @@
-// .docs-espejo/components/ui/Button.tsx.md
+<!-- .docs-espejo/components/ui/Button.tsx.md -->
 /**
  * @file .docs-espejo/components/ui/Button.tsx.md
  * @description Documento Espejo y SSoT conceptual para el aparato Button.
  * @author L.I.A. Legacy
- * @version 3.1.0
+ * @version 3.2.0
  */
 # Manifiesto Conceptual: Aparato `Button`
 
@@ -21,6 +21,7 @@ Es un componente de cliente (`"use client"`) polimórfico y compuesto:
 *   **Estilo Declarativo:** Utiliza `class-variance-authority` (`cva`) para gestionar un conjunto extendido de variantes de estilo semánticas (`variant`, `size`).
 *   **Estado de Carga Accesible:** Gestiona un estado `loading` que muestra un spinner, deshabilita el botón y notifica a los lectores de pantalla a través de atributos `aria-busy` y texto específico para lectores de pantalla.
 *   **Microinteracciones:** Integra `framer-motion` para proporcionar feedback táctil y visual (`whileHover`, `whileTap`) y efectos avanzados.
+*   **Observabilidad:** Utiliza `clientLogger` (de `src/lib/client-logger.ts` con la API unificada `(context, message)`) para registrar su propio flujo y estados, contribuyendo a la observabilidad del lado del cliente.
 
 ## 3. Contrato de API
 
@@ -30,13 +31,13 @@ Es un componente de cliente (`"use client"`) polimórfico y compuesto:
 *   **`size?`**: `"default" | "sm" | "lg" | "icon" | "pill"`: El tamaño.
 *   **`asChild?: boolean`**: Si es `true`, se renderiza como su hijo directo.
 *   **`loading?: boolean`**: Si es `true`, muestra un spinner y se deshabilita.
-*   **`loadingText?: string`**: **(Nuevo en v3.1.0)** Texto opcional que se anuncia a los lectores de pantalla durante el estado de carga, proporcionando un feedback de accesibilidad superior.
+*   **`loadingText?: string`**: Texto opcional que se anuncia a los lectores de pantalla durante el estado de carga, proporcionando un feedback de accesibilidad superior.
 
-## 4. Zona de Melhorias Futuras
+## 4. Zona de Mejoras Nuevas (Valor al Proyecto)
 
-*   **SOPORTE PARA ICONOS DECLARATIVOS:** Añadir props `iconLeft?: LucideIcon` y `iconRight?: LucideIcon` que rendericen iconos de forma automática junto al texto.
-*   **ESTADOS DE ÉXITO/ERROR VISUALES:** Añadir variantes visuales (ej. `variant: "success" | "error"`) que puedan ser activadas por un corto período tras una acción para feedback inmediato.
-*   **FEEDBACK AUDITIVO:** Añadir un efecto sonoro sutil de clic (`onTap`) como feedback auditivo opcional.
-*   **GRUPO DE BOTONES:** Crear un componente `ButtonGroup` que envuelva múltiples `Button` y aplique estilos para que parezcan un único control segmentado.
-*   **TOOLTIP INTEGRADO:** Añadir una prop `tooltip?: string` que renderice un `Tooltip` de Radix al hacer hover sobre el botón.
-// .docs-espejo/components/ui/Button.tsx.md
+*   **SOPORTE PARA ICONOS DECLARATIVOS:** Añadir props `iconLeft?: LucideIcon` y `iconRight?: LucideIcon` que rendericen iconos de forma automática junto al texto. Esto centralizaría la lógica de renderizado de iconos dentro del botón.
+*   **ESTADOS DE ÉXITO/ERROR VISUALES:** Añadir variantes visuales (ej. `variant: "success" | "error"`) que puedan ser activadas por un corto período tras una acción exitosa o fallida, para proporcionar feedback inmediato al usuario.
+*   **FEEDBACK AUDITIVO (Opcional):** Añadir una prop `playClickSound?: boolean` que, si es `true`, reproduzca un sonido sutil de clic (`onTap`) como feedback auditivo opcional, mejorando la experiencia para algunos usuarios.
+*   **GRUPO DE BOTONES (ButtonGroup):** Crear un componente `ButtonGroup` que envuelva múltiples `Button` y aplique estilos para que parezcan un único control segmentado, útil para grupos de acciones relacionadas.
+*   **TOOLTIP INTEGRADO:** Añadir una prop `tooltip?: string` que renderice un `Tooltip` de Radix al hacer `hover` sobre el botón, proporcionando información adicional sobre la acción sin ocupar espacio en la UI.
+<!-- .docs-espejo/components/ui/Button.tsx.md -->

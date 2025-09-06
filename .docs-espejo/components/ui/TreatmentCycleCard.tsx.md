@@ -1,35 +1,38 @@
-// .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
+<!-- .docs-espejo/components/ui/TreatmentCycleCard.tsx.md -->
 /**
- * @file .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
- * @description Documento Espejo y SSoT conceptual para el aparato TreatmentCycleSection.
+ * @file .docs-espejo/components/ui/TreatmentCycleCard.tsx.md
+ * @description Documento Espejo y SSoT conceptual para el aparato TreatmentCycleCard.
  * @author L.I.A. Legacy
- * @version 2.0.0
+ * @version 4.2.0
  */
-# Manifiesto Conceptual: Aparato `TreatmentCycleSection`
+# Manifiesto Conceptual: Aparato `TreatmentCycleCard`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es un **organismo de UI narrativo y soberano**. Su propósito es presentar la "hoja de ruta" del cliente con el producto, dividiendo el viaje en fases digeribles. Estratégicamente, gestiona las expectativas del cliente, aumenta la confianza al mostrar un plan estructurado y fomenta el uso a largo plazo.
+Este aparato es una **molécula de UI de presentación pura, atómica y accesible**. Su propósito es presentar una fase individual de un programa de bienestar de una manera concisa, visual y semánticamente correcta.
 
-Como **orquestador soberano**, su responsabilidad es **obtener y validar su propio contenido de i18n** y componer las moléculas `TreatmentCycleCard` en un layout cohesivo y animado.
+Estratégicamente, ayuda a gestionar las expectativas del cliente, aumenta la confianza al mostrar un plan estructurado y fomenta el compromiso a largo plazo con el producto.
 
-## 2. Arquitectura y Flujo de Ejecución
+## 2. Arquitectura de Élite
 
-Es un **Componente de Cliente (`"use client"`) soberano y resiliente**.
+Es un **Componente de Cliente (`"use client"`) de presentación 100% puro**.
+*   **Responsabilidad de Validación:** Este componente confía en que las `props` que recibe ya han sido validadas por su orquestador (`TreatmentCycleSection`). No contiene su propio esquema de validación Zod.
+*   **Semántica y Accesibilidad:** Utiliza un elemento `<section>` como raíz con `aria-labelledby` para crear un "nombre accesible" explícito, garantizando una experiencia de élite para usuarios de lectores de pantalla.
+*   **Animación:** Su lógica interna está dedicada a las animaciones de `framer-motion` para la entrada y la interacción.
+*   **Observabilidad:** Utiliza el `clientLogger` (ahora con la API unificada `(context, message)`) para registrar su propio flujo, contribuyendo a la observabilidad del lado del cliente.
 
-```mermaid
-graph TD
-    A["`TreatmentCycleSection.tsx`"] -- "1. Invoca `useTranslations()`" --> B["Obtiene contenido de su .json"];
-    B -- "2. Valida contra `TreatmentCycleSection.schema.ts`" --> C{¿Validación OK?};
-    C -- Sí --> D["Renderiza Título y mapea `cycles`"];
-    D -- "Para cada `cycle`, pasa props a" --> E["`TreatmentCycleCard`"];
-    C -- No --> F["Registra error y retorna `null`"];
-3. Contrato de API
-Props de Entrada: Ninguna. Este es un componente soberano y autocontenido.
-Contrato de Datos (i18n): El contenido obtenido de useTranslations debe cumplir con el TreatmentCycleSectionContentSchema.
-4. Zona de Melhorias Futuras
-VISUALIZACIÓN DE PROGRESO: Implementar un elemento visual (ej. una línea de tiempo SVG animada) que conecte las tarjetas, reforzando la idea de una jornada continua.
-LAYOUT DE CARRUSEL: Añadir una variante de layout que muestre las tarjetas en un carrusel interactivo, especialmente útil en vistas móviles.
-SELECCIÓN DE PLAN (CTA INTEGRADO): Permitir que cada tarjeta tenga un botón "Seleccionar Plan" que desplace la vista al formulario de pedido.
-CONTENIDO VÍA CMS: Permitir que los datos de los ciclos provengan de un Headless CMS para que el equipo de marketing pueda realizar pruebas A/B de la narrativa.
-// .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
+## 3. Contrato de API
+### Props de Entrada (`TreatmentCycleCardProps`):
+*   `duration: string`: La duración de la fase del tratamiento (ej., "30 Días").
+*   `title: string`: El título de la fase del tratamiento.
+*   `description: string`: Una descripción detallada de lo que ocurre en esta fase.
+*   `index: number`: El índice de la tarjeta en la lista, utilizado para escalonar la animación.
+
+## 4. Zona de Mejoras Nuevas (Valor al Proyecto)
+
+*   **ICONO O IMAGEN POR FASE:** Extender el contrato de datos para incluir una prop `icon?: LucideIcon` o `imageUrl?: string` que represente visualmente la fase del tratamiento, en lugar de solo la duración numérica. Esto podría mejorar la comprensión y el atractivo visual.
+*   **INDICADOR DE PROGRESO DE LA FASE:** Añadir una pequeña barra de progreso visual o un indicador de "completado" en la tarjeta para simular el avance del usuario a través del ciclo, especialmente si se integra con un sistema de seguimiento del progreso.
+*   **CALL TO ACTION POR FASE (CTA):** Permitir que cada tarjeta tenga un botón de `Call To Action` opcional que, al hacer clic, dirija al usuario a una sección relevante (ej. el formulario de pedido si es el final del ciclo, o a un artículo de blog relacionado con esa fase).
+*   **TOOLTIP CON DETALLES ADICIONALES:** Al pasar el cursor sobre la tarjeta, podría mostrarse un `Tooltip` con información más detallada sobre los beneficios específicos o los hitos de esa fase, sin sobrecargar la UI principal.
+*   **VARIANTES DE ESTILO (cva):** Definir variantes de estilo utilizando `class-variance-authority` (`cva`) para las tarjetas, permitiendo diferentes diseños o colores para distinguir fases críticas o para pruebas A/B.
+<!-- .docs-espejo/components/ui/TreatmentCycleCard.tsx.md -->

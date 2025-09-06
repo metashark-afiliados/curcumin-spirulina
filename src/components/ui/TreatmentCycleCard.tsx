@@ -1,37 +1,67 @@
 // src/components/ui/TreatmentCycleCard.tsx
 /**
- * @file TreatmentCycleCard.tsx
- * @description Aparato de UI atómico (Molécula) de apresentação puro e acessível.
- *              Exibe uma fase do programa de bem-estar, utilizando HTML semântico
- *              e ARIA para uma experiência de utilizador de elite.
- * @version 4.1.0
+ * @file src/components/ui/TreatmentCycleCard.tsx
+ * @description Aparato de UI atómico (Molécula) de presentación puro y accesible.
+ *              Exibe una fase del programa de bienestar, utilizando HTML semántico
+ *              y ARIA para una experiencia de utilizador de elite.
+ *              Se adhiere a la API de logging del cliente unificada para una
+ *              observabilidad completa de los ciclos de tratamiento.
+ * @version 4.2.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/TreatmentCycleCard.tsx.md
+ * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
+ * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 "use client";
 
 import { motion } from "framer-motion";
 import React, { useId } from "react";
+// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
+import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
+/**
+ * @interface TreatmentCycleCardProps
+ * @description Propiedades del componente `TreatmentCycleCard`.
+ */
 export interface TreatmentCycleCardProps {
+  /**
+   * @property {string} duration - La duración de la fase del tratamiento (ej., "30 Días").
+   */
   duration: string;
+  /**
+   * @property {string} title - El título de la fase del tratamiento.
+   */
   title: string;
+  /**
+   * @property {string} description - Una descripción detallada de lo que ocurre en esta fase.
+   */
   description: string;
+  /**
+   * @property {number} index - El índice de la tarjeta en una lista, utilizado para escalonar animaciones.
+   */
   index: number;
 }
 
+/**
+ * @component TreatmentCycleCard
+ * @description Componente de presentación para mostrar una fase individual del ciclo de tratamiento.
+ *              Incluye animaciones `framer-motion` y logging de su renderizado.
+ * @param {TreatmentCycleCardProps} props - Las propiedades para configurar la tarjeta de ciclo de tratamiento.
+ * @returns {React.ReactElement}
+ */
 export function TreatmentCycleCard({
   duration,
   title,
   description,
   index,
-}: TreatmentCycleCardProps) {
+}: TreatmentCycleCardProps): React.ReactElement {
   const titleId = useId();
-  clientLogger.trace("Renderizando card de ciclo de tratamento.", {
-    component: "TreatmentCycleCard",
-    title,
-  });
+  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+  clientLogger.trace(
+    { component: "TreatmentCycleCard", title, index, duration } as LogContext, // Aserción de tipo para LogContext
+    "Renderizando card de ciclo de tratamiento."
+  );
 
   return (
     <motion.section

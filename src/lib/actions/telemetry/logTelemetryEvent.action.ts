@@ -9,7 +9,7 @@
  */
 "use server";
 
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 import { type ActionResult } from "@/lib/types/actions";
 import {
   TelemetryEventSchema,

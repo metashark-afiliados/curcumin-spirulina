@@ -1,12 +1,17 @@
 // src/components/ui/TreatmentCycleSection.tsx
 /**
- * @file TreatmentCycleSection.tsx
- * @description Aparato soberano, resiliente e de cliente. Orquesta a exibição
- *              das fases do tratamento, obtendo e VALIDANDO seu próprio conteúdo
- *              de i18n contra um schema Zod antes de renderizar.
- * @version 6.3.1
+ * @file src/components/ui/TreatmentCycleSection.tsx
+ * @description Aparato soberano, resiliente y de cliente. Orquesta la exhibición
+ *              de las fases del tratamiento, obteniendo y VALIDANDO su propio contenido
+ *              de i18n contra un schema Zod antes de renderizar.
+ *              Se adhiere a la API de logging del cliente unificada para una
+ *              observabilidad completa de los ciclos de tratamiento.
+ * @version 6.4.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
+ * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
+ * @see src/lib/types/logging.ts (SSoT para `LogContext`)
+ * @see src/lib/validators/i18n/TreatmentCycleSection.schema.ts (SSoT para la validación del contenido)
  */
 "use client";
 
@@ -14,22 +19,41 @@ import { useTranslations } from "next-intl";
 import React, { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
+// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
-// CORREÇÃO: Extensão .ts removida do caminho de importação para resolver o erro ts(5097).
 import {
   TreatmentCycleSectionContentSchema,
   type TreatmentCycleSectionContent,
 } from "@/lib/validators/i18n/TreatmentCycleSection.schema";
+import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
+/**
+ * @component TreatmentCycleSection
+ * @description Muestra una sección que describe el ciclo de tratamiento del producto
+ *              dividido en fases. Es un componente de cliente que obtiene y valida
+ *              su propio contenido de i18n, y orquesta la renderización de las tarjetas
+ *              de ciclo individual (`TreatmentCycleCard`).
+ * @returns {React.ReactElement | null} La sección de ciclos de tratamiento renderizada
+ *                                    o `null` si falla la validación del contenido.
+ */
 export function TreatmentCycleSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.TreatmentCycleSection");
   const titleId = useId();
   let content: TreatmentCycleSectionContent;
 
   try {
-    const rawContent = t.raw("");
+    const rawContent = t.raw(""); // Obtenemos todo el namespace para validación.
     const validation = TreatmentCycleSectionContentSchema.safeParse(rawContent);
     if (!validation.success) {
+      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+      clientLogger.error(
+        {
+          component: "TreatmentCycleSection",
+          error: validation.error.flatten(),
+          rawContent,
+        },
+        "Validação de conteúdo de TreatmentCycleSection falhou."
+      );
       throw new Error(
         `Validação de conteúdo de TreatmentCycleSection falhou: ${JSON.stringify(
           validation.error.flatten()
@@ -38,21 +62,21 @@ export function TreatmentCycleSection(): React.ReactElement | null {
     }
     content = validation.data;
   } catch (error) {
-    // CORREÇÃO: Assinatura da chamada ao logger alinhada com a API do clientLogger (mensagem, contexto).
+    // USO DE CLIENTLOGGER CORREGIDO: (context, message)
     clientLogger.error(
-      "Erro ao obter ou validar conteúdo da TreatmentCycleSection. A seção não será renderizada.",
-      { err: error }
+      { error, component: "TreatmentCycleSection" } as LogContext, // Aserción de tipo para LogContext
+      "Erro ao obter ou validar conteúdo da TreatmentCycleSection. A seção não será renderizada."
     );
     return null;
   }
 
-  // CORREÇÃO: Assinatura da chamada ao logger alinhada com a API do clientLogger (mensagem, contexto).
+  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
   clientLogger.trace(
-    "Renderizando seção de ciclos de tratamento soberana e validada.",
     {
       component: "TreatmentCycleSection",
       cycleCount: content.cycles.length,
-    }
+    },
+    "Renderizando seção de ciclos de tratamento soberana e validada."
   );
 
   return (

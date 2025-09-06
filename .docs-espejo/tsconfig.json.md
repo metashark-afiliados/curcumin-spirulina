@@ -3,38 +3,36 @@
  * @file .docs-espejo/tsconfig.json.md
  * @description Documento Espejo y SSoT conceptual para la configuración de TypeScript.
  * @author L.I.A. Legacy
- * @version 3.0.0
+ * @version 1.0.0
  */
 # Manifiesto Conceptual: Aparato `tsconfig.json`
 
 ## 1. Rol Estratégico y Propósito
+El `tsconfig.json` es la **Constitución para el compilador de TypeScript**. Define las reglas del lenguaje, la resolución de módulos y qué archivos forman parte del programa de la aplicación. Su propósito es garantizar la máxima seguridad de tipos (`strict: true`), una configuración de módulos moderna (`moduleResolution: "bundler"`) y una correcta resolución de alias (`paths`).
 
-Este aparato es el **cerebro del compilador de TypeScript** y la Única Fuente de Verdad (SSoT) para las reglas de tipado y resolución de módulos del proyecto. Su propósito es instruir al compilador de TypeScript (TSC) y a los servicios de lenguaje del editor sobre cómo interpretar, validar y compilar el código.
+La refactorización clave ha sido sanear la directiva `include` para que se enfoque exclusivamente en el código fuente de la aplicación (`src`), excluyendo explícitamente los archivos de prueba, lo cual resuelve los errores de "archivo no encontrado".
 
-La estrategia adoptada es la de **"Configuración Soberana y Autocontenida"**. En lugar de heredar de una configuración base externa, este archivo define explícitamente todas las directivas necesarias, garantizando un comportamiento predecible y resiliente en cualquier entorno de desarrollo.
-
-## 2. Arquitectura de la Configuración
-
-La configuración es un objeto JSON autocontenido que define todas las reglas del compilador.
-
-*   **`compilerOptions`:** Es el núcleo del aparato.
-    *   **`jsx: "preserve"`:** Directiva crítica que instruye a TypeScript para que entienda la sintaxis JSX y la emita sin transformarla, delegando esa tarea a Next.js.
-    *   **`esModuleInterop: true`:** Habilita la compatibilidad entre módulos CommonJS y ES Modules.
-    *   **`moduleResolution: "bundler"`:** La estrategia moderna y recomendada para resolver módulos, alineada con herramientas como Vite y Next.js.
-    *   **`resolveJsonModule: true`:** Permite importar archivos `.json` directamente como módulos, esencial para la arquitectura IMAS.
-    *   **`strict: true`:** Activa todas las banderas de verificación de tipos estrictas, garantizando la máxima seguridad de tipos.
-    *   **`paths` y `baseUrl`:** Definen la SSoT para los alias de importación (`@/*`), mejorando drásticamente la mantenibilidad.
-    *   **`plugins`:** Integra el plugin de lenguaje de Next.js para una experiencia de desarrollo optimizada.
-*   **`include` / `exclude`:** Definen explícitamente el alcance del proyecto para el compilador, asegurando que solo los archivos relevantes sean procesados.
-
-## 3. Contrato de API
-
-*   **Entrada:** El código fuente completo del proyecto.
-*   **Salida:** Un proceso de compilación exitoso y una experiencia de desarrollo enriquecida con autocompletado y análisis estático precisos.
-
-## 4. Zona de Melhorias Futuras
-
-*   **PROJETOS COMPOSTOS (COMPOSITE PROJECTS):** A medida que el proyecto crezca, adoptar una estrategia de "proyectos compuestos", con un `tsconfig.json` base y otros específicos por submódulo (ej. `src/`, `tests/`) para optimizar los tiempos de compilación.
-*   **SEGURANÇA DE TIPOS MAIS ESTRITA:** Considerar habilitar la bandera `"noUncheckedIndexedAccess": true` para forzar la verificación de accesos a índices de arrays y objetos, previniendo errores de `undefined` en tiempo de ejecución.
-
+## 2. Arquitectura y Flujo de Ejecución
+Este archivo es consumido por varios procesos del ciclo de vida del desarrollo:
+```mermaid
+graph TD
+    A[Editor de Código (VS Code)] --> B{tsconfig.json};
+    C[Next.js Build (`pnpm build`)] --> B;
+    D[Linter (`pnpm lint`)] --> B;
+    B -- Define Reglas --> E[Análisis Estático y Compilación];
+3. Contrato de API (Opciones Clave)
+strict: true: Habilita todas las opciones de verificación estricta de tipos. No negociable.
+paths: { "@/*": ["./src/*"] }: Define el alias de importación canónico.
+include: Define explícitamente que solo el código en src y los tipos generados por Next.js pertenecen al programa de la aplicación.
+4. Zona de Melhorias Futuras
+Añadir alias @tests: Para simplificar las importaciones en la suite de pruebas.
+Habilitar noUnusedLocals: Para una limpieza de código más estricta.
+Habilitar noUnusedParameters: Para una API de funciones más limpia.
+Configurar baseUrl: Aunque implícito, establecer baseUrl: "." explícitamente.
+Explorar composite y references: Para optimizar los tiempos de compilación en un futuro monorepo.
+Sincronizar con jsconfig.json: Asegurar que las configuraciones sean consistentes si se introduce JavaScript en el proyecto.
+Definir target más moderno: Evaluar si el target puede ser actualizado a es2017 o superior, dependiendo de la compatibilidad de los navegadores objetivo.
+Habilitar forceConsistentCasingInFileNames: Para prevenir errores en sistemas de archivos que no distinguen mayúsculas de minúsculas.
+Crear un tsconfig.test.json: Para configuraciones específicas de la suite de pruebas.
+Documentar cada opción: Añadir comentarios en línea en el tsconfig.json explicando el propósito de cada opción de compilador.
 // .docs-espejo/tsconfig.json.md

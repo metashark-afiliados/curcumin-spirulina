@@ -1,12 +1,15 @@
 // src/components/blog/CallToAction.tsx
 /**
- * @file CallToAction.tsx
- * @description Aparato de UI soberano, resiliente e acessível. Obtém e VALIDA
- *              seu próprio conteúdo de i18n e atua como uma ponte estratégica
- *              do conteúdo informativo para o funil de conversão.
- * @version 4.0.0
+ * @file src/components/blog/CallToAction.tsx
+ * @description Aparato de UI soberano, resiliente y accesible.
+ *              Obtiene y VALIDA su propio contenido de i18n y actúa como una puente
+ *              estratégica del contenido informativo hacia el funnel de conversión.
+ *              Sincronizado con la SSoT de logging del cliente unificada y su API de élite.
+ * @version 4.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/blog/CallToAction.tsx.md
+ * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
+ * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 "use client";
 
@@ -15,13 +18,23 @@ import Image from "next/image";
 import { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { Button } from "@/components/ui/Button";
+// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
 import {
   CallToActionContentSchema,
   type CallToActionContent,
 } from "@/lib/validators/i18n/CallToAction.schema";
 import { Link } from "@/lib/navigation";
+import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
+/**
+ * @component CallToAction
+ * @description Muestra un Call-to-Action (CTA) persuasivo para dirigir a los usuarios
+ *              del contenido del blog al formulario de conversión principal.
+ *              Obtiene y valida su contenido de i18n y registra errores de validación.
+ * @returns {React.ReactElement | null} El componente CTA si la validación es exitosa,
+ *                                    o `null` si hay un error en la carga o validación del contenido.
+ */
 export function CallToAction(): React.ReactElement | null {
   const t = useTranslations("components.blog.CallToAction");
   const titleId = useId();
@@ -32,10 +45,19 @@ export function CallToAction(): React.ReactElement | null {
       mainTitle: t("mainTitle"),
       subtitle: t("subtitle"),
       ctaButton: t("ctaButton"),
-      image: t.raw("image"),
+      image: t.raw("image"), // Acceso a la estructura compleja con t.raw()
     };
     const validation = CallToActionContentSchema.safeParse(rawContent);
     if (!validation.success) {
+      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+      clientLogger.error(
+        {
+          component: "CallToAction",
+          error: validation.error.flatten(),
+          rawContent,
+        },
+        "Validação de conteúdo de CallToAction falhou."
+      );
       throw new Error(
         `Validação de conteúdo de CallToAction falhou: ${JSON.stringify(
           validation.error.flatten()
@@ -44,16 +66,19 @@ export function CallToAction(): React.ReactElement | null {
     }
     content = validation.data;
   } catch (error) {
+    // USO DE CLIENTLOGGER CORREGIDO: (context, message)
     clientLogger.error(
-      "Erro ao obter ou validar conteúdo do CallToAction. O componente não será renderizado.",
-      { error }
+      { error, component: "CallToAction" } as LogContext, // Aserción de tipo para LogContext
+      "Erro ao obter ou validar conteúdo do CallToAction. O componente não será renderizado."
     );
     return null;
   }
 
-  clientLogger.trace("Renderizando componente de CTA soberano e validado.", {
-    component: "CallToAction",
-  });
+  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+  clientLogger.trace(
+    { component: "CallToAction" },
+    "Renderizando componente de CTA soberano y validado."
+  );
 
   return (
     <AnimationWrapper>

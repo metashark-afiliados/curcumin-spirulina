@@ -1,12 +1,15 @@
 // src/components/ui/InfoSection.tsx
 /**
- * @file InfoSection.tsx
- * @description Aparato soberano, resiliente e de cliente. Renderiza um
- *              "mini-artigo" educacional, obtendo e VALIDANDO seu próprio
- *              conteúdo de i18n contra um schema Zod.
- * @version 6.0.0
+ * @file src/components/ui/InfoSection.tsx
+ * @description Aparato soberano, resiliente y de cliente. Renderiza un
+ *              "mini-artículo" educacional, obteniendo y VALIDANDO su propio
+ *              contenido de i18n contra un schema Zod. Se adhiere a la API
+ *              de logging del cliente unificada para una observabilidad completa.
+ * @version 6.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/InfoSection.tsx.md
+ * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
+ * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 "use client";
 
@@ -15,21 +18,39 @@ import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
+// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
 import {
   InfoSectionContentSchema,
   type InfoSectionContent,
 } from "@/lib/validators/i18n/InfoSection.schema";
+import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
+/**
+ * @component InfoSection
+ * @description Muestra una sección informativa con una narrativa "Problema -> Agitación -> Solución".
+ *              Es un componente de cliente que obtiene y valida su propio contenido de i18n,
+ *              incluyendo HTML enriquecido, y registra errores de validación.
+ * @returns {React.ReactElement | null} La Info Section renderizada o `null` si falla la validación.
+ */
 export function InfoSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.InfoSection");
   const titleId = useId();
   let content: InfoSectionContent;
 
   try {
-    const rawContent = t.raw(""); // Obter todo o namespace
+    const rawContent = t.raw(""); // Obtenemos todo el namespace para validación.
     const validation = InfoSectionContentSchema.safeParse(rawContent);
     if (!validation.success) {
+      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+      clientLogger.error(
+        {
+          component: "InfoSection",
+          error: validation.error.flatten(),
+          rawContent,
+        },
+        "Validação de conteúdo de InfoSection falhou."
+      );
       throw new Error(
         `Validação de conteúdo de InfoSection falhou: ${JSON.stringify(
           validation.error.flatten()
@@ -38,16 +59,19 @@ export function InfoSection(): React.ReactElement | null {
     }
     content = validation.data;
   } catch (error) {
+    // USO DE CLIENTLOGGER CORREGIDO: (context, message)
     clientLogger.error(
-      "Erro ao obter ou validar conteúdo da InfoSection. A seção não será renderizada.",
-      { error }
+      { error, component: "InfoSection" } as LogContext, // Aserción de tipo para LogContext
+      "Erro ao obter ou validar conteúdo da InfoSection. A seção não será renderizada."
     );
     return null;
   }
 
-  clientLogger.trace("Renderizando seção informativa soberana e validada.", {
-    component: "InfoSection",
-  });
+  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+  clientLogger.trace(
+    { component: "InfoSection", title: content.problem.title },
+    "Renderizando seção informativa soberana e validada."
+  );
 
   return (
     <section

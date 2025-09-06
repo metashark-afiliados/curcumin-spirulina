@@ -14,7 +14,7 @@ import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Calendar, Tag } from "lucide-react";
 import { type PostFrontmatter, formatDate } from "@/lib/blog";
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 import { Link, type Pathname } from "@/lib/navigation";
 
 interface ArticleCardProps extends PostFrontmatter {
@@ -32,7 +32,6 @@ export async function ArticleCard({
   locale,
 }: ArticleCardProps): Promise<React.ReactElement> {
   const t = await getTranslations("components.blog.ArticleCard");
-  // CORREÇÃO: Assinatura do logger corrigida para (contexto, mensagem).
   serverLogger.trace(
     { component: "ArticleCard", title, locale },
     "Renderizando card para o post."

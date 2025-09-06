@@ -1,18 +1,18 @@
-// .docs-espejo/app/sitemap.xml/route.ts.md
+<!-- .docs-espejo/app/sitemap.xml/route.ts.md -->
 /**
  * @file .docs-espejo/app/sitemap.xml/route.ts.md
  * @description Documento Espejo y SSoT conceptual para el generador de sitemap.xml.
  * @author L.I.A. Legacy
- * @version 5.0.0
+ * @version 5.1.0
  */
 
-# Manifiesto Conceptual: Aparato `sitemap.xml/route.ts`
+# Manifiesto Conceptual: Aparato `sitemap.xml/route.ts` (Route Handler)
 
 ## 1. Rol Estratégico y Propósito
 
 Este aparato es un **pilar fundamental de la estrategia de SEO técnico multilingüe**. Su única responsabilidad es generar dinámicamente un archivo `sitemap.xml` de élite, que informa a los motores de búsqueda sobre todas las URLs canónicas y sus traducciones disponibles.
 
-La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto.
+La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto. Además, su robusto sistema de logging (`serverLogger`) proporciona una observabilidad completa del proceso de generación.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
@@ -21,26 +21,35 @@ Es un **Route Handler** de Next.js blindado y resiliente, que agrupa las URLs po
 ```mermaid
 graph TD
     A[Petición a /sitemap.xml] --> B["`GET()` handler"];
-    B -- "Inicia bloque `try/catch`" --> C{Lógica de Generación};
+    B -- "1. `serverLogger.info()` (Inicio)" --> C[Registro de Observabilidad];
+    B -- "2. Inicia bloque `try/catch`" --> D{Lógica de Generación};
     subgraph "Lógica de Generación"
-        C -- "Agrupa páginas estáticas por ruta" --> D["`generateStaticEntries()`"];
-        C -- "Agrupa posts por slug" --> E["`generateBlogEntries()`"];
-        D & E --> F[Array `allEntries`];
-        F -- "Es renderizado por" --> G["`renderSitemap()`"];
+        D -- "3. `serverLogger.trace()` (Estáticas)" --> C;
+        D -- "4. Agrupa páginas estáticas por ruta" --> E["`generateStaticEntries()`"];
+        D -- "5. `serverLogger.trace()` (Blog)" --> C;
+        D -- "6. Agrupa posts por slug" --> F["`generateBlogEntries()`"];
+        F -- Errores por Locale de Blog --> G["`serverLogger.error()`"];
+        E & F --> H[Array `allEntries`];
+        H -- "7. `serverLogger.trace()` (Renderizado)" --> C;
+        H -- "8. Es renderizado por" --> I["`renderSitemap()`"];
+        I -- `canonicalUrl` ausente --> J["`serverLogger.warn()`"];
     end
-    G --> H[Template XML final con `<xhtml:link>`];
-    H --> I[Retorna `new Response()` con `Content-Type: application/xml`];
-    C -- En caso de fallo --> J["`serverLogger.error()`"];
-    J --> K[Retorna `new Response()` con `status: 500`];
-La arquitectura es ahora resiliente a fallos completos, evitando entregar un sitemap corrupto o incompleto.
+    I --> K[Template XML final con `<xhtml:link>`];
+    K --> L[Retorna `new Response()` con `Content-Type: application/xml`];
+    L -- "9. `serverLogger.info()` (Éxito)" --> C;
+    D -- En caso de fallo --> M["`serverLogger.error()`"];
+    M --> N[Retorna `new Response()` con `status: 500`];
+La arquitectura es ahora resiliente a fallos completos, evitando entregar un sitemap corrupto o incompleto, y proporcionando logs detallados para el diagnóstico.
 3. Contrato de API
-Endpoint: GET /sitemap.xml
-Salida (Éxito): Una Response con Content-Type: application/xml y el cuerpo conteniendo el XML del sitemap.
-Salida (Fallo): Una Response con status: 500 y un mensaje de error genérico.
-4. Zona de Melhorias Futuras
-SITEMAP INDEX: Cuando el número de URLs exceda el límite, refactorizar para que genere un "sitemap index" que apunte a múltiples sitemaps más pequeños.
-SITEMAP DE IMÁGENES: Generar un sitemap específico para las imágenes del blog y del producto para mejorar su indexación en Google Images.
-GENERACIÓN DE lastModified DINÁMICA: Para las páginas estáticas, obtener la fecha de lastModified del último commit de Git para ese archivo.
-EXCLUSIÓN DE PÁGINAS noindex: Integrar con los metadatos de las páginas para excluir automáticamente del sitemap cualquier página que esté marcada con robots: "noindex".
-VALIDACIÓN DE SITEMAP: Añadir un paso en las pruebas de integración o en el CI/CD que obtenga el sitemap generado y lo valide contra un schema de sitemap XML.
-// .docs-espejo/app/sitemap.xml/route.ts.md
+Endpoint:
+GET /sitemap.xml
+Salida:
+Éxito: Una Response con Content-Type: application/xml y el cuerpo conteniendo el XML del sitemap.
+Fallo: Una Response con status: 500 y un mensaje de error genérico ("Error interno del servidor al generar sitemap").
+4. Zona de Mejoras Nuevas (Valor al Proyecto)
+SITEMAP INDEX PARA ESCALABILIDAD: Cuando el número de URLs exceda el límite recomendado de 50,000 URLs o 50MB por sitemap, refactorizar la lógica para que genere un "sitemap index" (sitemap.xml) que apunte a múltiples sitemaps más pequeños (ej. sitemap-pages.xml, sitemap-blog.xml, etc.).
+SITEMAP DE IMÁGENES ESPECÍFICO: Generar un sitemap específico para las imágenes destacadas del blog y del producto, utilizando el namespace image de Schema.org en el XML. Esto mejoraría su indexación en Google Images, crucial para productos visuales.
+GENERACIÓN DE lastModified DINÁMICA (GIT-BASED): Para las páginas estáticas (no blog posts), obtener la fecha de lastModified del último commit de Git para el archivo fuente de esa página. Esto proporcionaría una fecha de modificación más precisa y automatizada que new Date().toISOString().
+EXCLUSIÓN INTELIGENTE DE PÁGINAS noindex: Integrar la lógica del sitemap con los metadatos de las páginas para excluir automáticamente del sitemap cualquier página que esté marcada con robots: "noindex" en su generateMetadata, garantizando la coherencia de las directivas de indexación.
+VALIDACIÓN EXTERNA DEL SITEMAP EN CI/CD: Añadir un paso en los tests de integración o en el pipeline de CI/CD que, después de generar el sitemap, lo obtenga y lo valide contra la API de Google Search Console o una herramienta de validación de sitemaps XML. Esto blindaría el sitemap contra errores de formato.
+<!-- .docs-espejo/app/sitemap.xml/route.ts.md -->

@@ -13,7 +13,7 @@ import "server-only";
 import Image from "next/image";
 import { Star } from "lucide-react";
 
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 import { generateReviewSchema } from "@/lib/schema";
 import { SchemaInjector } from "@/components/ui/SchemaInjector";
 
@@ -30,7 +30,6 @@ export async function TestimonialCard(
   props: TestimonialData
 ): Promise<React.ReactElement> {
   const { imageUrl, author, location, rating, title, text } = props;
-  // CORREÇÃO: Assinatura do logger corrigida para (contexto, mensagem).
   serverLogger.trace(
     { component: "TestimonialCard", author },
     "Renderizando depoimento no servidor."

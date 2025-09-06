@@ -8,7 +8,7 @@
  * @see .docs-espejo/lib/schema.ts.md
  */
 import "server-only";
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 import { type PostData } from "./blog";
 
 // --- SSoT de Constantes del Módulo ---

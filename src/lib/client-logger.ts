@@ -1,123 +1,61 @@
 // src/lib/client-logger.ts
 /**
- * @file client-logger.ts
- * @description Aparato de Logging de Cliente Híbrido y Soberano.
- *              Implementa un logger que enruta logs a la consola, a un buffer
- *              persistente en localStorage y a Sentry para eventos críticos.
- * @version 2.1.0 (Reversión Estratégica)
+ * @file src/lib/client-logger.ts
+ * @description Aparato de Logging de Élite y Única Fuente de Verdad (SSoT) para el lado del **cliente**.
+ *              Provee una API de logging segura, ultra-ligera y consistente, diseñada
+ *              exclusivamente para el entorno del navegador. Utiliza `console` de forma
+ *              controlada y se adhiere a la interfaz `ILogger` para una API unificada.
  * @author L.I.A. Legacy
+ * @version 1.0.0
  * @see .docs-espejo/lib/client-logger.ts.md
+ * @see src/lib/types/logging.ts (SSoT para `LogContext` y `ILogger`)
  */
-"use client";
+"use client"; // Directiva para asegurar que este módulo solo se compile en el cliente.
 
-import * as Sentry from "@sentry/nextjs";
+import { type ILogger, type LogContext } from "@/lib/types/logging";
 
-// --- [NÚCLEO DE PERSISTENCIA - Sin cambios] ---
-interface LogEntry {
-  timestamp: string;
-  level: "trace" | "info" | "warn" | "error";
-  message: string;
-  context?: Record<string, unknown>;
-}
-class LocalStorageLogManager {
-  private static readonly STORAGE_KEY = "app_client_logs";
-  private static readonly MAX_LOGS = 100;
-  private static readonly LOG_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-  private static getLogs(): LogEntry[] {
-    try {
-      if (typeof window === "undefined") return [];
-      const storedLogs = window.localStorage.getItem(this.STORAGE_KEY);
-      return storedLogs ? JSON.parse(storedLogs) : [];
-    } catch (error) {
-      console.error("[LocalStorageLogManager] Error al leer logs:", error);
-      return [];
-    }
+/**
+ * @private
+ * @function createSafeConsoleMethod
+ * @description Crea una función de logging segura que envuelve un método de `console`
+ *              existente. Garantiza que el logging solo ocurra en entornos donde
+ *              `console` y el método especificado están disponibles, previniendo errores.
+ *              Formatea el output para incluir un prefijo y el contexto.
+ * @param {"log" | "info" | "warn" | "error" | "debug"} method - El método de `console` a envolver.
+ * @param {string} prefix - Un prefijo para añadir al mensaje de log en la consola.
+ * @returns {(context: LogContext, message: string) => void} Una función de logging que
+ *          sigue la firma unificada `(context: LogContext, message: string)`.
+ */
+const createSafeConsoleMethod = (
+  method: "log" | "info" | "warn" | "error" | "debug",
+  prefix: string
+): ((context: LogContext, message: string) => void) => {
+  // Asegura que 'console' y el método existen antes de intentar usarlos.
+  if (typeof console !== "undefined" && typeof console[method] === "function") {
+    return (context: LogContext, message: string) => {
+      // Formatea el mensaje para la consola del navegador.
+      // Aquí el contexto se imprime como un objeto separado después del mensaje.
+      (console[method] as Function)(`${prefix} ${message}`, context);
+    };
   }
-  private static saveLogs(logs: LogEntry[]): void {
-    try {
-      if (typeof window === "undefined") return;
-      window.localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
-    } catch (error) {
-      console.error("[LocalStorageLogManager] Error al guardar logs:", error);
-    }
-  }
-  public static add(newLog: Omit<LogEntry, "timestamp">): void {
-    const now = new Date();
-    const entry: LogEntry = { timestamp: now.toISOString(), ...newLog };
-    let logs = this.getLogs();
-    logs = logs.filter(
-      (log) =>
-        now.getTime() - new Date(log.timestamp).getTime() < this.LOG_TTL_MS
-    );
-    logs.push(entry);
-    if (logs.length > this.MAX_LOGS) {
-      logs = logs.slice(logs.length - this.MAX_LOGS);
-    }
-    this.saveLogs(logs);
-  }
-}
-// --- [FIN DEL NÚCLEO DE PERSISTENCIA] ---
+  // En entornos donde el console no está disponible o el método falta,
+  // devuelve una función vacía para evitar errores.
+  return () => {};
+};
 
-type LogLevel = "trace" | "info" | "warn" | "error" | "fatal";
-type LogContext = Record<string, unknown>;
-
-// REVERSÃO ESTRATÉGICA: A assinatura foi revertida para (mensagem, contexto)
-// para evitar refatoração em cascata e garantir um build estável.
-// A unificação da API está documentada em .docs/TODO.md.
-function createClientLoggerMethod(
-  level: LogLevel
-): (message: string, context?: LogContext) => void {
-  const isDev = process.env.NODE_ENV === "development";
-  const { logger: sentryLogger } = Sentry;
-
-  return (message: string, context?: LogContext) => {
-    if (isDev) {
-      const consoleMethod =
-        level === "error" || level === "fatal"
-          ? console.error
-          : level === "warn"
-            ? console.warn
-            : console.info;
-      consoleMethod(`[${level.toUpperCase()}] ${message}`, context || "");
-    }
-
-    if (level !== "fatal") {
-      LocalStorageLogManager.add({
-        level: level as LogEntry["level"],
-        message,
-        context,
-      });
-    }
-
-    switch (level) {
-      case "warn":
-        sentryLogger.warn(message, context);
-        break;
-      case "error":
-        sentryLogger.error(message, context);
-        Sentry.captureMessage(`Error: ${message}`, {
-          level: "error",
-          extra: context,
-        });
-        break;
-      case "fatal":
-        sentryLogger.fatal(message, context);
-        Sentry.captureMessage(`Fatal: ${message}`, {
-          level: "fatal",
-          extra: context,
-        });
-        break;
-      default:
-        break;
-    }
-  };
-}
-
-export const clientLogger = {
-  trace: createClientLoggerMethod("trace"),
-  info: createClientLoggerMethod("info"),
-  warn: createClientLoggerMethod("warn"),
-  error: createClientLoggerMethod("error"),
-  fatal: createClientLoggerMethod("fatal"),
+/**
+ * @public
+ * @constant clientLogger
+ * @description La instancia del logger de cliente. Esta es la Única Fuente de Verdad
+ *              para emitir logs desde cualquier Client Component o lógica del navegador.
+ *              Implementa la interfaz `ILogger` para una API tipo-segura y unificada.
+ *              Sus métodos `trace`, `info`, `warn`, `error` esperan `(context: LogContext, message: string)`.
+ */
+export const clientLogger: ILogger = {
+  // `trace` se mapea a `console.debug` por convención en el navegador.
+  trace: createSafeConsoleMethod("debug", "[CLIENT_TRACE]"),
+  info: createSafeConsoleMethod("info", "[CLIENT_INFO]"),
+  warn: createSafeConsoleMethod("warn", "[CLIENT_WARN]"),
+  error: createSafeConsoleMethod("error", "[CLIENT_ERROR]"),
 };
 // src/lib/client-logger.ts

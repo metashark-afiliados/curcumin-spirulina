@@ -1,6 +1,6 @@
 {
   "name": "curcumin-spirulina-hub",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "description": "Hub de conteúdo de autoridade e landing page de alta conversão para o produto Curcumin Spirulina.",
   "author": {
@@ -9,10 +9,10 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:pretty": "next dev | pnpm pino-pretty",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,jsx,.ts,.tsx --fix",
+    "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
@@ -55,6 +55,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
+    "pino-sentry-transport": "^1.2.0",
     "@eslint/eslintrc": "^3.1.0",
     "@tailwindcss/typography": "0.5.13",
     "@testing-library/jest-dom": "6.4.8",
@@ -78,6 +79,7 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-vitest": "^0.4.1",
+    "globals": "16.3.0",
     "husky": "9.1.4",
     "jest-axe": "^8.0.0",
     "jsdom": "24.1.1",

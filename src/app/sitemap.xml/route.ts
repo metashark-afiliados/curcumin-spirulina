@@ -1,42 +1,67 @@
 // src/app/sitemap.xml/route.ts
 /**
- * @file route.ts
- * @description Route handler para generar dinámicamente el sitemap.xml.
+ * @file src/app/sitemap.xml/route.ts
+ * @description Route handler para generar dinámicamente el `sitemap.xml`.
  *              Implementa la estrategia de élite de SEO multilingüe usando
- *              etiquetas <xhtml:link alternate>, y está blindado con un
- *              manejo de errores robusto.
- * @version 5.0.0
+ *              etiquetas `<xhtml:link alternate>`, y está blindado con un
+ *              manejo de errores robusto y logging completo.
+ * @version 5.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/sitemap.xml/route.ts.md
+ * @see src/lib/blog.ts (SSoT para obtener datos de posts)
+ * @see src/lib/navigation.ts (SSoT para `locales` y `pathnames`)
+ * @see src/lib/logger.ts (SSoT para `serverLogger`)
+ * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
-import "server-only";
+import "server-only"; // Este Route Handler se ejecuta estrictamente en el servidor.
 
 import { getPostsData } from "@/lib/blog";
 import { locales, pathnames } from "@/lib/navigation";
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger"; // SSoT del logger de servidor
+import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
+/**
+ * @interface AlternateLink
+ * @description Representa un enlace alternativo para un `hreflang` específico en el sitemap.
+ */
 interface AlternateLink {
   href: string;
   hreflang: string;
 }
 
+/**
+ * @interface SitemapEntry
+ * @description Representa una entrada individual en el sitemap, con su fecha de
+ *              última modificación y sus enlaces alternativos por idioma.
+ */
 interface SitemapEntry {
   lastModified: string;
   alternates: AlternateLink[];
 }
 
 /**
- * @description Genera las entradas del sitemap para las páginas estáticas.
+ * @private
+ * @function generateStaticEntries
+ * @description Genera las entradas del sitemap para las páginas estáticas
+ *              definidas en `src/lib/navigation.ts`.
+ * @returns {SitemapEntry[]} Un array de entradas de sitemap para páginas estáticas.
  */
 function generateStaticEntries(): SitemapEntry[] {
+  // USO DE SERVERLOGGER: (context, message)
+  serverLogger.trace(
+    { component: "SitemapRoute", action: "generateStaticEntries" },
+    "Generando entradas para páginas estáticas."
+  );
   return Object.keys(pathnames).map((path) => {
     const alternates = locales.map((locale) => ({
       href: `${BASE_URL}/${locale}${path === "/" ? "" : path}`,
       hreflang: locale,
     }));
     return {
+      // Para páginas estáticas, la fecha de modificación puede ser la fecha de build
+      // o una fecha fija para evitar cambios innecesarios.
       lastModified: new Date().toISOString(),
       alternates,
     };
@@ -44,35 +69,67 @@ function generateStaticEntries(): SitemapEntry[] {
 }
 
 /**
- * @description Genera las entradas del sitemap para los artículos del blog.
+ * @private
+ * @async
+ * @function generateBlogEntries
+ * @description Genera las entradas del sitemap para los artículos del blog,
+ *              agrupando las versiones de idioma de cada post.
+ * @returns {Promise<SitemapEntry[]>} Una promesa que resuelve a un array de
+ *          entradas de sitemap para artículos del blog.
  */
 async function generateBlogEntries(): Promise<SitemapEntry[]> {
+  // USO DE SERVERLOGGER: (context, message)
+  serverLogger.trace(
+    { component: "SitemapRoute", action: "generateBlogEntries" },
+    "Generando entradas para artículos del blog."
+  );
+  // Almacena los posts agrupados por slug para generar los `alternates`.
   const postsBySlug: Record<
     string,
     { lastModified: string; paths: Set<string> }
   > = {};
 
   for (const locale of locales) {
-    const posts = await getPostsData(locale);
-    for (const post of posts) {
-      if (!postsBySlug[post.slug]) {
-        postsBySlug[post.slug] = {
-          lastModified: new Date(post.date).toISOString(),
-          paths: new Set(),
-        };
+    try {
+      const posts = await getPostsData(locale);
+      for (const post of posts) {
+        if (!postsBySlug[post.slug]) {
+          postsBySlug[post.slug] = {
+            lastModified: new Date(post.date).toISOString(),
+            paths: new Set(),
+          };
+        }
+        postsBySlug[post.slug].paths.add(
+          `${BASE_URL}/${locale}/blog/${post.slug}`
+        );
+        // Actualiza la fecha de modificación si se encuentra una más reciente.
+        // Esto asegura que `lastmod` refleje la fecha más reciente de cualquier versión del artículo.
+        if (
+          new Date(post.date) > new Date(postsBySlug[post.slug].lastModified)
+        ) {
+          postsBySlug[post.slug].lastModified = new Date(
+            post.date
+          ).toISOString();
+        }
       }
-      postsBySlug[post.slug].paths.add(
-        `${BASE_URL}/${locale}/blog/${post.slug}`
+    } catch (error) {
+      // USO DE SERVERLOGGER: (context, message)
+      serverLogger.error(
+        {
+          component: "SitemapRoute",
+          action: "generateBlogEntries",
+          locale,
+          err: error,
+        } as LogContext, // Aserción de tipo
+        `Error al obtener posts para el locale '${locale}' al generar el sitemap. Se ignorará este locale.`
       );
-      // Actualiza la fecha de modificación si se encuentra una más reciente
-      if (new Date(post.date) > new Date(postsBySlug[post.slug].lastModified)) {
-        postsBySlug[post.slug].lastModified = new Date(post.date).toISOString();
-      }
+      // Continúa procesando otros locales a pesar de un error en uno.
     }
   }
 
   return Object.values(postsBySlug).map((group) => {
     const alternates = Array.from(group.paths).map((path) => {
+      // Extrae el locale de la ruta para el `hreflang`.
       const locale = locales.find((loc) => path.includes(`/${loc}/`)) || "";
       return { href: path, hreflang: locale };
     });
@@ -84,14 +141,35 @@ async function generateBlogEntries(): Promise<SitemapEntry[]> {
 }
 
 /**
- * @description Renderiza el array de entradas en un string XML válido.
+ * @private
+ * @function renderSitemap
+ * @description Renderiza un array de entradas de sitemap en un string XML válido,
+ *              incluyendo las etiquetas `<xhtml:link alternate>`.
+ * @param {SitemapEntry[]} entries - El array de entradas de sitemap.
+ * @returns {string} El contenido del sitemap en formato XML.
  */
 function renderSitemap(entries: SitemapEntry[]): string {
+  // USO DE SERVERLOGGER: (context, message)
+  serverLogger.trace(
+    {
+      component: "SitemapRoute",
+      action: "renderSitemap",
+      entryCount: entries.length,
+    },
+    "Renderizando sitemap en formato XML."
+  );
   const urlsXml = entries
     .map((entry) => {
       // Usamos la primera alternativa como la URL <loc> canónica para esta entrada.
+      // Esto asume que el orden de `locales` define una preferencia para la canonicalización.
       const canonicalUrl = entry.alternates[0]?.href || "";
-      if (!canonicalUrl) return "";
+      if (!canonicalUrl) {
+        serverLogger.warn(
+          { component: "SitemapRoute", entry },
+          "Entrada de sitemap sin URL canónica. Se omitirá."
+        );
+        return "";
+      }
 
       const alternatesXml = entry.alternates
         .map(
@@ -115,9 +193,25 @@ ${alternatesXml}
 </urlset>`;
 }
 
-export async function GET(): Promise<Response> {
+/**
+ * @public
+ * @async
+ * @function GET
+ * @description Route Handler principal para la ruta `/sitemap.xml`.
+ *              Genera y devuelve el sitemap completo en formato XML.
+ *              Incluye un manejo de errores robusto para prevenir que un sitemap
+ *              corrupto o fallido sea servido.
+ * @param {Request} request - El objeto de la petición.
+ * @returns {Promise<Response>} Una promesa que resuelve a una `Response` con el sitemap XML
+ *          o un error 500 si la generación falla.
+ */
+export async function GET(request: Request): Promise<Response> {
   try {
-    serverLogger.info("[Sitemap] Iniciando generación del sitemap.xml.");
+    // USO DE SERVERLOGGER: (context, message)
+    serverLogger.info(
+      { component: "SitemapRoute", requestUrl: request.url },
+      "[Sitemap] Iniciando generación del sitemap.xml."
+    );
 
     const staticEntries = generateStaticEntries();
     const blogEntries = await generateBlogEntries();
@@ -125,7 +219,9 @@ export async function GET(): Promise<Response> {
 
     const sitemap = renderSitemap(allEntries);
 
+    // USO DE SERVERLOGGER: (context, message)
     serverLogger.info(
+      { component: "SitemapRoute", count: allEntries.length },
       `[Sitemap] Sitemap generado con éxito con ${allEntries.length} entradas canónicas.`
     );
 
@@ -133,11 +229,14 @@ export async function GET(): Promise<Response> {
       headers: { "Content-Type": "application/xml" },
     });
   } catch (error) {
+    // USO DE SERVERLOGGER: (context, message)
     serverLogger.error(
-      { err: error },
+      { component: "SitemapRoute", err: error } as LogContext, // Aserción de tipo para LogContext
       "[Sitemap] Error crítico durante la generación del sitemap."
     );
-    return new Response("Error interno del servidor", { status: 500 });
+    return new Response("Error interno del servidor al generar sitemap", {
+      status: 500,
+    });
   }
 }
 // src/app/sitemap.xml/route.ts

@@ -1,4 +1,4 @@
-// src/components/blog/ArticleLayout.tsx
+// src/components/layout/ArticleLayout.tsx
 /**
  * @file ArticleLayout.tsx
  * @description Aparato de layout de apresentação puro e de servidor. Sua única
@@ -16,7 +16,7 @@ import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
 
 import { Link } from "@/lib/navigation";
-import { serverLogger } from "@/lib/server-logger";
+import { serverLogger } from "@/lib/logger";
 
 export interface ArticleLayoutProps {
   post: {
@@ -100,4 +100,4 @@ export async function ArticleLayout({
     </div>
   );
 }
-// src/components/blog/ArticleLayout.tsx
+// src/components/layout/ArticleLayout.tsx
