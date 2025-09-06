@@ -2,15 +2,11 @@
 /**
  * @file src/components/ui/AnnouncementBar.tsx
  * @description Aparato de UI soberano, resiliente y accesible.
- *              Su propósito es mostrar un mensaje importante y conciso en la parte
- *              superior de la página, como ofertas o alertas. Obtiene y VALIDA
- *              su propio contenido de i18n contra un schema Zod antes de renderizar.
- *              Sincronizado con la SSoT de logging del cliente unificada y su API de élite.
- * @version 4.1.0
+ *              Nivelado para una adherencia estricta a la API de logging del
+ *              cliente unificada y un enriquecimiento de contexto de error superior.
+ * @version 5.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/AnnouncementBar.tsx.md
- * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 "use client";
 
@@ -18,24 +14,17 @@ import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
 import { useId } from "react";
 
-// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
 import {
   AnnouncementBarContentSchema,
   type AnnouncementBarContent,
 } from "@/lib/validators/i18n/AnnouncementBar.schema";
+import { type LogContext } from "@/lib/types/logging";
 
-/**
- * @component AnnouncementBar
- * @description Muestra una barra de anuncios deslizante en la parte superior de la página.
- *              Es un componente de cliente que obtiene y valida su propio contenido de i18n,
- *              y registra errores de validación con el `clientLogger`.
- * @returns {React.ReactElement | null} El componente `AnnouncementBar` si la validación es exitosa,
- *                                    o `null` si hay un error en la carga o validación del contenido.
- */
 export function AnnouncementBar(): React.ReactElement | null {
   const t = useTranslations("components.ui.AnnouncementBar");
   const titleId = useId();
+  const baseContext: LogContext = { component: "AnnouncementBar" };
   let content: AnnouncementBarContent;
 
   try {
@@ -44,27 +33,31 @@ export function AnnouncementBar(): React.ReactElement | null {
       message: t("message"),
     };
     const validation = AnnouncementBarContentSchema.safeParse(rawContent);
+
     if (!validation.success) {
-      throw new Error(
-        `Validação de conteúdo de AnnouncementBar falhou: ${JSON.stringify(
-          validation.error.flatten()
-        )}`
+      // Se enriquece el contexto de error con los datos que fallaron.
+      clientLogger.error(
+        {
+          ...baseContext,
+          error: validation.error.flatten(),
+          rawContent,
+        },
+        "Fallo en la validación de contenido. No se renderizará."
       );
+      return null;
     }
     content = validation.data;
   } catch (error) {
-    // USO DE CLIENTLOGGER CORREGIDO: (context, message) - La firma ya era compatible.
     clientLogger.error(
-      { error, component: "AnnouncementBar" },
-      "Erro ao obter ou validar conteúdo da AnnouncementBar. A seção não será renderizada."
+      { ...baseContext, error },
+      "Error al obtener contenido. No se renderizará."
     );
-    return null; // Renderización resiliente.
+    return null;
   }
 
-  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
   clientLogger.trace(
-    { component: "AnnouncementBar" },
-    "Renderizando componente de CTA soberano y validado."
+    baseContext,
+    "Renderizando componente soberano y validado."
   );
 
   return (

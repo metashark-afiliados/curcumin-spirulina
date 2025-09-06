@@ -1,38 +1,55 @@
 // src/components/layout/Footer.tsx
 /**
  * @file Footer.tsx
- * @description Aparato de layout soberano, resiliente e de servidor. Obtém e
- *              VALIDA seu próprio conteúdo de i18n contra um schema Zod.
- * @version 5.1.0
+ * @description Aparato de layout soberano y resiliente. Obtiene y VALIDA su
+ *              propio contenido de i18n. Refactorizado para recibir un logger
+ *              transaccional opcional (con tipado explícito `ILogger`) vía props,
+ *              alineándose con la arquitectura de Inyección de Dependencias.
+ * @version 7.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/layout/Footer.tsx.md
  */
 import "server-only";
+
 import { getTranslations } from "next-intl/server";
 import { Mail, Shield } from "lucide-react";
+
 import { Link, type Pathname } from "@/lib/navigation";
-import { serverLogger } from "@/lib/logger";
 import {
   FooterContentSchema,
   type FooterContent,
 } from "@/lib/validators/i18n/Footer.schema";
+import { logger as fallbackLogger } from "@/lib/logger";
+import { type ILogger } from "@/lib/types/logging";
 
-export async function Footer(): Promise<React.ReactElement | null> {
+// La firma del componente se actualiza para aceptar explícitamente nuestra interfaz ILogger.
+interface FooterProps {
+  logger?: ILogger;
+}
+
+export async function Footer({
+  logger = fallbackLogger, // El fallbackLogger ya cumple con ILogger.
+}: FooterProps): Promise<React.ReactElement | null> {
+  const baseContext = { component: "Footer" };
   const t = await getTranslations("components.layout.Footer");
   let content: FooterContent;
 
   try {
     const rawContent = t.raw("");
     const validation = FooterContentSchema.safeParse(rawContent);
-    if (!validation.success) throw validation.error;
+    if (!validation.success) {
+      throw validation.error;
+    }
     content = validation.data;
   } catch (error) {
-    serverLogger.error(
-      { err: error },
-      "Erro ao obter ou validar conteúdo do Footer. Não será renderizado."
+    logger.error(
+      { ...baseContext, err: error },
+      "Error al obtener o validar contenido del Footer. No será renderizado."
     );
     return null;
   }
+
+  logger.trace(baseContext, "Renderizando Footer soberano y validado.");
 
   const currentYear = new Date().getFullYear();
 
@@ -40,7 +57,6 @@ export async function Footer(): Promise<React.ReactElement | null> {
     <footer className="bg-brand-primary-dark/80 text-white/70">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {/* Coluna de Contato e Marca */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">
               {content.brandName}
@@ -57,7 +73,6 @@ export async function Footer(): Promise<React.ReactElement | null> {
             </div>
           </div>
 
-          {/* Coluna de Links Legais */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">
               {content.legalTitle}
@@ -76,7 +91,6 @@ export async function Footer(): Promise<React.ReactElement | null> {
             </ul>
           </div>
 
-          {/* Coluna de Disclaimers */}
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-white">
               {content.disclaimerTitle}
@@ -94,7 +108,6 @@ export async function Footer(): Promise<React.ReactElement | null> {
           </div>
         </div>
 
-        {/* Linha de Copyright e Disclaimer Científico */}
         <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs">
           <p className="mb-2">{content.scientificDisclaimer}</p>
           <p>{t("copyright", { year: currentYear })}</p>

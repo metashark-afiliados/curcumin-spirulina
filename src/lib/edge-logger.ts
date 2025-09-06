@@ -1,81 +1,69 @@
 // src/lib/edge-logger.ts
 /**
  * @file src/lib/edge-logger.ts
- * @description Aparato de Logging de Élite, ultra-ligero y Única Fuente de Verdad (SSoT),
- *              diseñado específicamente para el **Edge Runtime**. No posee dependencias
- *              de Node.js y ofrece una API consistente con el `serverLogger` y `clientLogger`
- *              mediante la implementación de `ILogger`. Permite registrar logs estructurados
- *              en entornos Edge, inyectando el `correlationId` para trazabilidad.
+ * @description Aparato de Logging de Élite, autónomo y SSoT para el Edge Runtime.
+ *              No tiene dependencias externas para la gestión de contexto; recibe
+ *              el `correlationId` y otros datos explícitamente a través del
+ *              objeto de contexto en cada llamada. Es resiliente y compatible con el Edge.
  * @author L.I.A. Legacy
- * @version 2.4.0
+ * @version 5.0.0
  * @see .docs-espejo/lib/edge-logger.ts.md
- * @see src/lib/types/logging.ts (SSoT para `LogContext` y `ILogger`)
- * @see src/lib/helpers/correlation-id.helper.ts (Para `getCorrelationId` en el Edge)
  */
-
 import { type ILogger, type LogContext } from "@/lib/types/logging";
-import { getCorrelationId } from "@/lib/helpers/correlation-id.helper"; // Importar para usar en el Edge
 
-/**
- * @private
- * @typedef {'trace' | 'info' | 'warn' | 'error'} LogLevel
- * @description Niveles de log soportados por el `edgeLogger`.
- */
-type LogLevel = "trace" | "info" | "warn" | "error";
+type LogLevel = "trace" | "info" | "warn" | "error" | "fatal";
 
-/**
- * @private
- * @function createEdgeLoggerMethod
- * @description Factoría para crear un método de logging específico para el Edge.
- *              Formatea el log como JSON e inyecta el `correlationId` si está disponible.
- *              Utiliza los métodos de `console` del Edge Runtime.
- * @param {LogLevel} level - El nivel de log (`'trace'`, `'info'`, etc.).
- * @returns {(context: LogContext, message: string) => void} Una función de logging
- *          que sigue la firma unificada `(context: LogContext, message: string)`.
- */
 const createEdgeLoggerMethod =
   (level: LogLevel) => (context: LogContext, message: string) => {
     const timestamp = new Date().toISOString();
-    const correlationId = getCorrelationId(); // Obtener correlationId para el Edge
 
+    // El correlationId y otros datos de contexto son recibidos explícitamente.
     const logObject = {
       level: level.toUpperCase(),
       timestamp,
       message,
-      service: "curcumin-spirulina-hub-edge", // Servicio específico para logs de Edge
-      ...(correlationId && { correlationId }), // Inyecta correlationId si existe
-      ...context, // Añade el contexto proporcionado
+      service: "curcumin-spirulina-hub-edge",
+      ...context, // Fusiona el contexto inyectado (que contiene el correlationId).
     };
 
-    // En el Edge, usamos console.* para la salida. Vercel u otros proveedores
-    // de Edge Runtime capturarán estos logs.
-    switch (level) {
-      case "error":
-        console.error(JSON.stringify(logObject));
-        break;
-      case "warn":
-        console.warn(JSON.stringify(logObject));
-        break;
-      case "info":
-        console.info(JSON.stringify(logObject));
-        break;
-      default: // Para 'trace' y otros no mapeados explícitamente.
-        console.log(JSON.stringify(logObject));
-        break;
+    try {
+      const logString = JSON.stringify(logObject);
+      switch (level) {
+        case "fatal":
+        case "error":
+          console.error(logString);
+          break;
+        case "warn":
+          console.warn(logString);
+          break;
+        case "info":
+          console.info(logString);
+          break;
+        default:
+          console.log(logString);
+          break;
+      }
+    } catch (error) {
+      console.error(
+        JSON.stringify({
+          level: "ERROR",
+          timestamp: new Date().toISOString(),
+          message:
+            "FALLO CRÍTICO EN EL LOGGER: Error de serialización de JSON.",
+          service: "curcumin-spirulina-hub-edge",
+          correlationId: context.correlationId || "unknown",
+          originalLogLevel: level,
+          originalMessage: message,
+        })
+      );
     }
   };
 
-/**
- * @public
- * @constant edgeLogger
- * @description La instancia del logger de Edge Runtime. Esta es la Única Fuente de Verdad
- *              para emitir logs desde cualquier parte de la aplicación que se ejecute en el Edge.
- *              Implementa la interfaz `ILogger` para una API tipo-segura y unificada.
- */
 export const edgeLogger: ILogger = {
   trace: createEdgeLoggerMethod("trace"),
   info: createEdgeLoggerMethod("info"),
   warn: createEdgeLoggerMethod("warn"),
   error: createEdgeLoggerMethod("error"),
+  fatal: createEdgeLoggerMethod("fatal"),
 };
 // src/lib/edge-logger.ts

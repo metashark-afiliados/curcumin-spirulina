@@ -1,61 +1,49 @@
 // src/lib/client-logger.ts
 /**
  * @file src/lib/client-logger.ts
- * @description Aparato de Logging de Élite y Única Fuente de Verdad (SSoT) para el lado del **cliente**.
- *              Provee una API de logging segura, ultra-ligera y consistente, diseñada
- *              exclusivamente para el entorno del navegador. Utiliza `console` de forma
- *              controlada y se adhiere a la interfaz `ILogger` para una API unificada.
+ * @description Aparato de Logging de Élite y SSoT para el lado del **cliente**.
+ *              Esta versión implementa la correlación E2E al leer el `correlationId`
+ *              del servidor desde un meta tag y vincularlo a cada log del cliente.
  * @author L.I.A. Legacy
- * @version 1.0.0
+ * @version 6.0.0
  * @see .docs-espejo/lib/client-logger.ts.md
- * @see src/lib/types/logging.ts (SSoT para `LogContext` y `ILogger`)
  */
-"use client"; // Directiva para asegurar que este módulo solo se compile en el cliente.
+"use client";
 
+import pino from "pino";
+import { browserLogLevel, loggerContext } from "../config";
 import { type ILogger, type LogContext } from "@/lib/types/logging";
 
 /**
  * @private
- * @function createSafeConsoleMethod
- * @description Crea una función de logging segura que envuelve un método de `console`
- *              existente. Garantiza que el logging solo ocurra en entornos donde
- *              `console` y el método especificado están disponibles, previniendo errores.
- *              Formatea el output para incluir un prefijo y el contexto.
- * @param {"log" | "info" | "warn" | "error" | "debug"} method - El método de `console` a envolver.
- * @param {string} prefix - Un prefijo para añadir al mensaje de log en la consola.
- * @returns {(context: LogContext, message: string) => void} Una función de logging que
- *          sigue la firma unificada `(context: LogContext, message: string)`.
+ * @function getCorrelationId
+ * @description Lee el ID de correlación del meta tag inyectado por el servidor.
+ * @returns {string | undefined} El ID de correlación o undefined si no se encuentra.
  */
-const createSafeConsoleMethod = (
-  method: "log" | "info" | "warn" | "error" | "debug",
-  prefix: string
-): ((context: LogContext, message: string) => void) => {
-  // Asegura que 'console' y el método existen antes de intentar usarlos.
-  if (typeof console !== "undefined" && typeof console[method] === "function") {
-    return (context: LogContext, message: string) => {
-      // Formatea el mensaje para la consola del navegador.
-      // Aquí el contexto se imprime como un objeto separado después del mensaje.
-      (console[method] as Function)(`${prefix} ${message}`, context);
-    };
+function getCorrelationId(): string | undefined {
+  if (typeof window !== "undefined") {
+    const metaTag = document.querySelector('meta[name="correlation-id"]');
+    return metaTag?.getAttribute("content") || undefined;
   }
-  // En entornos donde el console no está disponible o el método falta,
-  // devuelve una función vacía para evitar errores.
-  return () => {};
-};
+  return undefined;
+}
 
-/**
- * @public
- * @constant clientLogger
- * @description La instancia del logger de cliente. Esta es la Única Fuente de Verdad
- *              para emitir logs desde cualquier Client Component o lógica del navegador.
- *              Implementa la interfaz `ILogger` para una API tipo-segura y unificada.
- *              Sus métodos `trace`, `info`, `warn`, `error` esperan `(context: LogContext, message: string)`.
- */
+const pinoBrowserLogger = pino({
+  level: browserLogLevel,
+  browser: {
+    serialize: true,
+  },
+  // Vincula el contexto base y el correlationId a todos los logs emitidos.
+}).child({
+  ...loggerContext,
+  correlationId: getCorrelationId(),
+});
+
 export const clientLogger: ILogger = {
-  // `trace` se mapea a `console.debug` por convención en el navegador.
-  trace: createSafeConsoleMethod("debug", "[CLIENT_TRACE]"),
-  info: createSafeConsoleMethod("info", "[CLIENT_INFO]"),
-  warn: createSafeConsoleMethod("warn", "[CLIENT_WARN]"),
-  error: createSafeConsoleMethod("error", "[CLIENT_ERROR]"),
+  trace: (context, message) => pinoBrowserLogger.trace(context, message),
+  info: (context, message) => pinoBrowserLogger.info(context, message),
+  warn: (context, message) => pinoBrowserLogger.warn(context, message),
+  error: (context, message) => pinoBrowserLogger.error(context, message),
+  fatal: (context, message) => pinoBrowserLogger.fatal(context, message),
 };
 // src/lib/client-logger.ts

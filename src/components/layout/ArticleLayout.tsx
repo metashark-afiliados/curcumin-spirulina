@@ -1,12 +1,14 @@
 // src/components/layout/ArticleLayout.tsx
 /**
  * @file ArticleLayout.tsx
- * @description Aparato de layout de apresentação puro e de servidor. Sua única
- *              responsabilidade é renderizar a estrutura visual de um
- *              artigo de blog, com uma estrutura semântica de topo.
- * @version 4.0.0
+ * @description Aparato de layout de presentación puro y de servidor. Su única
+ *              responsabilidad es renderizar la estructura visual de un
+ *              artículo de blog. Refactorizado para recibir el logger
+ *              transaccional vía props y participar explícitamente en la
+ *              observabilidad.
+ * @version 6.0.0
  * @author L.I.A. Legacy
- * @see .docs-espejo/components/blog/ArticleLayout.tsx.md
+ * @see .docs-espejo/components/layout/ArticleLayout.tsx.md
  */
 import "server-only";
 
@@ -14,11 +16,13 @@ import Image from "next/image";
 import { Calendar, User } from "lucide-react";
 import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
+import type pino from "pino";
 
 import { Link } from "@/lib/navigation";
-import { serverLogger } from "@/lib/logger";
 
+// La firma se actualiza para incluir el logger.
 export interface ArticleLayoutProps {
+  logger: pino.Logger;
   post: {
     title: string;
     tags: string[];
@@ -35,14 +39,20 @@ export interface ArticleLayoutProps {
 }
 
 export async function ArticleLayout({
+  logger, // El logger ahora es una dependencia explícita.
   post,
   source,
   components,
   t,
 }: ArticleLayoutProps): Promise<React.ReactElement> {
-  serverLogger.trace(
-    { component: "ArticleLayout", title: post.title },
-    "Renderizando layout de apresentação de artigo em servidor."
+  const baseContext = {
+    component: "ArticleLayout",
+    title: post.title,
+  };
+  // Se elimina la llamada a `getCorrelationId()`.
+  logger.trace(
+    baseContext,
+    "Renderizando layout de presentación de artículo en servidor."
   );
 
   return (
@@ -74,7 +84,7 @@ export async function ArticleLayout({
           <div className="relative h-64 w-full overflow-hidden rounded-lg shadow-2xl md:h-[500px]">
             <Image
               src={post.featuredImage}
-              alt={`Imagem de destaque para o artigo: ${post.title}`}
+              alt={`Imagen de destaque para el artículo: ${post.title}`}
               fill
               className="object-cover"
               priority

@@ -1,63 +1,51 @@
 // src/app/not-found.tsx
 /**
  * @file src/app/not-found.tsx
- * @description Aparato soberano y resiliente para la página 404 global.
- *              Captura todas las peticiones a rutas no existentes y presenta
- *              una página de error 404 clara, útil e internacionalizada.
- *              Valida su propio contenido de i18n para garantizar que nunca
- *              falle, utilizando textos de fallback.
- *              **Esta ruta se considera intrínsecamente dinámica debido a la
- *              implementación subyacente de `notFound()` de Next.js, la cual
- *              puede hacer uso de `headers` para construir la respuesta.**
- * @version 5.3.0
+ * @description Aparato soberano para la página 404 global. Corregido para
+ *              utilizar el patrón de nomenclatura `Handler` y evitar la
+ *              redeclaración de identificadores, asegurando una compilación limpia.
+ * @version 8.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/app/not-found.tsx.md
- * @see https://nextjs.org/docs/app/api-reference/file-conventions/not-found
- * @see src/lib/logger.ts (SSoT para `serverLogger`)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
- * @see src/lib/validators/i18n/NotFound.schema.ts (SSoT para la validación del contenido i18n)
  */
-import "server-only"; // Este componente se ejecuta estrictamente en el servidor.
+import "server-only";
 
 import { getTranslations } from "next-intl/server";
 import { type Metadata } from "next";
 import { TriangleAlert } from "lucide-react";
-import { Link } from "@/lib/navigation";
-import { serverLogger } from "@/lib/logger";
-import { NotFoundContentSchema } from "@/lib/validators/i18n/NotFound.schema";
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
+import type pino from "pino";
 
-// IMPORTANTE: Se remueve la directiva `export const dynamic = 'force-static';`.
-// La función `notFound()` de Next.js, por su naturaleza, puede implicar el uso
-// de `headers()` o `cookies()` internamente para generar la respuesta 404,
-// lo que la marca como dinámica. Es más pragmático dejar que Next.js infiera
-// su naturaleza dinámica en este caso, ya que forzar la estaticidad no funciona.
+import { Link } from "@/lib/navigation";
+import { withLogger } from "@/lib/helpers/with-logger.helper";
+import { NotFoundContentSchema } from "@/lib/validators/i18n/NotFound.schema";
 
 /**
- * @public
- * @function generateMetadata
- * @description Genera los metadatos SEO para la página 404.
- * @returns {Promise<Metadata>} Los metadatos de la página.
+ * @private
+ * @function generateMetadataHandler
+ * @description Lógica interna para generar los metadatos.
  */
-export async function generateMetadata(): Promise<Metadata> {
+async function generateMetadataHandler(logger: pino.Logger): Promise<Metadata> {
   const t = await getTranslations("app.notFound.meta");
-  serverLogger.trace(
-    { component: "NotFoundPage", action: "generateMetadata" } as LogContext,
+
+  logger.trace(
+    { component: "NotFoundPage", action: "generateMetadata" },
     "Generando metadatos para la página 404."
   );
+
   return { title: t("title") };
 }
+// Exporta la función envuelta con el nombre esperado por Next.js
+export const generateMetadata = withLogger(generateMetadataHandler);
 
 /**
- * @public
- * @component NotFoundPage
- * @description Componente de página para errores 404 (página no encontrada).
- *              Obtiene y valida su contenido de i18n, proporcionando textos de
- *              fallback para resiliencia. Muestra un icono, un título, una
- *              descripción y un botón para volver a la página de inicio.
- * @returns {Promise<JSX.Element>} La página 404 renderizada.
+ * @private
+ * @function NotFoundPageHandler
+ * @description Lógica interna para renderizar la página 404.
  */
-export default async function NotFoundPage(): Promise<JSX.Element> {
+async function NotFoundPageHandler(logger: pino.Logger): Promise<JSX.Element> {
+  const t = await getTranslations("app.notFound");
+  const baseContext = { component: "NotFoundPage" };
+
   const fallbackTexts = {
     title: "Error 404",
     description: "La página que buscas no existe o ha sido movida.",
@@ -66,38 +54,26 @@ export default async function NotFoundPage(): Promise<JSX.Element> {
 
   let content;
   try {
-    const t = await getTranslations("app.notFound");
     const rawContent = t.raw("");
     const validation = NotFoundContentSchema.safeParse({
       meta: {},
       ...rawContent,
     });
+
     if (!validation.success) {
-      serverLogger.error(
-        {
-          component: "NotFoundPage",
-          error: validation.error.flatten(),
-          rawContent,
-        },
-        "Falló la validación de contenido de la página 404. Usando fallbacks."
-      );
-      throw new Error(
-        `Validação de conteúdo de NotFoundPage falhou: ${JSON.stringify(
-          validation.error.flatten()
-        )}`
-      );
+      throw new Error(JSON.stringify(validation.error.flatten()));
     }
     content = validation.data;
   } catch (error) {
-    serverLogger.error(
-      { error, component: "NotFoundPage" } as LogContext,
-      "Error fatal al cargar o validar traducciones para 404. Usando fallbacks."
+    logger.error(
+      { ...baseContext, error },
+      "Error al cargar/validar traducciones para 404. Usando fallbacks."
     );
     content = fallbackTexts;
   }
 
-  serverLogger.trace(
-    { component: "NotFoundPage", title: content.title },
+  logger.warn(
+    { ...baseContext, title: content.title },
     "Renderizando página 404."
   );
 
@@ -119,4 +95,6 @@ export default async function NotFoundPage(): Promise<JSX.Element> {
     </main>
   );
 }
+// Exporta el componente envuelto con el HOC.
+export default withLogger(NotFoundPageHandler);
 // src/app/not-found.tsx

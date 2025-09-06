@@ -3,54 +3,32 @@
  * @file .docs-espejo/app/not-found.tsx.md
  * @description Documento Espejo y SSoT conceptual para la página 404 global.
  * @author L.I.A. Legacy
- * @version 5.3.0
+ * @version 7.0.0
  */
 # Manifiesto Conceptual: Aparato `not-found.tsx` (Página 404 Global)
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **red de seguridad soberana** de la experiencia de usuario. Su propósito es capturar todas las peticiones a rutas no existentes y presentar una página de error 404 clara, útil e internacionalizada.
+Este aparato es la **red de seguridad soberana y observable** de la aplicación. Implementa el patrón de **"Aislamiento Contextual"** para garantizar una ejecución estable y trazable. Sus responsabilidades son:
+1.  **Aislar `next-intl`:** Ejecuta `getTranslations` en un entorno puro.
+2.  **Observabilidad Transaccional:** Establece un contexto de logging con `storage.run()` para el resto de la lógica.
+3.  **Resiliencia:** Usa `try/catch` y validación Zod para asegurar que siempre se renderice, incluso con contenido de i18n corrupto.
 
-Como aparato soberano (Server Component), es responsable de toda la respuesta:
-1.  **Metadatos (`<head>`):** Exporta `generateMetadata` para definir el título de la página, contribuyendo al SEO y la UX.
-2.  **Contenido (`<body>`):** Renderiza el cuerpo de la página con un mensaje de error y una opción para volver al inicio.
-3.  **Resiliencia:** Implementa un patrón de `try/catch` con textos de `fallback` para garantizar que la página 404 se renderice siempre, incluso si el sistema de i18n falla.
-4.  **Naturaleza Dinámica:** Esta ruta se considera **intrínsecamente dinámica** debido a la implementación subyacente de `notFound()` de Next.js, la cual puede hacer uso de `headers` para construir la respuesta HTTP 404. Por lo tanto, no se fuerza su estaticidad.
-5.  **Observabilidad de Élite:** Utiliza `serverLogger` (con la API unificada `(context, message)`) para registrar la generación de metadatos, errores de validación de contenido y el renderizado de la página, asegurando la trazabilidad.
-
-## 2. Arquitectura y Flujo de Ejecución
-
-Es un **Server Component** especial, invocado por Next.js cuando una ruta no es encontrada.
+## 2. Arquitectura de Flujo ("Aislamiento Contextual")
 
 ```mermaid
 graph TD
-    A[Request a /ruta-inexistente] --> B{Next.js};
-    B -- "1. Renderiza `not-found.tsx`" --> C["(Next.js lo infiere como Dinámico)"];
-    C --> D["`generateMetadata()`"];
-    D -- "Llama a `getTranslations()`" --> E{Capa de i18n};
-    E -- Éxito --> F[Obtiene título];
-    E -- Fallo --> G["`serverLogger.warn()` y usa título de fallback"];
-    D --> H[Retorna `Metadata` con título];
-    H --> I[Inyectado en `<head>`];
-
-    C --> J["`NotFoundPage()`"];
-    J -- "1. `serverLogger.trace()` (Inicio render)" --> K[Registro de Observabilidad];
-    J -- "2. `getTranslations()` y `t.raw('')`" --> L{Contenido i18n};
-    L -- "3. Valida contra `NotFoundContentSchema`" --> M{¿Validación OK?};
-    M -- Sí --> N[Usa `content.data`];
-    M -- No --> O["`serverLogger.error()` y usa `fallbackTexts`"];
-    O --> N;
-    N --> P[Renderiza UI con textos traducidos y botón de Home];
-    P --> Q[HTML final de la página];
+    A[Next.js invoca `NotFoundPage`] --> B["Fase 1: getTranslations (Pura)"];
+    B --> C["Fase 2: Inicia `storage.run()`"];
+    subgraph "Contexto Transaccional Activo"
+      C --> D[Lógica de App: Logging, Validación, Renderizado];
+    end
+    D --> E[HTML Final de la página 404];
 3. Contrato de API
-Props de Entrada:
-Ninguna. Es invocado por el framework.
-Salida:
-El JSX.Element que representa la página 404 completa.
+Props de Entrada: Ninguna. Es invocado por el framework.
+Salida: El JSX.Element que representa la página 404 completa.
 4. Zona de Mejoras Nuevas (Valor al Proyecto)
-SUGERENCIAS DE PÁGINAS INTELIGENTES: Implementar una lógica que sugiera páginas relevantes basadas en la URL mal escrita (utilizando un algoritmo de coincidencia difusa o un índice de búsqueda) si la página no existe.
-LOGGING DE 404 PERSISTENTE: Implementar una lógica en el middleware o en una Server Action para registrar las URLs que generan errores 404 en una base de datos o sistema de analíticas. Esto es una mina de oro para el SEO, permitiendo identificar enlaces rotos o nuevas oportunidades de contenido.
-CAMPO DE BÚSQUEDA INTERNA: Añadir una barra de búsqueda a la página 404, permitiendo a los usuarios encontrar directamente el contenido que buscaban sin tener que volver a la página de inicio.
-DISEÑO MÁS CREATIVO Y BRANDED: Diseñar una ilustración o animación 404 personalizada que refuerce la identidad de la marca y haga la experiencia del error menos frustrante.
-REPORTE DE ENLACE ROTO (USER-SUBMITTED): Añadir un botón opcional de "Reportar enlace roto" que, al hacer clic, permita a los usuarios notificar al equipo de desarrollo sobre la URL que no funciona, enviando un evento de telemetría o una Server Action.
+Logging de 404 Persistente: Implementar una Server Action para registrar las URLs que generan errores 404 en una base de datos o sistema de analíticas, proveyendo datos valiosos para SEO.
+Campo de Búsqueda Interna: Añadir una barra de búsqueda a la página 404 para ayudar al usuario a encontrar lo que busca.
+Sugerencias de Páginas Inteligentes: Implementar una lógica que sugiera páginas relevantes basadas en la URL mal escrita.
 <!-- .docs-espejo/app/not-found.tsx.md -->

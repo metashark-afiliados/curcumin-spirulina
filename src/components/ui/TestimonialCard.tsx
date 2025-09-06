@@ -1,10 +1,12 @@
 // src/components/ui/TestimonialCard.tsx
 /**
  * @file TestimonialCard.tsx
- * @description Aparato de UI soberano (Organismo) e de servidor. Exibe um
- *              único depoimento, sendo responsável por renderizar tanto a UI
- *              quanto o schema JSON-LD associado para SEO.
- * @version 6.1.0
+ * @description Aparato de UI soberano (Organismo) y de servidor. Exibe un
+ *              único depoimento. Refactorizado para aceptar un logger
+ *              transaccional vía props y propagarlo a sus dependencias
+ *              (como `generateReviewSchema`), asegurando su correcta
+ *              participación en la observabilidad de la arquitectura.
+ * @version 8.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/TestimonialCard.tsx.md
  */
@@ -12,30 +14,29 @@ import "server-only";
 
 import Image from "next/image";
 import { Star } from "lucide-react";
+import type pino from "pino";
 
-import { serverLogger } from "@/lib/logger";
 import { generateReviewSchema } from "@/lib/schema";
 import { SchemaInjector } from "@/components/ui/SchemaInjector";
+import { type TestimonialData } from "@/lib/validators/i18n/Testimonials.schema";
 
-export interface TestimonialData {
-  imageUrl: string;
-  author: string;
-  location: string;
-  rating: number;
-  title: string;
-  text: string;
+// La firma del componente se actualiza para incluir el logger.
+interface TestimonialCardProps extends TestimonialData {
+  logger: pino.Logger;
 }
 
-export async function TestimonialCard(
-  props: TestimonialData
-): Promise<React.ReactElement> {
+export async function TestimonialCard({
+  logger,
+  ...props
+}: TestimonialCardProps): Promise<React.ReactElement> {
   const { imageUrl, author, location, rating, title, text } = props;
-  serverLogger.trace(
-    { component: "TestimonialCard", author },
-    "Renderizando depoimento no servidor."
-  );
 
-  const reviewSchema = generateReviewSchema({
+  const baseContext = { component: "TestimonialCard", author };
+  // La llamada a `getCorrelationId()` es eliminada. Se usa el logger inyectado.
+  logger.trace(baseContext, "Renderizando testimonio en el servidor.");
+
+  // Se propaga el logger explícitamente a la función generadora de schemas.
+  const reviewSchema = generateReviewSchema(logger, {
     authorName: author,
     reviewBody: text,
     ratingValue: rating,
@@ -44,7 +45,6 @@ export async function TestimonialCard(
   return (
     <div className="relative grid h-full grid-cols-1 items-center gap-8 rounded-xl bg-white/5 p-8 shadow-lg backdrop-blur-lg md:grid-cols-3 md:gap-12">
       <SchemaInjector schema={reviewSchema} />
-      {/* ... JSX inalterado ... */}
       <div className="relative h-48 w-48 justify-self-center overflow-hidden rounded-full shadow-lg md:h-56 md:w-56">
         <Image
           src={imageUrl}

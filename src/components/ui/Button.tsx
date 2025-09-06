@@ -1,16 +1,12 @@
 // src/components/ui/Button.tsx
 /**
  * @file src/components/ui/Button.tsx
- * @description Aparato de UI atómico de élite para botones. Es polimórfico,
- *              totalmente animado, accesible, tipo-seguro, y soporta un
- *              estado de carga declarativo y un conjunto extendido de
- *              variantes visuales semánticas. Se adhiere a la API de logging
- *              del cliente unificada para una observabilidad completa.
- * @version 3.2.0
+ * @description Aparato de UI atómico de élite para botones. Nivelado para una
+ *              adherencia estricta a la API de logging del cliente unificada
+ *              y un enriquecimiento de contexto de log tipo-seguro.
+ * @version 4.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/Button.tsx.md
- * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 "use client";
 
@@ -20,16 +16,10 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import * as React from "react";
 
-// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
+import { type LogContext } from "@/lib/types/logging";
 import { cn } from "@/lib/utils";
 
-/**
- * @constant buttonVariants
- * @description Define las variantes visuales y de tamaño para el componente Button
- *              utilizando `class-variance-authority` (cva).
- */
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-bold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden",
   {
@@ -63,43 +53,15 @@ const buttonVariants = cva(
   }
 );
 
-/**
- * @interface ButtonProps
- * @description Propiedades del componente `Button`.
- * @extends Omit<HTMLMotionProps<'button'>, 'children' | 'color'> - Hereda props de `motion.button`.
- * @extends VariantProps<typeof buttonVariants> - Hereda props de variantes de `cva`.
- */
 export interface ButtonProps
   extends Omit<HTMLMotionProps<"button">, "children" | "color">,
     VariantProps<typeof buttonVariants> {
-  /**
-   * @property {React.ReactNode} children - El contenido a renderizar dentro del botón.
-   */
   children: React.ReactNode;
-  /**
-   * @property {boolean} [asChild=false] - Si es `true`, el botón se renderiza como su hijo directo
-   *           (ej. un `Link`), fusionando props y estilos.
-   */
   asChild?: boolean;
-  /**
-   * @property {boolean} [loading=false] - Si es `true`, el botón muestra un spinner de carga
-   *           y se deshabilita.
-   */
   loading?: boolean;
-  /**
-   * @property {string} [loadingText] - Texto opcional que se anuncia a los lectores de pantalla
-   *           durante el estado de carga, proporcionando un feedback de accesibilidad superior.
-   */
   loadingText?: string;
 }
 
-/**
- * @component Button
- * @description Componente polimórfico de botón con estilos variantes, soporte para estado de carga
- *              accesible, y microinteracciones animadas.
- * @param {ButtonProps} props - Las propiedades para configurar el botón.
- * @returns {React.ReactElement}
- */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -118,15 +80,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = loading || props.disabled;
 
     if (loading) {
-      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+      // Se estandariza la creación del contexto para el log.
+      const logContext: LogContext = {
+        component: "Button",
+        loadingState: true,
+        variant,
+        size,
+        loadingText,
+      };
       clientLogger.trace(
-        {
-          component: "Button",
-          loadingState: true,
-          variant,
-          size,
-          loadingText,
-        } as LogContext, // Forzar el tipo a LogContext para asegurar compatibilidad
+        logContext,
         "Renderizando botón en estado de cargamento."
       );
     }
@@ -158,8 +121,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
-              {/* Para acessibilidade: o texto visual é mantido, mas um texto específico
-                  para leitores de ecrã é fornecido, se disponível. */}
               <span>{children}</span>
               {loadingText && (
                 <span className="sr-only" aria-live="polite">

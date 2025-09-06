@@ -1,32 +1,59 @@
+// tsconfig.json
+/**
+ * @file tsconfig.json
+ * @description Constitución del compilador de TypeScript y SSoT para las reglas del lenguaje.
+ *              Nivelado para una inclusión de archivos más específica y una exclusión
+ *              robusta, resolviendo errores de archivos no encontrados y optimizando
+ *              el proceso de compilación.
+ * @author L.I.A. Legacy
+ * @version 3.0.0
+ * @see .docs-espejo/tsconfig.json.md
+ */
 {
   "compilerOptions": {
+    // --- Comportamiento del Lenguaje ---
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
+
+    // --- Módulos ---
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+
+    // --- Salida del Compilador ---
+    "noEmit": true,
     "incremental": true,
+
+    // --- Integración con Frameworks ---
+    "jsx": "preserve",
     "plugins": [
       {
         "name": "next"
       }
     ],
+
+    // --- Resolución de Rutas ---
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    // --- Misceláneo ---
+    "skipLibCheck": true
   },
+  // CORRECCIÓN: Se refina la inclusión de archivos para mayor precisión.
   "include": [
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  // CORRECCIÓN: Se añade una exclusión explícita para directorios que no
+  // deben ser parte del programa de compilación principal.
+  "exclude": ["node_modules", "tests"]
 }
+// tsconfig.json

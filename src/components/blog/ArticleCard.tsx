@@ -1,10 +1,11 @@
 // src/components/blog/ArticleCard.tsx
 /**
  * @file ArticleCard.tsx
- * @description Aparato de UI soberano, semântico e de servidor. Renderiza a
- *              pré-visualização de um artigo de blog, utilizando a tag <article>
- *              e ARIA para uma acessibilidade de elite.
- * @version 4.1.0
+ * @description Aparato de UI soberano, semántico y de servidor. Renderiza la
+ *              previsualización de un artículo de blog. Refactorizado para
+ *              aceptar un logger transaccional explícitamente a través de
+ *              props, asegurando su participación en la observabilidad.
+ * @version 6.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/blog/ArticleCard.tsx.md
  */
@@ -13,13 +14,16 @@ import "server-only";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Calendar, Tag } from "lucide-react";
+import type pino from "pino";
+
 import { type PostFrontmatter, formatDate } from "@/lib/blog";
-import { serverLogger } from "@/lib/logger";
 import { Link, type Pathname } from "@/lib/navigation";
 
+// La firma del componente se actualiza para incluir el logger.
 interface ArticleCardProps extends PostFrontmatter {
   slug: string;
   locale: string;
+  logger: pino.Logger;
 }
 
 export async function ArticleCard({
@@ -30,14 +34,15 @@ export async function ArticleCard({
   featuredImage,
   tags,
   locale,
+  logger, // El logger ahora es una dependencia explícita.
 }: ArticleCardProps): Promise<React.ReactElement> {
   const t = await getTranslations("components.blog.ArticleCard");
-  serverLogger.trace(
-    { component: "ArticleCard", title, locale },
-    "Renderizando card para o post."
-  );
+  const baseContext = { component: "ArticleCard", title, locale };
 
-  const formattedDate = formatDate(date, locale);
+  // La llamada a `getCorrelationId()` es eliminada. Se usa el logger inyectado.
+  logger.trace(baseContext, "Renderizando card para el post.");
+
+  const formattedDate = formatDate(logger, date, locale); // Propagación del logger a la utilidad.
   const href = `/blog/${slug}` as Pathname;
 
   return (

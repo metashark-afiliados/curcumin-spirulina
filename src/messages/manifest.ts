@@ -1,37 +1,24 @@
 // src/messages/manifest.ts
 /**
  * @file src/messages/manifest.ts
- * @description Manifiesto de Importación Dinámica y Única Fuente de Verdad (SSoT) para los módulos de
- *              mensajes de internacionalización. Este archivo es el mapa maestro que el orquestador
- *              `i18n.ts` utiliza para descubrir y cargar de forma perezosa los archivos de traducción atómicos.
- *              Esta versión refactorizada ajusta el tipado de las importaciones para ser compatible
- *              con la estructura real de los archivos JSON de mensajes, incluyendo arrays de objetos
- *              y otros tipos complejos, resolviendo errores de compilación. La validación granular
- *              de estas estructuras recae en los schemas Zod de los componentes consumidores.
- * @version 2.1.0
+ * @description Manifiesto de Importación Dinámica y Única Fuente de Verdad (SSoT)
+ *              para los módulos de mensajes de internacionalización (IMAS).
+ *              Este archivo es el mapa maestro que el orquestador `i18n.ts` utiliza
+ *              para descubrir y cargar de forma perezosa los archivos de traducción atómicos.
  * @author L.I.A. Legacy
+ * @version 3.0.0
  * @see .docs/I18N_MANIFESTO_V2.md
  * @see .docs-espejo/messages/manifest.ts.md
- * @see src/i18n.ts (Consumidor)
- * @see src/messages/types.ts (SSoT para `MessageModule`, `AppLocale`)
  */
-
-import { type ManifestModule } from "./types";
-import { type AppLocale } from "@/lib/navigation"; // Necesario para tipar las claves de locale
+import { type AppLocale } from "@/lib/navigation";
 
 /**
  * @public
  * @constant messagesManifest
- * @description Registro canónico de todos los namespaces de traducción.
- *              La clave es el namespace (derivado de la ruta del archivo), y el
- *              valor es una función de importación dinámica que carga el módulo
- *              JSON correspondiente de forma perezosa (lazy-loading).
- *              El tipo de retorno de las funciones de importación se ha flexibilizado
- *              a `Record<AppLocale, Record<string, any>>` para acomodar la estructura
- *              real de los archivos JSON (que pueden contener arrays de objetos, etc.)
- *              sin generar errores de tipo en el manifiesto. La validación profunda
- *              del contenido se realiza en los schemas Zod de los componentes que
- *              consumen `t.raw()`.
+ * @description Registro canónico de todos los namespaces de traducción. La clave
+ *              es el namespace (derivado de la ruta del componente) y el valor
+ *              es una función de importación dinámica. Se han eliminado las entradas
+ *              para componentes que ya no existen para mantener la integridad.
  */
 export const messagesManifest: Record<
   string,
@@ -39,7 +26,7 @@ export const messagesManifest: Record<
 > = {
   // --- Páginas de App ---
   "app.notFound": () => import("./app/not-found.json"),
-  "app.selectLanguage": () => import("./app/select-language.json"),
+  // "app.selectLanguage": () => import("./app/select-language.json"), // Eliminado
 
   // --- Componentes de Blog ---
   "components.blog.ArticleCard": () =>

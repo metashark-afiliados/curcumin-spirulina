@@ -1,71 +1,53 @@
 // src/lib/helpers/geoip.helper.ts
 /**
  * @file src/lib/helpers/geoip.helper.ts
- * @description Aparato de infraestructura SSoT para la lógica de detección de
- *              GeoIP en el Edge Runtime. Es responsable de extraer el país
- *              de la petición y mapearlo a un locale soportado.
- *              **Ahora utiliza `edgeLogger` para la observabilidad,
- *              garantizando la compatibilidad con el Edge Runtime.**
- * @version 2.3.0
+ * @description Aparato de infraestructura atómico y SSoT para la lógica de
+ *              detección de GeoIP en el Edge Runtime. Su única responsabilidad
+ *              es extraer la información de geolocalización de una petición y
+ *              mapearla a un `locale`, utilizando `edgeLogger` y un `correlationId`
+ *              propagado explícitamente para una observabilidad completa.
  * @author L.I.A. Legacy
+ * @version 4.0.0
  * @see .docs-espejo/lib/helpers/geoip.helper.ts.md
- * @see src/config/geoip.config.ts (SSoT para el mapeo de GeoIP)
- * @see src/lib/edge-logger.ts (SSoT para el logger del Edge)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
-// La directiva "server-only" se ha removido ya que este módulo se ejecuta en el Edge Runtime.
-// No necesita "server-only" ni "use client".
-
 import { type NextRequest } from "next/server";
-
 import { COUNTRY_TO_LOCALE_MAP } from "@/config/geoip.config";
-// IMPORTACIÓN CORREGIDA: Usar el logger específico para el Edge.
 import { edgeLogger } from "@/lib/edge-logger";
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
-import { getCorrelationId } from "@/lib/helpers/correlation-id.helper"; // Para logs
+import { type LogContext } from "@/lib/types/logging";
+import { type AppLocale } from "@/lib/navigation";
 
 /**
  * @public
  * @function lookupCountryFromRequest
  * @description Extrae el código de país (ISO 3166-1 Alpha-2) de la cabecera
- *              `x-vercel-ip-country` inyectada por Vercel.
+ *              `x-vercel-ip-country` inyectada por Vercel. Es resiliente a fallos.
  * @param {NextRequest} request - El objeto de la petición entrante.
- * @returns {string | null} El código del país o null si no se encuentra.
+ * @param {string} correlationId - El ID de correlación para el logging.
+ * @returns {string | null} El código del país o `null` si no se encuentra o hay un error.
  */
-export function lookupCountryFromRequest(request: NextRequest): string | null {
-  const currentCorrelationId = getCorrelationId(); // Obtener correlationId del contexto.
+export function lookupCountryFromRequest(
+  request: NextRequest,
+  correlationId: string
+): string | null {
+  const baseContext: LogContext = { component: "GeoIPHelper", correlationId };
   try {
     const country = request.headers.get("x-vercel-ip-country");
     if (country) {
-      // USO DE EDGELOGGER CORREGIDO: (context, message)
       edgeLogger.trace(
-        {
-          component: "GeoIPHelper",
-          country,
-          correlationId: currentCorrelationId,
-        } as LogContext, // Aserción de tipo
-        "[GeoIP Helper] País detectado vía Vercel header."
+        { ...baseContext, country },
+        "[GeoIPHelper] País detectado vía Vercel header."
       );
       return country;
     }
-    // USO DE EDGELOGGER CORREGIDO: (context, message)
     edgeLogger.trace(
-      {
-        component: "GeoIPHelper",
-        correlationId: currentCorrelationId,
-      } as LogContext,
-      "[GeoIP Helper] Header de Vercel no encontrado."
+      baseContext,
+      "[GeoIPHelper] Header de Vercel no encontrado."
     );
     return null;
   } catch (error) {
-    // USO DE EDGELOGGER CORREGIDO: (context, message)
     edgeLogger.error(
-      {
-        component: "GeoIPHelper",
-        err: error,
-        correlationId: currentCorrelationId,
-      } as LogContext,
-      "[GeoIP Helper] Error al detectar el país."
+      { ...baseContext, err: error },
+      "[GeoIPHelper] Error al intentar leer headers para detectar el país."
     );
     return null;
   }
@@ -77,46 +59,35 @@ export function lookupCountryFromRequest(request: NextRequest): string | null {
  * @description Mapea un código de país a un `AppLocale` soportado, consumiendo
  *              la SSoT desde `geoip.config.ts`.
  * @param {string | null} countryCode - El código del país a mapear.
- * @returns {string | undefined} El `AppLocale` correspondiente o undefined si
- *              no hay un mapeo definido.
+ * @param {string} correlationId - El ID de correlación para el logging.
+ * @returns {AppLocale | undefined} El `AppLocale` correspondiente o `undefined` si
+ *          no hay un mapeo definido.
  */
 export function mapCountryToLocale(
-  countryCode: string | null
-): string | undefined {
-  const currentCorrelationId = getCorrelationId(); // Obtener correlationId del contexto.
+  countryCode: string | null,
+  correlationId: string
+): AppLocale | undefined {
+  const baseContext: LogContext = {
+    component: "GeoIPHelper",
+    countryCode,
+    correlationId,
+  };
+
   if (!countryCode) {
-    edgeLogger.trace(
-      {
-        component: "GeoIPHelper",
-        correlationId: currentCorrelationId,
-      } as LogContext,
-      "[GeoIP Helper] No se proporcionó countryCode para mapear a locale."
-    );
     return undefined;
   }
 
   const locale = COUNTRY_TO_LOCALE_MAP[countryCode.toUpperCase()];
 
   if (locale) {
-    // USO DE EDGELOGGER CORREGIDO: (context, message)
     edgeLogger.trace(
-      {
-        component: "GeoIPHelper",
-        countryCode,
-        locale,
-        correlationId: currentCorrelationId,
-      } as LogContext,
-      "[GeoIP Helper] País mapeado para locale."
+      { ...baseContext, locale },
+      `[GeoIPHelper] País '${countryCode}' mapeado a locale '${locale}'.`
     );
   } else {
-    // USO DE EDGELOGGER CORREGIDO: (context, message)
     edgeLogger.trace(
-      {
-        component: "GeoIPHelper",
-        countryCode,
-        correlationId: currentCorrelationId,
-      } as LogContext,
-      `[GeoIP Helper] No se encontró mapeo para el país '${countryCode}'.`
+      baseContext,
+      `[GeoIPHelper] No se encontró mapeo de locale para el país '${countryCode}'.`
     );
   }
   return locale;

@@ -1,67 +1,47 @@
 // src/components/ui/PlaceholderSection.tsx
 /**
  * @file src/components/ui/PlaceholderSection.tsx
- * @description Aparato de UI de desarrollo. Renderiza un placeholder visualmente
- *              distinto para secciones de la página que están planificadas
- *              pero aún no han sido implementadas. Es una herramienta clave
- *              para la planificación visual y la comunicación del roadmap.
- *              Como Server Component, utiliza el `serverLogger` para registrar
- *              su renderizado y advertencias, contribuyendo a la observabilidad
- *              del lado del servidor.
- * @version 3.2.0
+ * @description Aparato de UI de desarrollo. Renderiza un placeholder para
+ *              secciones no implementadas. Refactorizado para recibir el logger
+ *              transaccional opcionalmente vía props, alineándose con la
+ *              arquitectura de Inyección de Dependencias.
+ * @version 4.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/PlaceholderSection.tsx.md
- * @see src/lib/logger.ts (SSoT para el logger de servidor)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
-import "server-only"; // Este componente es estrictamente del lado del servidor.
+import "server-only";
 
 import { Construction } from "lucide-react";
-import { serverLogger } from "@/lib/logger"; // SSoT del logger de servidor
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
+import type pino from "pino";
+import { logger as fallbackLogger } from "@/lib/logger";
+import { type ILogger } from "@/lib/types/logging";
 
-/**
- * @interface PlaceholderSectionProps
- * @description Propiedades del componente `PlaceholderSection`.
- */
 interface PlaceholderSectionProps {
-  /**
-   * @property {string} title - El título de la sección pendiente a implementar.
-   */
   title: string;
-  /**
-   * @property {string} [description] - Una descripción opcional de la funcionalidad futura.
-   */
   description?: string;
-  /**
-   * @property {string} [blueprintSection] - Una referencia opcional a la sección
-   *           correspondiente en el documento del Blueprint (ej., `PARTE I, 2.1`).
-   */
   blueprintSection?: string;
+  logger?: ILogger | pino.Logger; // Acepta la interfaz o la instancia de pino.
 }
 
-/**
- * @component PlaceholderSection
- * @description Componente que actúa como un marcador de posición visual para secciones
- *              en desarrollo. Solo se renderiza en entornos que no sean de producción,
- *              y registra una advertencia con `serverLogger` cuando se utiliza.
- * @param {PlaceholderSectionProps} props - Las propiedades para configurar el placeholder.
- * @returns {React.ReactElement | null} El placeholder renderizado o `null` si el entorno es de producción.
- */
 export function PlaceholderSection({
   title,
   description,
   blueprintSection,
+  logger = fallbackLogger, // Utiliza el logger base como fallback.
 }: PlaceholderSectionProps): React.ReactElement | null {
-  // Renderizado resiliente: no muestra placeholders en producción.
   if (process.env.NODE_ENV === "production") {
     return null;
   }
 
-  // USO DE SERVERLOGGER CORREGIDO: (context, message)
-  serverLogger.warn(
-    { component: "PlaceholderSection", title, blueprintSection } as LogContext, // Aserción de tipo para LogContext
-    `[PlaceholderSection] Renderizando placeholder para la sección: "${title}"`
+  const baseContext = {
+    component: "PlaceholderSection",
+    title,
+    blueprintSection,
+  };
+
+  logger.warn(
+    baseContext,
+    `Renderizando placeholder para la sección: "${title}"`
   );
 
   return (

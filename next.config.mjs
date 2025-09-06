@@ -1,54 +1,89 @@
 // next.config.mjs
 /**
  * @file next.config.mjs
- * @description Manifiesto de configuración de Next.js de élite.
- *              Integra el plugin de `next-intl` para la internacionalización
- *              y configura `webpack` para suprimir warnings específicos
- *              relacionados con Sentry/OpenTelemetry, resultando en un build limpio.
+ * @description Manifiesto de configuración de Next.js de élite. Esta es la Única
+ *              Fuente de Verdad (SSoT) para el comportamiento del framework,
+ *              definiendo la estrategia de build, la compatibilidad del logger,
+ *              la internacionalización y las cabeceras de seguridad.
+ *              Esta versión implementa una estrategia de renderizado dinámico (SSR).
  * @author L.I.A. Legacy
- * @version 2.1.0
+ * @version 6.0.0
  * @see .docs-espejo/next.config.mjs.md
- * @see https://nextjs.org/docs/api-reference/next.config.js/custom-webpack-config
  */
 import createNextIntlPlugin from "next-intl/plugin";
+import createBundleAnalyzer from "@next/bundle-analyzer";
 
-// El plugin necesita la ruta al orquestador de i18n.
 const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
+const withBundleAnalyzer = createBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configuración de Webpack para suprimir warnings específicos.
-  // Esto es necesario para limpiar el output del build de Next.js
-  // de advertencias provenientes de librerías de instrumentación como Sentry.
-  webpack: (config, { isServer }) => {
-    // Suprime warnings relacionados con 'Critical dependency' en módulos de Sentry/OpenTelemetry.
-    // Estos warnings son comunes en librerías que realizan instrumentación dinámica
-    // y no afectan la funcionalidad en producción, pero ensucian el log del build.
+  reactStrictMode: true,
+
+  // NOTA ARQUITECTÓNICA: La directiva `output: 'export'` ha sido eliminada.
+  // La aplicación utiliza middleware y otras funciones dinámicas que son
+  // incompatibles con una exportación estática. La estrategia es Server-Side Rendering (SSR).
+
+  // SSoT de Compatibilidad para Pino Logger con React Server Components (RSC).
+  // Estas configuraciones instruyen a Next.js para que no intente empaquetar
+  // ciertas dependencias de `pino` que dependen de APIs nativas de Node.js,
+  // resolviendo así errores de build en el entorno de RSC.
+  experimental: {
+    serverComponentsExternalPackages: [
+      "pino",
+      "pino-pretty",
+      "thread-stream",
+      "async_hooks",
+    ],
+  },
+
+  webpack: (config) => {
+    // Silencia warnings conocidos de dependencias de Sentry.
     config.ignoreWarnings = [
-      {
-        module: /node_modules\/@opentelemetry/,
-        message:
-          /Critical dependency: the request of a dependency is an expression/,
-      },
-      {
-        module: /node_modules\/require-in-the-middle/,
-        message:
-          /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
-      },
-      // Puedes añadir más reglas de supresión de warnings aquí si aparecen otras
-      // advertencias no deseadas que no son críticas para la funcionalidad.
+      { module: /node_modules\/@opentelemetry/ },
+      { module: /node_modules\/require-in-the-middle/ },
     ];
 
-    // Importante: Retorna siempre la configuración de Webpack modificada.
+    // Trata 'thread-stream' como un módulo externo para pino-pretty.
+    if (!config.externals) {
+      config.externals = [];
+    }
+    config.externals.push({
+      "thread-stream": "commonjs thread-stream",
+    });
+
     return config;
   },
 
-  // Aquí irían otras configuraciones de Next.js
-  // Por ejemplo:
-  // images: {
-  //   remotePatterns: [...]
-  // }
+  // SSoT para Cabeceras de Seguridad HTTP.
+  // Añade una capa de protección básica a nivel de aplicación.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+    ];
+  },
 };
 
-export default withNextIntl(nextConfig);
+// El orden de los wrappers es importante:
+// 1. `withNextIntl` envuelve la configuración base.
+// 2. `withBundleAnalyzer` envuelve el resultado para el análisis opcional.
+export default withBundleAnalyzer(withNextIntl(nextConfig));
 // next.config.mjs

@@ -1,21 +1,14 @@
 // src/middleware/handlers/i18n/index.ts
 /**
  * @file src/middleware/handlers/i18n/index.ts
- * @description Manejador de middleware atómico para la internacionalización (i18n) en el Edge Runtime.
- *              Su responsabilidad es determinar el `locale` correcto para cada petición entrante
- *              y configurar el contexto de `next-intl` antes de que la petición llegue a los
- *              Server Components. Utiliza la Única Fuente de Verdad (SSoT) para la configuración
- *              de locales y rutas, garantizando la coherencia.
- *              **Ahora recibe explícitamente el `correlationId` como parámetro, eliminando cualquier
- *              dependencia de `getCorrelationId()` dentro de este módulo para compatibilidad con el Edge.**
- * @version 2.6.1
+ * @description Manejador de middleware atómico para la internacionalización (i18n).
+ *              Determina el `locale` más apropiado para cada petición y configura
+ *              `next-intl` en consecuencia. Consume la SSoT para la configuración
+ *              de locales y rutas, y recibe el `correlationId` explícitamente
+ *              para una trazabilidad de élite en el Edge.
  * @author L.I.A. Legacy
+ * @version 4.1.0
  * @see .docs-espejo/middleware/handlers/i18n/index.ts.md
- * @see src/lib/navigation.ts (SSoT para `locales`, `defaultLocale`, `pathnames`, `localePrefix`)
- * @see src/lib/helpers/geoip.helper.ts (Para detección de GeoIP)
- * @see src/lib/edge-logger.ts (SSoT para el logger del Edge)
- * @see src/lib/helpers/correlation-id.helper.ts (La función `getCorrelationId` se utiliza en el middleware principal)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
 import { match } from "@formatjs/intl-localematcher";
 import Negotiator from "negotiator";
@@ -34,32 +27,19 @@ import {
   type AppLocale,
 } from "@/lib/navigation";
 import { edgeLogger } from "@/lib/edge-logger";
-// REMOVIDO: getCorrelationId ya no se importa ni se llama directamente en este archivo.
-// El correlationId se pasa explícitamente como argumento.
-// import { getCorrelationId } from "@/lib/helpers/correlation-id.helper";
 import { type LogContext } from "@/lib/types/logging";
 
-/**
- * @private
- * @function getLocaleFromRequest
- * @description Determina el locale preferido del usuario basándose en varias fuentes,
- *              con un orden de prioridad: Cookie > Accept-Language > GeoIP.
- *              **Recibe el `correlationId` explícitamente para el logging.**
- * @param {NextRequest} request - El objeto de la petición entrante.
- * @param {string | undefined} correlationId - El ID de correlación de la petición, pasado explícitamente.
- * @returns {AppLocale | undefined} El locale detectado o `undefined`.
- */
 function getLocaleFromRequest(
   request: NextRequest,
-  correlationId: string | undefined
+  correlationId: string
 ): AppLocale | undefined {
-  // USO DE CORRELATIONID: Se usa el parámetro recibido directamente.
+  const baseContext: LogContext = { component: "I18nHandler", correlationId };
 
   // 1. Detección por Cookie
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   if (cookieLocale && locales.includes(cookieLocale as AppLocale)) {
     edgeLogger.trace(
-      { locale: cookieLocale, method: "cookie", correlationId } as LogContext,
+      { ...baseContext, method: "cookie", locale: cookieLocale },
       "[I18nHandler] Locale detectado vía cookie."
     );
     return cookieLocale as AppLocale;
@@ -72,109 +52,86 @@ function getLocaleFromRequest(
   try {
     const matchedLocale = match(
       languages,
-      locales as readonly string[],
+      [...locales],
       defaultLocale
     ) as AppLocale;
     edgeLogger.trace(
       {
-        locale: matchedLocale,
+        ...baseContext,
         method: "accept-language",
+        locale: matchedLocale,
         languages,
-        correlationId,
-      } as LogContext,
+      },
       "[I18nHandler] Locale detectado vía Accept-Language."
     );
     return matchedLocale;
   } catch (e) {
     edgeLogger.warn(
-      { err: e, languages, correlationId } as LogContext,
+      { ...baseContext, err: e, languages },
       "[I18nHandler] Fallo al detectar locale vía Accept-Language."
     );
-    // Continuar con la siguiente estrategia.
   }
 
-  // 3. Detección por GeoIP (cabecera `x-vercel-ip-country`)
-  // Nota: `lookupCountryFromRequest` y `mapCountryToLocale` en `geoip.helper.ts`
-  // ahora también usarán `getCorrelationId()` de su contexto, que es establecido
-  // por `src/middleware.ts` (que envuelve handleI18n).
-  const country = lookupCountryFromRequest(request);
-  const geoLocale = mapCountryToLocale(country);
+  // 3. Detección por GeoIP (Fallback)
+  // CORRECCIÓN DEFINITIVA: Se pasa el `correlationId` a las funciones del helper.
+  const country = lookupCountryFromRequest(request, correlationId);
+  const geoLocale = mapCountryToLocale(country, correlationId);
   if (geoLocale) {
     edgeLogger.trace(
-      {
-        locale: geoLocale,
-        country,
-        method: "geoip",
-        correlationId,
-      } as LogContext,
+      { ...baseContext, method: "geoip", locale: geoLocale, country },
       "[I18nHandler] Locale detectado vía GeoIP."
     );
-    return geoLocale as AppLocale;
+    return geoLocale;
   }
 
   edgeLogger.warn(
-    { correlationId } as LogContext,
+    baseContext,
     "[I18nHandler] No se pudo determinar el locale por ningún método."
   );
   return undefined;
 }
 
-/**
- * @public
- * @function handleI18n
- * @description Manejador principal para la lógica de internacionalización del middleware.
- *              Orquesta la detección del locale y la aplicación del middleware de `next-intl`.
- *              Redirige a una página de selección de idioma si no se puede determinar
- *              un locale válido. **Recibe el `correlationId` explícitamente para trazabilidad.**
- * @param {NextRequest} request - El objeto de la petición entrante.
- * @param {string | undefined} correlationId - El ID de correlación de la petición, pasado explícitamente desde el middleware principal.
- * @returns {Promise<NextResponse>} La respuesta del middleware de `next-intl` o una redirección.
- */
 export async function handleI18n(
   request: NextRequest,
-  correlationId: string | undefined // FIRMA CORREGIDA: Ahora acepta correlationId
+  correlationId: string
 ): Promise<NextResponse> {
-  // USO DE CORRELATIONID: Se usa el parámetro recibido.
-  // const currentCorrelationId = getCorrelationId(); // REMOVIDO
-
   const { pathname } = request.nextUrl;
+  const baseContext: LogContext = { component: "I18nHandler", correlationId };
 
-  // Permite pasar la página de selección de idioma sin ser redirigida de nuevo.
-  if (pathname.startsWith("/select-language")) {
+  const isExcludedPath = pathname.startsWith("/select-language");
+  if (isExcludedPath) {
     edgeLogger.trace(
-      { path: pathname, correlationId } as LogContext,
-      "[I18nHandler] Saltando procesamiento de i18n para /select-language."
+      { ...baseContext, path: pathname },
+      "[I18nHandler] Saltando procesamiento de i18n para ruta excluida."
     );
     return NextResponse.next();
   }
 
-  // PASAMOS CORRELATIONID A getLocaleFromRequest
   const locale = getLocaleFromRequest(request, correlationId);
 
   if (!locale) {
     const url = request.nextUrl.clone();
     url.pathname = "/select-language";
     edgeLogger.warn(
-      { path: pathname, correlationId } as LogContext,
-      "[I18nHandler] No se pudo determinar el locale. Redireccionando a la página de selección de idioma."
+      { ...baseContext, path: pathname },
+      "[I18nHandler] Redireccionando a /select-language."
     );
     return NextResponse.redirect(url);
   }
 
-  // Crea el middleware de next-intl con la configuración SSoT.
-  const handle = createNextIntlMiddleware({
-    locales, // SSoT de src/lib/navigation.ts
-    localePrefix, // SSoT de src/lib/navigation.ts
-    pathnames, // SSoT de src/lib/navigation.ts
-    defaultLocale, // SSoT de src/lib/navigation.ts
+  const nextIntlMiddleware = createNextIntlMiddleware({
+    locales: [...locales],
+    localePrefix,
+    pathnames,
+    defaultLocale,
   });
 
-  const response = handle(request);
-  response.headers.set("x-app-locale", locale); // Añadir cabecera para observabilidad
+  const response = nextIntlMiddleware(request);
+  response.headers.set("x-app-locale", locale);
 
   edgeLogger.trace(
-    { locale, path: pathname, correlationId } as LogContext,
-    "[I18nHandler] Procesamiento de i18n completado. Locale establecido."
+    { ...baseContext, locale, path: pathname },
+    "[I18nHandler] Procesamiento de i18n completado."
   );
 
   return response;

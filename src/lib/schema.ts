@@ -2,36 +2,29 @@
 /**
  * @file schema.ts
  * @description Módulo de utilidades SSoT para generar objetos de datos
- *              estructurados (JSON-LD) conformes con Schema.org.
- * @version 5.0.0
+ *              estructurados (JSON-LD). Refactorizado para utilizar Inyección
+ *              de Dependencias Explícita, recibiendo el logger transaccional
+ *              en cada una de sus funciones.
+ * @version 7.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/lib/schema.ts.md
  */
 import "server-only";
-import { serverLogger } from "@/lib/logger";
+
+import type pino from "pino";
 import { type PostData } from "./blog";
 
 // --- SSoT de Constantes del Módulo ---
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 const BRAND_NAME = "Curcumin+";
 
-/**
- * @interface ReviewData
- * @description Contrato de datos para la generación de un schema de Review.
- */
 interface ReviewData {
   authorName: string;
   reviewBody: string;
   ratingValue: number;
 }
 
-/**
- * @public
- * @function generateProductSchema
- * @description Genera un objeto JSON-LD para el schema `Product`.
- * @returns {object} El objeto de schema.
- */
-export function generateProductSchema() {
+export function generateProductSchema(logger: pino.Logger) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -46,18 +39,14 @@ export function generateProductSchema() {
       url: `${BASE_URL}/#order-form`,
     },
   };
-  serverLogger.trace({ schemaType: "Product" }, "Gerado schema de Produto.");
+  logger.trace(
+    { component: "SchemaGenerator", schemaType: "Product" },
+    "Generado schema de Producto."
+  );
   return schema;
 }
 
-/**
- * @public
- * @function generateReviewSchema
- * @description Genera un objeto JSON-LD para el schema `Review`.
- * @param {ReviewData} data - Los datos de la reseña.
- * @returns {object} El objeto de schema.
- */
-export function generateReviewSchema(data: ReviewData) {
+export function generateReviewSchema(logger: pino.Logger, data: ReviewData) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Review",
@@ -74,19 +63,18 @@ export function generateReviewSchema(data: ReviewData) {
       image: `${BASE_URL}/img/produto-curcuma-hero.png`,
     },
   };
-  serverLogger.trace({ schemaType: "Review" }, "Gerado schema de Review.");
+  logger.trace(
+    { component: "SchemaGenerator", schemaType: "Review" },
+    "Generado schema de Review."
+  );
   return schema;
 }
 
-/**
- * @public
- * @function generateBlogPostingSchema
- * @description Genera un objeto JSON-LD para el schema `BlogPosting`.
- * @param {PostData} post - Los datos completos del post.
- * @param {string} locale - El locale del post para construir la URL canónica.
- * @returns {object} El objeto de schema.
- */
-export function generateBlogPostingSchema(post: PostData, locale: string) {
+export function generateBlogPostingSchema(
+  logger: pino.Logger,
+  post: PostData,
+  locale: string
+) {
   const fullUrl = `${BASE_URL}/${locale}/blog/${post.slug}`;
 
   const schema = {
@@ -106,11 +94,15 @@ export function generateBlogPostingSchema(post: PostData, locale: string) {
       },
     },
     datePublished: post.date,
-    dateModified: post.date, // Idealmente, se usaría una fecha de modificación si existiera.
+    dateModified: post.date,
   };
-  serverLogger.trace(
-    { schemaType: "BlogPosting", slug: post.slug },
-    "Gerado schema de BlogPosting."
+  logger.trace(
+    {
+      component: "SchemaGenerator",
+      schemaType: "BlogPosting",
+      slug: post.slug,
+    },
+    "Generado schema de BlogPosting."
   );
   return schema;
 }

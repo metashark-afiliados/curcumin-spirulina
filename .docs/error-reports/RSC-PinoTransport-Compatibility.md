@@ -1,67 +1,55 @@
-<!-- .docs/error-reports/RSC-PinoTransport-Compatibility.md -->
+// .docs/error-reports/RSC-PinoTransport-Compatibility.md
 /**
  * @file .docs/error-reports/RSC-PinoTransport-Compatibility.md
- * @description Reporte de Error Canónico: Conflicto de Compatibilidad entre Pino.transport y React Server Components (RSC) en Next.js.
- *              Este documento detalla un error crítico encontrado durante el desarrollo, su causa raíz holística,
- *              la solución implementada y la justificación arquitectónica, adhiriéndose al principio de "Falla Limpio, Falla Observable".
+ * @description Reporte de Error Canónico: Conflicto de Compatibilidad entre `pino`
+ *              (con `AsyncLocalStorage`) y el ciclo de vida de renderizado de
+ *              React Server Components (RSC) en Next.js con `next-intl`.
  * @author L.I.A. Legacy
  * @version 1.0.0
  * @date 2025-09-06
  */
-# Reporte de Error: `RSC-PinoTransport-Compatibility`
+# Reporte de Error: `RSC-AsyncLocalStorage-Compatibility`
 
 ## 1. Título del Error
 
-`TypeError: pino.transport is not a function` y `Error: the worker has exited` en el entorno de desarrollo de Next.js (middleware/RSC).
+`TypeError: Invalid value used as weak map key` durante el renderizado del lado del servidor de páginas del App Router, específicamente en la función `generateMetadata`.
 
 ## 2. Descripción del Problema
 
-Durante la ejecución de `pnpm run dev`, el proceso fallaba catastróficamente con una serie de errores recurrentes que indicaban problemas con `pino.transport` y `worker threads`:
+Durante la ejecución de `pnpm run dev`, el proceso de renderizado de la página fallaba con un error `500`, mostrando repetidamente el error `TypeError: Invalid value used as weak map key` en la consola. La traza de la pila apuntaba a interacciones entre el motor de Next.js, la librería `next-intl` y nuestro sistema de logging.
 
-*   `TypeError: pino__WEBPACK_IMPORTED_MODULE_0___default(...).transport is not a function`
-*   `Error: Cannot find module '.../lib/worker.js'`
-*   `Error: the worker thread exited`
-*   `TypeError: Invalid value used as weak map key` (en `generateMetadata` y `src/i18n.ts`)
+## 3. Historial de Depuración e Hipótesis
 
-Estos errores se manifestaban específicamente cuando el `serverLogger` (configurado con `pino`) era importado en módulos que se ejecutaban en el Edge Runtime (middleware) o en contextos de React Server Components (RSC) durante la fase de Server-Side Rendering (SSR) o Static Site Generation (SSG).
+El proceso de depuración siguió un análisis profundo e incremental, descartando hipótesis hasta llegar a la causa raíz.
 
-## 3. Causa Raíz Holística (Análisis Profundo y Persistente)
+### Hipótesis 1: `pino.transport` es incompatible (Parcialmente Correcta)
 
-La causa raíz principal era una **incompatibilidad fundamental entre la forma en que `pino.transport` (especialmente `pino-pretty` u otros transportes que utilizan `worker threads`) opera y el entorno de ejecución de React Server Components (RSC) de Next.js**.
+*   **Observación:** El proyecto de referencia `nextjs-pino-log-demo-main` utilizaba un pipe externo (`| pino-pretty`) en lugar de `pino.transport`.
+*   **Acción:** Se implementó el "Patrón Guardián" en `src/lib/logger.ts`, que desactivaba el logging si no había un contexto `AsyncLocalStorage`.
+*   **Resultado:** El error persistió. **Conclusión:** Aunque la incompatibilidad de `pino.transport` con RSC es real, no era la causa raíz de *este* error específico.
 
-*   **Pino y `worker threads`:** La función `pino.transport` está diseñada para delegar el formateo y envío de logs a un proceso separado o a un `worker thread` de Node.js. Esto es eficiente para la producción, ya que evita bloquear el hilo principal.
-*   **Next.js RSC y SSR:** Los Server Components y las funciones como `generateMetadata` o `getServerSideProps` (y sus equivalentes en el App Router) se ejecutan en un entorno de Node.js. Sin embargo, Next.js puede optimizar esto ejecutando partes de estos en `worker threads` o en un entorno altamente optimizado para el rendimiento (`RSC`).
-*   **Limitaciones del `worker thread` / RSC:** El `worker thread` de Node.js (y el entorno RSC) tiene un contexto de módulos y un acceso al sistema de archivos más restringido que el proceso principal. Cuando `pino.transport` intentaba iniciar su propio `worker thread` o cargar sus dependencias (`lib/worker.js`) dentro de este entorno ya "workerizado" o restringido de Next.js/RSC, las dependencias no se resolvían correctamente o el `worker thread` interno de `pino` fallaba al iniciarse.
-*   **Error de `TypeError: Invalid value used as weak map key`:** Este era un síntoma secundario. Cuando el `serverLogger` fallaba (`the worker has exited`), cualquier intento posterior de usar el logger (o un objeto de logger corrupto) en el flujo de Next.js, especialmente cuando se pasaba a través de los límites del RSC, resultaba en que Next.js intentaba usar una instancia de objeto no serializable o inválida como clave en sus `WeakMaps` internos, causando el `TypeError`.
+### Hipótesis 2: El `Proxy` del Logger contamina `next-intl` (Parcialmente Correcta)
 
-En resumen, se intentaba usar una funcionalidad de Pino (transporte con workers) en un entorno de Next.js (RSC/SSR) que no la soportaba de la manera esperada, lo que llevaba a un fallo en cascada del sistema de logging y a la inestabilidad de la aplicación.
+*   **Observación:** El error ocurría después de llamar a `getTranslations` de `next-intl` desde un contexto con `AsyncLocalStorage` activo.
+*   **Acción:** Se refactorizó `i18n.ts` para que fuera una función pura, sin logging ni contexto `AsyncLocalStorage`, y se implementó el "Patrón de Aislamiento Contextual" en las páginas para llamar a `getTranslations` *antes* de establecer el contexto de logging.
+*   **Resultado:** El error persistió. **Conclusión:** El problema no era el logging *dentro* de `i18n.ts`, sino la existencia misma del contexto `AsyncLocalStorage` durante la ejecución de `next-intl`.
 
-## 4. Solución Implementada
+## 4. Causa Raíz Holística (Definitiva)
 
-La solución se implementó de forma holística en dos aparatos clave:
+La causa raíz es un **conflicto de contextos asíncronos anidados**. La librería `next-intl` y/o el motor de renderizado de Next.js utilizan muy probablemente su propia instancia interna de `AsyncLocalStorage` para gestionar el `locale` y otros datos de la petición.
 
-1.  **`src/lib/logger.ts` (Aparato Refactorizado: `version 5.2.0`)**
-    *   **Acción:** Se **eliminó completamente el uso de `pino.transport`** del `pinoConfig`.
-    *   **Justificación:** Al no configurar un transporte explícito, `pino` por defecto emite logs estructurados en formato JSON directamente a `stdout`. Este es el patrón más compatible y robusto para Next.js App Router (RSC, Edge, SSR, SSG), ya que evita la creación de `worker threads` internos de Pino que chocaban con el entorno de Next.js. Esto resolvió directamente el `TypeError: pino.transport is not a function` y los errores de `worker has exited`.
+Cuando envolvemos `generateMetadata` o una página en nuestro propio `storage.run()`, creamos un contexto `AsyncLocalStorage` anidado. El motor de Next.js, al ejecutar `getTranslations` dentro de nuestro contexto, se confunde, intenta operar con el contexto incorrecto y termina pasando un valor inválido (probablemente relacionado con nuestro `childLogger`) a una de sus `WeakMap` internas, provocando el `TypeError`.
 
-2.  **`package.json` (Aparato Refactorizado: `version 2.3.0`)**
-    *   **Acción:** El script de desarrollo `dev` fue modificado de `next dev` a `next dev | pnpm pino-pretty`.
-    *   **Justificación:** Esta modificación permite que el `serverLogger` de Pino emita JSON crudo a `stdout`, y luego la utilidad `pino-pretty` (ejecutada como un proceso de shell separado, pipeado) formatea esos logs JSON a un formato legible en la consola. Esto mantiene la deseada legibilidad de los logs en desarrollo sin que `pino` intente gestionar `worker threads` internamente dentro del proceso de Next.js.
+**En resumen, la propagación de contexto implícita mediante `AsyncLocalStorage` es demasiado invasiva e incompatible con el funcionamiento interno de `next-intl` en el ciclo de vida de renderizado de Next.js.**
 
-## 5. Justificación de la Refactorización
+## 5. Solución Final Implementada
 
-*   **Compatibilidad del Runtime:** La modificación asegura que el sistema de logging de servidor sea totalmente compatible con el entorno de ejecución de Next.js (incluyendo RSC y SSR), eliminando las dependencias problemáticas de `worker threads` de `pino.transport`.
-*   **Estabilidad y Resiliencia:** Resolver el fallo del logger era crítico, ya que su inoperabilidad causaba efectos secundarios como el `TypeError: Invalid value used as weak map key` en `generateMetadata`. La aplicación ahora puede ejecutarse y loguear de forma estable.
-*   **Full Observabilidad:** Se mantiene la capacidad de emitir logs ricos en contexto (con `correlationId` y censura de `PII`) en el servidor, que son capturados y procesados externamente por Next.js/Vercel. La legibilidad en desarrollo se restaura a través de la externalización de `pino-pretty`.
-*   **Principio de Responsabilidad Única:** Se clarifica la responsabilidad de `pino` (emitir logs JSON) y se delega el formateo a una herramienta externa en la fase de desarrollo.
+La solución es abandonar la propagación de contexto *implícita* y adoptar un patrón de **Inyección de Dependencias explícita** para la observabilidad.
 
-## 6. Pruebas del Snapshot o Última Refactorización
+1.  **Eliminación de `AsyncLocalStorage`:** Se refactorizará `src/lib/logger.ts` para eliminar `AsyncLocalStorage` y el `Proxy`. El `logger` exportado será la instancia base de `pino`.
+2.  **`withCorrelationId` se convierte en un Inyector:** El HOC `withCorrelationId` ya no usará `storage.run()`. Su nueva responsabilidad será generar un `requestId`, crear un `childLogger` con ese ID, y **pasarlo como primer argumento** a la función que envuelve.
+3.  **Refactorización de Consumidores:** Todos los aparatos (páginas, sitemap) serán refactorizados para aceptar un `logger` como parámetro y utilizarlo, en lugar del logger global.
+4.  **Middleware:** El `middleware` generará el `correlationId` y lo pasará explícitamente a sus manejadores.
 
-La evidencia directa de la resolución se vería al ejecutar `pnpm run dev` o `pnpm run build` y observar que:
-1.  Los errores `TypeError: pino.transport is not a function` ya no aparecen.
-2.  Los errores `Error: the worker has exited` y `Cannot find module .../worker.js` ya no aparecen.
-3.  Los errores `TypeError: Invalid value used as weak map key` (relacionados con el logger que fallaba) deberían haber desaparecido o reducido significativamente.
-4.  Los logs de `serverLogger` se muestran correctamente en la consola (formateados por `pino-pretty` en desarrollo, o JSON crudo en producción).
-
-Este reporte de error forma parte de nuestra estrategia de observabilidad y documentación de élite, registrando las lecciones aprendidas y las soluciones implementadas de forma transparente.
-<!-- .docs/error-reports/RSC-PinoTransport-Compatibility.md -->
+Este enfoque es más simple, más predecible, y elimina por completo el conflicto de contextos, garantizando un build exitoso.
+// .docs/error-reports/RSC-PinoTransport-Compatibility.md

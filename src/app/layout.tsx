@@ -1,33 +1,39 @@
 // src/app/layout.tsx
 /**
- * @file layout.tsx
- * @description Layout Raíz Mínimo da aplicação. Sua única responsabilidade é
- *              renderizar os componentes filhos que o Next.js fornece. Delega
- *              a responsabilidade de renderizar as tags <html> e <body> para
- *              o layout de locale para uma internacionalização correta.
- * @version 1.0.0
- * @author RaZ Podestá - MetaShark Tech
+ * @file src/app/layout.tsx
+ * @description Layout Raíz Mínimo y SSoT. Su única responsabilidad es actuar
+ *              como un "delegador radical", renderizando sus `children` sin
+ *              envolturas. Delega el control total de `<html>` y `<body>` al
+ *              layout de locale para una internacionalización correcta.
+ *              Esta es la versión final y estable post-migración de la
+ *              arquitectura de observabilidad.
+ * @author L.I.A. Legacy
+ * @version 3.0.0
+ * @see .docs-espejo/app/layout.tsx.md
  */
 import { type ReactNode } from "react";
+import { logger } from "@/lib/logger";
 
 interface RootLayoutProps {
   children: ReactNode;
 }
 
-/**
- * @component RootLayout
- * @description Um componente "pass-through" que renderiza seus filhos diretamente.
- *              Este padrão permite que layouts aninhados (como o de locale)
- *              controlem a totalidade da estrutura HTML.
- * @param {RootLayoutProps} props - As propriedades do componente.
- * @returns {React.ReactElement}
- */
 export default function RootLayout({
   children,
 }: RootLayoutProps): React.ReactElement {
-  // Na arquitetura canônica da next-intl, este layout não renderiza
-  // nada por si só, apenas atua como um ponto de entrada para os
-  // layouts aninhados que controlam a estrutura HTML completa.
+  // Esta llamada al logger es intencional y actúa como un "no-op" seguro.
+  // Se ejecuta fuera de un contexto transaccional, por lo que el logger
+  // base no emitirá el log, previniendo errores en este nivel raíz.
+  // Su propósito es de diagnóstico durante el desarrollo si fuera necesario
+  // envolver este layout en un HOC en el futuro.
+  logger.trace(
+    { component: "RootLayout" },
+    "Iniciando renderizado del layout raíz."
+  );
+
+  // En la arquitectura canónica de `next-intl`, este layout es un "pass-through" puro.
+  // Actúa como el punto de entrada que Next.js requiere, y delega inmediatamente
+  // el control a los layouts anidados (ej. `/[locale]/layout.tsx`).
   return <>{children}</>;
 }
 // src/app/layout.tsx

@@ -3,41 +3,32 @@
  * @file .docs-espejo/lib/client-logger.ts.md
  * @description Documento Espejo y SSoT conceptual para el aparato de logging del cliente.
  * @author L.I.A. Legacy
- * @version 1.0.0
+ * @version 5.0.0
  */
-# Manifiesto Conceptual: Aparato `client-logger.ts` (Client-Side)
+# Manifiesto Conceptual: Aparato `client-logger.ts` (Client-Side, SSG-Compatible)
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **Única Fuente de Verdad (SSoT) para el sistema de logging del lado del cliente**. Su propósito es proporcionar una API de logging ultra-ligera, segura y consistente para todas las operaciones que se ejecutan en el entorno del navegador (Client Components, Hooks, Event Handlers).
+Este aparato es la **SSoT para el sistema de logging del lado del cliente**. En una arquitectura de **Generación de Sitio Estático (SSG)**, su propósito es proporcionar una API de logging estructurado de alto rendimiento para todas las operaciones del navegador, con la **consola del desarrollador como su destino principal**.
 
-Como aparato soberano y atómico, sus responsabilidades son:
-
-1.  **Emisión de Logs Segura:** Utiliza un wrapper sobre los métodos nativos de `console` para emitir mensajes. Garantiza que el logging solo se realice cuando `console` y el método específico están disponibles, previniendo errores en entornos donde `console` podría ser suprimido.
-2.  **API Unificada:** Implementa la interfaz `ILogger` (desde `src/lib/types/logging.ts`), asegurando que su firma `(context: LogContext, message: string)` sea consistente con el `serverLogger`. Esto reduce la carga cognitiva y mejora la experiencia del desarrollador (DX).
-3.  **Contexto Enriquecido:** Permite adjuntar un objeto `LogContext` a cada mensaje, proporcionando información adicional estructurada que puede ser útil para la depuración en las herramientas de desarrollo del navegador.
-4.  **Optimización del Bundle:** La directiva `"use client";` al principio del archivo indica a Next.js que este módulo está destinado al cliente, asegurando que solo el código relevante se incluya en el bundle del navegador y evitando dependencias innecesarias del lado del servidor.
+Delega la recolección de errores remotos a servicios de terceros (ej. Sentry), manteniendo el logger ligero y enfocado en la observabilidad durante el desarrollo y la depuración.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un módulo de cliente puro (`"use client"`) que exporta una instancia de logger configurada.
+Es un módulo de cliente (`"use client"`) que exporta una instancia de `pino` configurada para el navegador. El flujo de transmisión a un backend propio ha sido eliminado deliberadamente para mantener la compatibilidad con SSG.
 
 ```mermaid
 graph TD
-    A["`src/lib/types/logging.ts` <br> (ILogger, LogContext)"] --> B["`src/lib/client-logger.ts`"];
-
-    B -- "1. Define `createSafeConsoleMethod`" --> C["`clientLogger` (ILogger)"];
-    C -- "2. Se expone como `clientLogger`" --> D[Client Components, Client Hooks];
-    D -- "3. Invoca `clientLogger.info({ context }, 'message')`" --> C;
-    C -- "4. Formatea y llama a `console.method()`" --> E[Consola del Navegador (Developer Tools)];
+    A[Componente Cliente] -- "1. Llama a `clientLogger.info(ctx, msg)`" --> B["`clientLogger` (Adapter `ILogger`)"];
+    B -- "2. Delega a `pinoBrowserLogger`" --> C["Instancia de Pino"];
+    C -- "3. Registra en la consola del navegador" --> D["Consola DevTools"];
 3. Contrato de API
-clientLogger: ILogger:
-Propósito: La instancia principal del logger de cliente.
-Métodos: trace (mapeado a console.debug), info, warn, error, todos siguiendo la firma (context: LogContext, message: string).
+clientLogger: ILogger: La instancia principal del logger de cliente.
+Métodos: trace, info, warn, error, fatal, todos con la firma (context: LogContext, message: string).
 4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Captura y Envío de Logs a Telemetría: Integrar clientLogger con el sistema de telemetría (como TelemetryProvider) para que los logs emitidos puedan ser agrupados y enviados a un endpoint del servidor para persistencia centralizada, especialmente los logs de warn y error.
-Filtrado Dinámico de Niveles: Permitir la configuración dinámica del nivel de log mínimo en el cliente (ej. a través de una variable de entorno inyectada en el build o una configuración remota), para poder ajustar la verbosidad en producción o staging.
-Enriquecimiento Automático de Contexto: Explorar la posibilidad de inyectar automáticamente información contextual común (ej. sessionId, browserInfo, path) en cada LogContext sin que el desarrollador tenga que pasarla explícitamente.
-Integración con Sentry (Frontend): Configurar clientLogger.error para que, además de a la consola, envíe los errores críticos a Sentry de forma estructurada.
-Formateo de Salida Personalizable: Ofrecer la posibilidad de configurar el formato de salida para la consola del navegador, permitiendo mensajes más concisos o detallados según la preferencia del desarrollador.
+Integración Directa con Sentry: Modificar los métodos error y fatal para que, además de console.error, también invoquen Sentry.captureException, combinando la observabilidad local con el poder de análisis de Sentry.
+Offloading a Web Worker: Mover la instancia de pino a un Web Worker para garantizar un impacto nulo en el hilo principal de la UI, especialmente para aplicaciones con ráfagas de logs.
+Filtrado de Datos Sensibles: Implementar una utilidad que aplique reglas de REDACTED_PATHS a los objetos de context antes de que sean registrados, como una primera línea de defensa contra la exposición de PII en logs visibles.
+Sincronización con correlationId del Servidor: Implementar un mecanismo para leer un correlationId (si es proporcionado por el servidor en un meta tag) y añadirlo a todos los logs del cliente para permitir la correlación de sesiones.
+Control de Nivel de Log Dinámico: Permitir que el browserLogLevel pueda ser sobrescrito para una sesión específica mediante un parámetro en la URL (?log_level=trace) o un comando en la consola.
 <!-- .docs-espejo/lib/client-logger.ts.md -->
