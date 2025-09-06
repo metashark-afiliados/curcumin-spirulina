@@ -3,7 +3,7 @@
  * @file .docs-espejo/app/sitemap.xml/route.ts.md
  * @description Documento Espejo y SSoT conceptual para el generador de sitemap.xml.
  * @author L.I.A. Legacy
- * @version 5.1.0
+ * @version 5.2.0
  */
 
 # Manifiesto Conceptual: Aparato `sitemap.xml/route.ts` (Route Handler)
@@ -12,7 +12,7 @@
 
 Este aparato es un **pilar fundamental de la estrategia de SEO técnico multilingüe**. Su única responsabilidad es generar dinámicamente un archivo `sitemap.xml` de élite, que informa a los motores de búsqueda sobre todas las URLs canónicas y sus traducciones disponibles.
 
-La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto. Además, su robusto sistema de logging (`serverLogger`) proporciona una observabilidad completa del proceso de generación.
+La arquitectura implementa la mejor práctica de SEO para sitios multilingües, utilizando la etiqueta `<xhtml:link rel="alternate" />` para agrupar las versiones de idioma de cada página. Esto consolida la autoridad de la página y ayuda a Google a servir la versión correcta al usuario correcto. Además, su robusto sistema de logging (`serverLogger`) proporciona una observabilidad completa del proceso de generación. **Se ha configurado explícitamente para forzar la estaticidad (`export const dynamic = 'force-static';`) para optimizar el prerrenderizado durante el build, evitando dependencias dinámicas innecesarias.**
 
 ## 2. Arquitectura y Flujo de Ejecución
 
@@ -21,22 +21,23 @@ Es un **Route Handler** de Next.js blindado y resiliente, que agrupa las URLs po
 ```mermaid
 graph TD
     A[Petición a /sitemap.xml] --> B["`GET()` handler"];
-    B -- "1. `serverLogger.info()` (Inicio)" --> C[Registro de Observabilidad];
-    B -- "2. Inicia bloque `try/catch`" --> D{Lógica de Generación};
+    B -- "1. `export const dynamic = 'force-static'`" --> B; // Directiva para Next.js
+    B -- "2. `serverLogger.info()` (Inicio con `BASE_URL`)" --> C[Registro de Observabilidad];
+    B -- "3. Inicia bloque `try/catch`" --> D{Lógica de Generación};
     subgraph "Lógica de Generación"
-        D -- "3. `serverLogger.trace()` (Estáticas)" --> C;
-        D -- "4. Agrupa páginas estáticas por ruta" --> E["`generateStaticEntries()`"];
-        D -- "5. `serverLogger.trace()` (Blog)" --> C;
-        D -- "6. Agrupa posts por slug" --> F["`generateBlogEntries()`"];
+        D -- "4. `serverLogger.trace()` (Estáticas)" --> C;
+        D -- "5. Agrupa páginas estáticas por ruta" --> E["`generateStaticEntries()`"];
+        D -- "6. `serverLogger.trace()` (Blog)" --> C;
+        D -- "7. Agrupa posts por slug" --> F["`generateBlogEntries()`"];
         F -- Errores por Locale de Blog --> G["`serverLogger.error()`"];
         E & F --> H[Array `allEntries`];
-        H -- "7. `serverLogger.trace()` (Renderizado)" --> C;
-        H -- "8. Es renderizado por" --> I["`renderSitemap()`"];
+        H -- "8. `serverLogger.trace()` (Renderizado)" --> C;
+        H -- "9. Es renderizado por" --> I["`renderSitemap()`"];
         I -- `canonicalUrl` ausente --> J["`serverLogger.warn()`"];
     end
     I --> K[Template XML final con `<xhtml:link>`];
     K --> L[Retorna `new Response()` con `Content-Type: application/xml`];
-    L -- "9. `serverLogger.info()` (Éxito)" --> C;
+    L -- "10. `serverLogger.info()` (Éxito)" --> C;
     D -- En caso de fallo --> M["`serverLogger.error()`"];
     M --> N[Retorna `new Response()` con `status: 500`];
 La arquitectura es ahora resiliente a fallos completos, evitando entregar un sitemap corrupto o incompleto, y proporcionando logs detallados para el diagnóstico.
