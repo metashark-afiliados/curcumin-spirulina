@@ -1,14 +1,15 @@
 // src/middleware/handlers/index.ts
 /**
- * @file index.ts
+ * @file src/middleware/handlers/index.ts
  * @description Manifiesto (Barrel File) y API pública para todos los manejadores
- *              del middleware. Ensambla y exporta todos los aparatos de lógica
- *              atómicos del directorio, proveyendo una fachada limpia para el
+ *              del middleware. Su única responsabilidad es ensamblar y exportar
+ *              todos los aparatos de lógica atómicos del directorio, adhiriéndose
+ *              a la "Filosofía LEGO" y proveyendo una fachada limpia para el
  *              orquestador principal.
+ * @author IA Ingeniera de Software Senior v2.0
  * @version 1.0.0
- * @author RaZ Podestá - MetaShark Tech
- * @see src/middleware.ts (Consumidor)
+ * @see .docs-espejo/middleware/handlers/index.ts.md
  */
-export { handleI18n } from "./i18n";
-// A medida que se añadan nuevos manejadores (auth, telemetry, etc.), se exportarán aquí.
+export * from "./i18n";
+export * from "./telemetry";
 // src/middleware/handlers/index.ts

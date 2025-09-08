@@ -1,35 +1,42 @@
 // src/components/blog/CallToAction.tsx
 /**
  * @file src/components/blog/CallToAction.tsx
- * @description Aparato de UI soberano, resiliente y de conversión. Nivelado para
- *              una adherencia estricta a la API de logging unificada y un
- *              enriquecimiento de contexto de error superior, garantizando una
- *              observabilidad de élite.
- * @version 6.0.0
+ * @description Aparato de UI soberano, resiliente y de conversión. Nivelado a
+ *              la arquitectura de logging de ConvertiKit e instrumentado con
+ *              el sistema de telemetría de élite.
  * @author L.I.A. Legacy
+ * @version 7.0.0
  * @see .docs-espejo/components/blog/CallToAction.tsx.md
  */
 "use client";
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useId, useCallback } from "react";
-import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
-import { Button } from "@/components/ui/Button";
+import { useCallback, useId } from "react";
+
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging";
+import { Link } from "@/lib/navigation";
 import {
   CallToActionContentSchema,
   type CallToActionContent,
 } from "@/lib/validators/i18n/CallToAction.schema";
-import { Link } from "@/lib/navigation";
-import { useTelemetry } from "@/hooks/useTelemetry";
+import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
+import { Button } from "@/components/ui/Button";
 
+/**
+ * @component CallToAction
+ * @description Un organismo de UI soberano diseñado para actuar como un puente
+ *              entre el contenido informativo (blog) y el funnel de conversión principal.
+ *              Obtiene, valida y renderiza su propio contenido, y registra
+ *              las interacciones clave del usuario.
+ * @returns {React.ReactElement | null} El componente renderizado o null si la
+ *          validación del contenido falla.
+ */
 export function CallToAction(): React.ReactElement | null {
   const t = useTranslations("components.blog.CallToAction");
   const titleId = useId();
   const { trackEvent } = useTelemetry();
-  const baseContext: LogContext = { component: "CallToAction" };
   let content: CallToActionContent;
 
   try {
@@ -41,26 +48,28 @@ export function CallToAction(): React.ReactElement | null {
     };
     const validation = CallToActionContentSchema.safeParse(rawContent);
     if (!validation.success) {
-      // Se enriquece el contexto de error con los datos que fallaron.
       clientLogger.error(
-        {
-          ...baseContext,
-          error: validation.error.flatten(),
-          rawContent,
-        },
-        "Fallo en la validación de contenido. No se renderizará."
+        "[CallToAction]",
+        "Fallo en la validación de contenido. No se renderizará.",
+        { error: validation.error.flatten(), rawContent }
       );
       return null;
     }
     content = validation.data;
   } catch (error) {
     clientLogger.error(
-      { ...baseContext, error },
-      "Error al obtener contenido. No se renderizará."
+      "[CallToAction]",
+      "Error al obtener contenido. No se renderizará.",
+      { error }
     );
     return null;
   }
 
+  /**
+   * @function handleCtaClick
+   * @description Callback para registrar el evento de telemetría cuando el
+   *              usuario hace clic en el botón de llamada a la acción.
+   */
   const handleCtaClick = useCallback(() => {
     trackEvent("CTA_CLICK", {
       source: "blog_call_to_action",
@@ -69,7 +78,7 @@ export function CallToAction(): React.ReactElement | null {
   }, [trackEvent]);
 
   clientLogger.trace(
-    baseContext,
+    "[CallToAction]",
     "Renderizando componente de CTA soberano, validado e instrumentado."
   );
 

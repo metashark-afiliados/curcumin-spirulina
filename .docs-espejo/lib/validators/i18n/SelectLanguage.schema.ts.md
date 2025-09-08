@@ -1,46 +1,40 @@
-<!-- .docs-espejo/lib/validators/i18n/SelectLanguage.schema.ts.md -->
+// .docs-espejo/lib/validators/i18n/SelectLanguage.schema.ts.md
 /**
  * @file .docs-espejo/lib/validators/i18n/SelectLanguage.schema.ts.md
- * @description Documento Espejo y SSoT conceptual para el esquema de validación del contenido de la página de selección de idioma.
- * @author L.I.A. Legacy
- * @version 1.2.0
+ * @description Documento Espejo y SSoT conceptual para el schema de contenido de la página de selección de idioma.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 2.0.0
  */
-# Manifiesto Conceptual: Aparato `SelectLanguage.schema.ts`
+# Manifiesto Conceptual: `SelectLanguage.schema.ts`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **Única Fuente de Verdad (SSoT) y el contrato de datos** para el contenido de la página de selección de idioma (`src/app/select-language/page.tsx`). Su propósito es definir y validar la estructura esperada del archivo de mensajes JSON correspondiente (`src/messages/app/select-language.json`).
+Este aparato de validación es el **Guardián del Contrato de Contenido** para la página `select-language`. Su única responsabilidad es definir y hacer cumplir la estructura y los tipos de datos que el componente de UI (`select-language/page.tsx`) espera recibir de su archivo de mensajes.
 
-Estratégicamente, este esquema Zod garantiza que:
-1.  **Integridad del Contenido:** Los datos de traducción cargados en tiempo de ejecución cumplen con la forma esperada, previniendo errores de UI o de lógica debido a traducciones faltantes o mal formadas.
-2.  **Resiliencia:** Permite que el componente `SelectLanguagePage` implemente el "Escudo de Resiliencia", usando textos de fallback si la validación falla.
-3.  **Coherencia de Nomenclatura:** Establece los nombres canónicos para las claves de los mensajes (`title`, `countdownText`, `languages`), facilitando la colaboración y el mantenimiento.
-4.  **Validación Robusta:** Asegura que las validaciones complejas (como la de tener al menos un idioma definido) se implementen correctamente con las capacidades idiomáticas de Zod.
+Esta versión de élite es **dinámicamente consciente** de la configuración de navegación del proyecto. Se asegura de que exista una traducción para cada `locale` activo, creando una validación cruzada entre la configuración y el contenido.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un módulo de definición de esquema puro. No tiene un flujo de ejecución, sino que es consumido por el componente `SelectLanguagePage` para la validación en tiempo de ejecución.
+Es un módulo de configuración que consume la SSoT de `navigation.ts` para construir y exportar un `Zod schema` dinámico.
 
 ```mermaid
 graph TD
-    A["`src/messages/app/select-language.json` <br> (Datos crudos i18n)"] --> B["`SelectLanguageContentSchema` <br> (Schema Zod)"];
-    B --> C["`src/app/select-language/page.tsx` <br> (Componente Consumidor)"];
-    C -- "Llama a `SelectLanguageContentSchema.safeParse()`" --> D{¿Datos Válidos?};
-    D -- Sí --> E[Usa `content.data`];
-    D -- No --> F[Loguea error y usa fallbacks];
+    A["navigation.ts <br> (SSoT de locales activos)"] --> B["SelectLanguage.schema.ts"];
+    B -- "Construye un schema dinámico" --> C{Valida};
+    D["messages/app/select-language.json <br> (Datos de Contenido)"] --> C;
+    B -- "Infiere tipo estricto" --> E["select-language/page.tsx <br> (Consumidor de UI)"];
 3. Contrato de API
-SelectLanguageContentSchema: z.ZodObject<...>:
-Propósito: El objeto Zod que define y valida la estructura completa del contenido de la página de selección de idioma.
-Estructura esperada:
-title: string: El título principal de la página.
-countdownText: string: El texto del contador regresivo (espera el placeholder {seconds}).
-selectLanguageAriaLabel: string: La etiqueta ARIA para los botones de selección (espera el placeholder {language}).
-languages: z.ZodEffects<z.ZodRecord<z.ZodString, z.ZodString>, Record<string, string>, Record<string, string>>: Un objeto que mapea los códigos de locale a sus nombres traducidos (ej., "it-IT": "Italiano"). Se valida mediante .refine() para asegurar que contiene al menos una entrada.
-SelectLanguageContent: type:
-Propósito: El tipo de TypeScript inferido directamente de SelectLanguageContentSchema, proporcionando un contrato tipo-seguro para el acceso al contenido validado.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-VALIDACIÓN DE PLACEHOLDERS ESPECÍFICOS MEJORADA: Mejorar la descripción del esquema para countdownText y selectLanguageAriaLabel para que no solo mencionen los placeholders esperados ({seconds}, {language}), sino que, si Zod lo permite en futuras versiones, validar su presencia con un regex o refine más estricto, asegurando que el contenido del JSON sea siempre interpolable.
-GENERACIÓN AUTOMÁTICA DE SCHEMAS A PARTIR DE JSON: Implementar un script que, en tiempo de desarrollo, pueda generar o actualizar automáticamente estos archivos de esquema Zod a partir de los archivos JSON de mensajes. Esto mantendría el esquema siempre sincronizado con los datos reales, evitando errores manuales y la deuda técnica de mantenimiento.
-AÑADIR meta PARA generateMetadata: Aunque la página ya tiene generateMetadata, el esquema podría incluir una clave meta (ej., meta: z.object({ title: z.string(), description: z.string() })) para validar los metadatos SEO específicos de la página de selección de idioma, haciendo que el componente sea totalmente soberano en su validación de contenido relevante para el SEO.
-VALIDACIÓN DE AppLocale EN languages (Claves): Aunque z.record(z.string()) valida los valores, se podría añadir una validación de tiempo de ejecución (ej. con otro .refine()) para asegurar que las claves dentro del objeto languages (it-IT, en-US, etc.) sean realmente AppLocale válidos definidos en src/lib/navigation.ts.
-<!-- .docs-espejo/lib/validators/i18n/SelectLanguage.schema.ts.md -->
+SelectLanguageContentSchema: El objeto de schema de Zod dinámico.
+SelectLanguageContent: El tipo de TypeScript inferido, que ahora garantiza la existencia de todas las claves de locale.
+4. Zona de Melhorias Futuras
+Factoría de Schemas Genérica: La lógica de construir un objeto de schema a partir de un array de locales podría ser extraída a una función helper (createLocaleRecordSchema) para ser reutilizada por otros schemas de contenido.
+Mensajes de Error de Zod Internacionalizados: Los mensajes de error de validación podrían ser reemplazados por claves de ValidationErrors para ser traducidos.
+Schema para Banderas (Flags): Si se añade la funcionalidad de banderas, el schema podría ser extendido para validar un objeto flags que mapee locale a un emoji de bandera.
+Generación Automática: Un script podría generar este archivo completo a partir de una plantilla y la configuración de navigation.ts.
+Refinamiento del Placeholder Check: El .refine podría ser reemplazado por un tipo de Zod personalizado (z.string().placeholder("{key}")) para una mayor reutilización.
+Documentación de Placeholders: Utilizar .describe() en Zod para documentar explícitamente qué placeholders se esperan en cada clave.
+Pruebas Unitarias del Schema: Escribir pruebas para el schema que verifiquen que valida correctamente los datos correctos y rechaza los incorrectos, incluyendo la falta de un locale.
+Versión del Schema: Añadir un campo version al schema para gestionar futuras migraciones de la estructura del contenido.
+Herramientas de Linter para i18n: Integrar un linter de i18n que utilice este schema para proporcionar feedback en tiempo real a los traductores.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/lib/validators/i18n/SelectLanguage.schema.ts.md

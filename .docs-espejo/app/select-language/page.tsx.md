@@ -1,57 +1,51 @@
-<!-- .docs-espejo/app/select-language/page.tsx.md -->
+// .docs-espejo/app/select-language/page.tsx.md
 /**
  * @file .docs-espejo/app/select-language/page.tsx.md
  * @description Documento Espejo y SSoT conceptual para la página de selección de idioma.
- * @author L.I.A. Legacy
- * @version 4.1.0
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 2.0.0
  */
-# Manifiesto Conceptual: Aparato `select-language/page.tsx` (Página de Selección de Idioma)
+# Manifiesto Conceptual: `select-language/page.tsx`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **página de "puerta de entrada" resiliente y accesible** de la aplicación, diseñada para guiar al usuario a seleccionar su idioma preferido cuando este no puede ser determinado automáticamente. Su propósito es triple:
+Este aparato es el **componente de UI para el fallback de internacionalización**. Su único propósito es presentarse cuando la detección automática de idioma falla, ofreciendo al usuario una opción explícita y evitando una experiencia de usuario frustrante en un idioma inesperado.
 
-1.  **Detección y Redirección Automática:** Presentar una cuenta regresiva que, al expirar, redirige automáticamente al usuario al `defaultLocale`, garantizando que siempre haya un punto de partida.
-2.  **Selección Manual de Idioma:** Ofrecer una lista clara de los locales soportados, permitiendo al usuario elegir manualmente su idioma y guardar esta preferencia en una cookie (`NEXT_LOCALE`).
-3.  **Resiliencia y Accesibilidad:** Garantizar que la página se renderice correctamente incluso si hay problemas con la carga o validación del contenido de internacionalización, utilizando textos de fallback. La UI está diseñada para ser accesible y clara.
-
-Como Client Component, orquesta la interacción del usuario, la gestión de cookies y la navegación del router. **Está configurada explícitamente como una ruta dinámica (`export const dynamic = 'force-dynamic';`)** debido a su uso de `useCookies` y `useRouter`, que acceden a información dinámica de la petición. El reporte de que no puede ser estática (`Dynamic server usage`) es el comportamiento esperado por el proceso de `build` de Next.js (`output: 'export'`).
+Es un componente de cliente que gestiona su propio estado (el temporizador) y efectos secundarios (la redirección). Actúa como una "sala de espera" temporal antes de dirigir al usuario al sitio principal. Como componente soberano, es responsable de cargar y validar su propio contenido de i18n.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un **Client Component (`"use client"`) soberano** que sigue el patrón "Orquestador de Interacción y Validaciones".
+La lógica se basa en un temporizador, la interacción del usuario y un cargador de contenido resiliente.
 
 ```mermaid
 graph TD
-    A[Usuario llega a `/select-language`] --> B["`SelectLanguagePage` (Componente Cliente)"];
-    B -- "1. `export const dynamic = 'force-dynamic';`" --> B; // Directiva para Next.js (comportamiento esperado)
-    B -- "2. Invoca `useTranslations('app.selectLanguage')` y `t.raw('')`" --> C[Contenido i18n];
-    C -- "3. Valida contra `SelectLanguageContentSchema`" --> D{¿Validación OK?};
-    D -- Sí --> E[Usa `content.data`];
-    D -- No --> F["`clientLogger.error()` y usa `fallbackContent`"];
-    F --> E;
-
-    E --> G["`useState(5)` (countdown)"];
-    E --> H["`useCallback(handleLanguageSelect)`"];
-    H -- "4. `clientLogger.info()`" --> I[Registro de Evento];
-    H -- "5. `cookies.set()`" --> J[Persistencia en Cookie];
-    H -- "6. `router.push('/')`" --> K[Redirección];
-
-    E --> L["`useEffect` (gestiona `countdown`)"];
-    L -- `countdown === 0` --> M["`clientLogger.warn()`"];
-    M --> H; // Llama a `handleLanguageSelect(defaultLocale)`
-
-    E --> N["Renderiza UI (Título, CountdownCircle, Botones de Idioma)"];
-    B -- "Utiliza `clientLogger.trace()`" --> I;
+    subgraph "Fase de Carga"
+        A[Componente Monta] --> B(Invoca `useTranslations`);
+        B --> C{Valida contenido con `SelectLanguageContentSchema`};
+        C -- Falla --> D[Renderiza Fallback / No renderiza nada];
+        C -- Éxito --> E[Renderiza UI con contenido i18n];
+    end
+    subgraph "Fase de Interacción"
+        E --> F(Inicia temporizador de 5s);
+        F --> G{Usuario hace clic en un idioma?};
+        G -- Sí --> H[Establece Cookie `NEXT_LOCALE`];
+        H --> J[Redirige a `/`];
+        G -- No --> I{Temporizador llega a 0?};
+        I -- Sí --> J;
+        I -- No --> F;
+    end
 3. Contrato de API
-Props de Entrada:
-Ninguna. Es un componente de página que es orquestado por el App Router de Next.js.
-Contrato de Datos (desde lib/validators/i18n/SelectLanguage.schema.ts):
-El contenido de internacionalización (t.raw("")) debe cumplir con la estructura definida en SelectLanguageContentSchema.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Detección de Locale Automática con Feedback Visual: Aunque el middleware ya intenta detectar el locale, esta página podría mostrar un mensaje "Detectando tu idioma preferido..." mientras se carga la API de GeoIP o se procesan los headers, y luego resaltar la opción de idioma detectada antes de la redirección.
-"No, gracias, prefiero no seleccionar" (Opción de Omisión): Añadir una opción "Continuar en [Idioma por defecto]" o "Más tarde" que simplemente cierre la pantalla de selección sin forzar una elección o redirección inmediata, mejorando la flexibilidad para el usuario.
-Diseño Responsivo Avanzado y Animaciones: Optimizar aún más el diseño para diferentes tamaños de pantalla, quizás con un carrusel de idiomas en pantallas muy pequeñas o un layout de cuadrícula más denso para pantallas grandes. Añadir animaciones de framer-motion para transiciones más suaves entre estados.
-PRECARGA INTELIGENTE DE RECURSOS DEL defaultLocale: Para el idioma por defecto, precargar los recursos críticos (imágenes, fuentes, datos de i18n) en segundo plano mientras el usuario está en la página de selección. Esto haría que la carga de la página principal para el defaultLocale sea instantánea y mejoraría el LCP.
-TESTES A/B DE UX DE SELECCIÓN: Utilizar un sistema de feature flags para probar diferentes layouts o flujos de interacción en la página de selección de idioma (ej., ¿es más efectiva la redirección automática o una selección manual obligatoria?) para optimizar la conversión.
-<!-- .docs-espejo/app/select-language/page.tsx.md -->
+Entradas: Es un componente de página, por lo que recibe params y searchParams de Next.js.
+Salidas: No exporta ninguna funcionalidad. Su salida es la renderización de la UI y los efectos secundarios de redirección.
+4. Zona de Melhorias Futuras
+Redirección a la URL Original: Modificar el middleware para que añada un parámetro ?next=/ruta-original. Esta página leería ese parámetro y redirigiría al usuario a su destino original después de seleccionar un idioma.
+Animación del Temporizador: Añadir una barra de progreso visual o una animación más elaborada para el temporizador.
+Accesibilidad del Temporizador: Utilizar atributos aria-live para anunciar el tiempo restante a los lectores de pantalla.
+Desactivación del Temporizador: Pausar la cuenta regresiva si el usuario interactúa con la página (ej. onMouseEnter sobre los botones).
+Añadir Banderas: Incluir emojis de banderas junto al nombre de cada idioma para una identificación visual más rápida.
+Pruebas Unitarias: Escribir pruebas unitarias con Vitest y Testing Library para simular el paso del tiempo y verificar que las funciones de redirección y establecimiento de cookies se llaman correctamente.
+Logging de Telemetría: Registrar un evento (LANGUAGE_SELECTED o LANGUAGE_DEFAULTED) para analizar qué tan a menudo los usuarios eligen un idioma versus dejar que el temporizador expire.
+Diseño Responsivo Avanzado: Mejorar el layout para pantallas ultra-anchas o muy pequeñas.
+Componente Atómico LanguageButton: Extraer la lógica del botón de selección de idioma a su propio componente para mayor reutilización.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/app/select-language/page.tsx.md

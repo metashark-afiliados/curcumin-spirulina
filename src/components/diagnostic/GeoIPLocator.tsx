@@ -2,10 +2,9 @@
 /**
  * @file src/components/diagnostic/GeoIPLocator.tsx
  * @description Aparato de diagnóstico y proveedor de contexto resiliente.
- *              Nivelado para asegurar la adherencia estricta a la API de
- *              logging del cliente unificada, garantizando una observabilidad
- *              consistente y correlacionada.
- * @version 5.0.0
+ *              Nivelado a la arquitectura de logging de ConvertiKit,
+ *              consumiendo el logger unificado con su firma nativa.
+ * @version 6.0.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/diagnostic/GeoIPLocator.tsx.md
  */
@@ -18,10 +17,9 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { clientLogger } from "@/lib/client-logger";
+import { clientLogger } from "@/lib/client-logger"; // <-- IMPORTACIÓN CORREGIDA
 import { GeoIPResponseSchema } from "@/lib/validators/GeoIP.schema";
 import { type ValidationErrorKey } from "@/lib/types/actions";
-import { type LogContext } from "@/lib/types/logging";
 
 const GEOIP_API_URL =
   process.env.NEXT_PUBLIC_GEOIP_API_URL || "https://ipapi.co/json/";
@@ -40,22 +38,18 @@ interface GeoIPContextState {
 const GeoIPContext = createContext<GeoIPContextState | undefined>(undefined);
 
 async function fetchGeoIPData(): Promise<GeoIPData> {
-  const baseContext = { component: "GeoIPLocator" };
   clientLogger.info(
-    { ...baseContext, apiUrl: GEOIP_API_URL },
-    "Iniciando obtención de datos de GeoIP."
+    "[GeoIPLocator]",
+    "Iniciando obtención de datos de GeoIP.",
+    { apiUrl: GEOIP_API_URL }
   );
 
   const response = await fetch(GEOIP_API_URL);
   if (!response.ok) {
-    const errorContext: LogContext = {
-      ...baseContext,
-      status: response.status,
-      statusText: response.statusText,
-    };
     clientLogger.error(
-      errorContext,
-      `Fallo en la respuesta de la API de GeoIP.`
+      "[GeoIPLocator]",
+      `Fallo en la respuesta de la API de GeoIP.`,
+      { status: response.status, statusText: response.statusText }
     );
     throw new Error(`API response status: ${response.status}`);
   }
@@ -63,22 +57,17 @@ async function fetchGeoIPData(): Promise<GeoIPData> {
 
   const validation = GeoIPResponseSchema.safeParse(data);
   if (!validation.success) {
-    const errorContext: LogContext = {
-      ...baseContext,
+    clientLogger.error("[GeoIPLocator]", "Respuesta de API GeoIP inválida.", {
       error: validation.error.flatten(),
       rawData: data,
-    };
-    clientLogger.error(errorContext, "Respuesta de API GeoIP inválida.");
+    });
     throw new Error(`Invalid GeoIP API response: ${validation.error.message}`);
   }
 
-  const successContext: LogContext = {
-    ...baseContext,
-    country: validation.data.country_name,
-  };
   clientLogger.info(
-    successContext,
-    "Datos de GeoIP obtenidos y validados con éxito."
+    "[GeoIPLocator]",
+    "Datos de GeoIP obtenidos y validados con éxito.",
+    { country: validation.data.country_name }
   );
 
   return {
@@ -99,23 +88,23 @@ export function GeoIPProvider({
   });
 
   useEffect(() => {
-    const baseContext = { component: "GeoIPProvider" };
     fetchGeoIPData()
       .then((geoData) => {
         setState({ geoData, isLoading: false, errorKey: null });
         clientLogger.trace(
+          "[GeoIPProvider]",
+          "Estado de GeoIP actualizado con datos exitosos.",
           {
-            ...baseContext,
             status: "success",
             countryCode: geoData.countryCode,
-          },
-          "Estado de GeoIP actualizado con datos exitosos."
+          }
         );
       })
       .catch((error) => {
         clientLogger.error(
-          { ...baseContext, error: error.message },
-          "Fallo al obtener/validar datos de GeoIP. Usando estado de fallback."
+          "[GeoIPProvider]",
+          "Fallo al obtener/validar datos de GeoIP. Usando estado de fallback.",
+          { error: error.message }
         );
         setState({
           geoData: { countryCode: null, countryName: null },
@@ -133,13 +122,10 @@ export function GeoIPProvider({
 export const useGeoIP = (): GeoIPContextState => {
   const context = useContext(GeoIPContext);
   if (context === undefined) {
-    const errorContext = {
-      component: "useGeoIP",
-      error: "Context not provided",
-    };
     clientLogger.error(
-      errorContext,
-      "Hook `useGeoIP` utilizado fuera de `GeoIPProvider`. Esto es un error de desarrollo."
+      "[useGeoIP]",
+      "Hook `useGeoIP` utilizado fuera de `GeoIPProvider`. Esto es un error de desarrollo.",
+      { error: "Context not provided" }
     );
     throw new Error("useGeoIP debe ser usado dentro de un GeoIPProvider");
   }

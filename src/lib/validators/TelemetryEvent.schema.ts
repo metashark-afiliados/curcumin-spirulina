@@ -2,10 +2,11 @@
 /**
  * @file TelemetryEvent.schema.ts
  * @description Aparato de Contrato de Datos y SSoT para eventos de telemetría.
- *              Define la estructura canónica de un evento de telemetría usando Zod,
- *              garantizando la integridad y consistencia de los datos recolectados.
- * @version 1.0.0
- * @author L.I.A. Legacy
+ *              Esta versión expande el vocabulario para incluir eventos de
+ *              negocio específicos del ciclo de vida del formulario de pedido.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 2.2.0
+ * @see .docs-espejo/lib/validators/TelemetryEvent.schema.ts.md
  */
 import "server-only";
 import { z } from "zod";
@@ -20,7 +21,13 @@ export const TelemetryEventNames = z.enum([
   "PAGE_VIEW",
   "CTA_CLICK",
   "SCROLL_DEPTH",
-  "SESSION_START", // Futuro uso por el middleware
+  "SESSION_START",
+  "LANGUAGE_SELECTED",
+  "BENEFIT_HOVER",
+  // MEJORA: Nuevos eventos para el funil de conversión.
+  "FORM_VIEW",
+  "FORM_SUBMIT_SUCCESS",
+  "FORM_SUBMIT_INVALID",
 ]);
 
 /**

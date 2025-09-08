@@ -1,10 +1,12 @@
 {
   "it-IT": {
+    "formTitle": "Modulo d'ordine speciale",
     "ctaButton": "RICHIEDI L'OFFERTA SPECIALE",
     "namePlaceholder": "Nome completo",
     "phonePlaceholder": "Numero di telefono",
     "contactlessDelivery": "Pagamento alla consegna",
     "freeDelivery": "SPEDIZIONE GRATUITA",
+    "submittingText": "Invio in corso...",
     "validation": {
       "name": {
         "minLength": "Il nome deve avere almeno 2 caratteri.",
@@ -17,11 +19,13 @@
     }
   },
   "en-US": {
+    "formTitle": "Special Order Form",
     "ctaButton": "REQUEST THE SPECIAL OFFER",
     "namePlaceholder": "Full name",
     "phonePlaceholder": "Phone number",
     "contactlessDelivery": "Payment on delivery",
     "freeDelivery": "FREE SHIPPING",
+    "submittingText": "Submitting...",
     "validation": {
       "name": {
         "minLength": "Name must be at least 2 characters long.",
@@ -34,11 +38,13 @@
     }
   },
   "es-ES": {
+    "formTitle": "Formulario de Pedido Especial",
     "ctaButton": "SOLICITAR LA OFERTA ESPECIAL",
     "namePlaceholder": "Nombre completo",
     "phonePlaceholder": "Número de teléfono",
     "contactlessDelivery": "Pago contra reembolso",
     "freeDelivery": "ENVÍO GRATUITO",
+    "submittingText": "Enviando...",
     "validation": {
       "name": {
         "minLength": "El nombre debe tener al menos 2 caracteres.",
@@ -51,11 +57,13 @@
     }
   },
   "pt-BR": {
+    "formTitle": "Formulário de Pedido Especial",
     "ctaButton": "SOLICITAR A OFERTA ESPECIAL",
     "namePlaceholder": "Nome completo",
     "phonePlaceholder": "Número de telefone",
     "contactlessDelivery": "Pagamento na entrega",
     "freeDelivery": "FRETE GRÁTIS",
+    "submittingText": "Enviando...",
     "validation": {
       "name": {
         "minLength": "O nome deve ter pelo menos 2 caracteres.",

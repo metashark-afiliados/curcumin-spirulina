@@ -1,34 +1,45 @@
-<!-- .docs-espejo/lib/client-logger.ts.md -->
+// .docs-espejo/lib/client-logger.ts.md
 /**
  * @file .docs-espejo/lib/client-logger.ts.md
- * @description Documento Espejo y SSoT conceptual para el aparato de logging del cliente.
- * @author L.I.A. Legacy
- * @version 5.0.0
+ * @description Documento Espejo y SSoT conceptual para el aparato `client-logger.ts`.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `client-logger.ts` (Client-Side, SSG-Compatible)
+# Manifiesto Conceptual: `client-logger.ts`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **SSoT para el sistema de logging del lado del cliente**. En una arquitectura de **Generación de Sitio Estático (SSG)**, su propósito es proporcionar una API de logging estructurado de alto rendimiento para todas las operaciones del navegador, con la **consola del desarrollador como su destino principal**.
+El aparato `client-logger.ts` es la **Única Fuente de Verdad (SSoT) para el logging en el entorno del navegador**. Su propósito es proporcionar una API de logging segura, ligera y consistente para ser utilizada en todos los Componentes de Cliente (`"use client"`).
 
-Delega la recolección de errores remotos a servicios de terceros (ej. Sentry), manteniendo el logger ligero y enfocado en la observabilidad durante el desarrollo y la depuración.
+Actúa como una **capa de abstracción** sobre el `console` del navegador. Esto nos proporciona un punto de control centralizado: si en el futuro decidimos enviar logs de cliente a un colector externo, solo necesitaremos modificar este archivo, sin tener que refactorizar cada componente que lo consume.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un módulo de cliente (`"use client"`) que exporta una instancia de `pino` configurada para el navegador. El flujo de transmisión a un backend propio ha sido eliminado deliberadamente para mantener la compatibilidad con SSG.
+Es un módulo de cliente puro. No tiene dependencias de servidor.
 
-```mermaid
-graph TD
-    A[Componente Cliente] -- "1. Llama a `clientLogger.info(ctx, msg)`" --> B["`clientLogger` (Adapter `ILogger`)"];
-    B -- "2. Delega a `pinoBrowserLogger`" --> C["Instancia de Pino"];
-    C -- "3. Registra en la consola del navegador" --> D["Consola DevTools"];
-3. Contrato de API
-clientLogger: ILogger: La instancia principal del logger de cliente.
-Métodos: trace, info, warn, error, fatal, todos con la firma (context: LogContext, message: string).
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Integración Directa con Sentry: Modificar los métodos error y fatal para que, además de console.error, también invoquen Sentry.captureException, combinando la observabilidad local con el poder de análisis de Sentry.
-Offloading a Web Worker: Mover la instancia de pino a un Web Worker para garantizar un impacto nulo en el hilo principal de la UI, especialmente para aplicaciones con ráfagas de logs.
-Filtrado de Datos Sensibles: Implementar una utilidad que aplique reglas de REDACTED_PATHS a los objetos de context antes de que sean registrados, como una primera línea de defensa contra la exposición de PII en logs visibles.
-Sincronización con correlationId del Servidor: Implementar un mecanismo para leer un correlationId (si es proporcionado por el servidor en un meta tag) y añadirlo a todos los logs del cliente para permitir la correlación de sesiones.
-Control de Nivel de Log Dinámico: Permitir que el browserLogLevel pueda ser sobrescrito para una sesión específica mediante un parámetro en la URL (?log_level=trace) o un comando en la consola.
-<!-- .docs-espejo/lib/client-logger.ts.md -->
+1.  **Inicialización:** El módulo exporta un objeto `clientLogger`.
+2.  **Invocación:** Un Componente de Cliente importa y llama a un método, ej: `clientLogger.info("Componente montado")`.
+3.  **Ejecución:** La función wrapper correspondiente se ejecuta, añadiendo un prefijo `[INFO]` al mensaje y delegando la impresión al `console.info()` nativo del navegador.
+
+## 3. Contrato de API
+
+*   **`clientLogger`**: Objeto con los siguientes métodos:
+    *   `trace(...args: any[])`
+    *   `info(...args: any[])`
+    *   `warn(...args: any[])`
+    *   `error(...args: any[])`
+    *   `fatal(...args: any[])`
+
+## 4. Zona de Melhorias Futuras
+
+1.  **Envío de Logs al Servidor (Log Shipping):** Implementar una lógica que, además de imprimir en la consola, acumule los logs en un buffer y los envíe periódicamente a un endpoint de API (`/api/log-client-events`) para su persistencia y análisis centralizado.
+2.  **Filtrado por Nivel de Log:** Añadir una configuración (posiblemente desde una cookie o `localStorage`) que permita cambiar el nivel de log visible en la consola en producción para depuración remota.
+3.  **Integración con Sentry:** Enriquecer el método `error` para que también llame a `Sentry.captureMessage` o `Sentry.captureException`, unificando el reporte de errores del cliente.
+4.  **Contexto de Sesión:** Integrar el logger con el `TelemetryProvider` para que cada log incluya automáticamente el `sessionId` actual.
+5.  **Supresión de Logs en Producción:** Implementar una lógica que deshabilite los logs de `trace` e `info` en el entorno de producción para evitar el "ruido" en la consola del usuario final.
+6.  **Formateo de Objetos:** Mejorar los wrappers para que manejen el formateo de objetos y arrays de manera más legible, similar a `pino-pretty`.
+7.  **Soporte para Grupos de Logs:** Añadir métodos `group` y `groupEnd` para agrupar visualmente logs relacionados en la consola.
+8.  **Medición de Performance:** Añadir un método `time(label)` y `timeEnd(label)` que utilice `performance.now()` para medir y registrar la duración de operaciones en el cliente.
+9.  **Tipado de Contexto:** Definir un tipo `ClientLogContext` para estandarizar las claves de contexto comunes (ej. `componentName`, `userAction`).
+10. **Internacionalización de la Documentación:** Traducir este documento espejo.
+// .docs-espejo/lib/client-logger.ts.md

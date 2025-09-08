@@ -1,23 +1,23 @@
 // src/components/ui/BenefitsSection.tsx
 /**
  * @file src/components/ui/BenefitsSection.tsx
- * @description Aparato de UI soberano, resiliente y de cliente. Orquesta la
- *              exhibición de los beneficios. Nivelado para una adherencia
- *              estricta a la API de logging unificada y un enriquecimiento
- *              de contexto de error superior.
- * @version 7.0.0
+ * @description Aparato de UI soberano. Corregido para resolver el error de
+ *              build `ts1005` y `ts2304` causado por una sintaxis de importación
+ *              inválida en la refactorización anterior.
  * @author L.I.A. Legacy
+ * @version 8.0.2
  * @see .docs-espejo/components/ui/BenefitsSection.tsx.md
  */
 "use client";
 
 import { useTranslations } from "next-intl";
 import { Leaf, ShieldCheck, Smile, type LucideIcon, Zap } from "lucide-react";
+// CORRECCIÓN: Se rectifica la sintaxis de la importación para resolver los errores de compilación.
 import React, { useId } from "react";
+
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { BenefitPill } from "@/components/ui/BenefitPill";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging";
 import {
   BenefitsSectionContentSchema,
   type BenefitsSectionContent,
@@ -30,12 +30,19 @@ const iconMap: Record<string, LucideIcon> = {
   natural: Leaf,
 };
 
-export function BenefitsSection(): React.ReactElement | null {
-  const t = useTranslations("components.ui.BenefitsSection");
-  const titleId = useId();
-  const baseContext: LogContext = { component: "BenefitsSection" };
-  let content: BenefitsSectionContent;
+type TFunction = ReturnType<
+  typeof useTranslations<"components.ui.BenefitsSection">
+>;
 
+/**
+ * @private
+ * @function loader
+ * @description Orquestador de datos soberano y resiliente.
+ * @param {TFunction} t - La función de traducción con el tipo correcto.
+ * @returns {BenefitsSectionContent | null} El contenido validado o null en caso de fallo.
+ */
+function loader(t: TFunction): BenefitsSectionContent | null {
+  const baseContext = { component: "BenefitsSectionLoader" };
   try {
     const rawContent = {
       mainTitle: t("mainTitle"),
@@ -45,27 +52,51 @@ export function BenefitsSection(): React.ReactElement | null {
 
     if (!validation.success) {
       clientLogger.error(
+        "[BenefitsSectionLoader]",
+        "Fallo en la validación de contenido. La sección no será renderizada.",
         {
-          ...baseContext,
           error: validation.error.flatten(),
           rawContent,
-        },
-        "Fallo en la validación de contenido. No se renderizará."
+        }
       );
       return null;
     }
-    content = validation.data;
+
+    clientLogger.trace(
+      "[BenefitsSectionLoader]",
+      "Contenido cargado y validado con éxito.",
+      { benefitCount: validation.data.benefits.length }
+    );
+    return validation.data;
   } catch (error) {
     clientLogger.error(
-      { ...baseContext, error },
-      "Error al obtener contenido. No se renderizará."
+      "[BenefitsSectionLoader]",
+      "Error fatal al obtener contenido. La sección no será renderizada.",
+      { error }
     );
+    return null;
+  }
+}
+
+/**
+ * @public
+ * @component BenefitsSection
+ * @description Componente de presentación que consume el loader para obtener
+ *              sus datos y orquesta el renderizado de la sección de beneficios.
+ * @returns {React.ReactElement | null}
+ */
+export function BenefitsSection(): React.ReactElement | null {
+  const t = useTranslations("components.ui.BenefitsSection");
+  const titleId = useId();
+  const content = loader(t);
+
+  if (!content) {
     return null;
   }
 
   clientLogger.trace(
-    { ...baseContext, benefitCount: content.benefits.length },
-    "Renderizando sección de beneficios soberana y validada."
+    "[BenefitsSection]",
+    "Renderizando sección de beneficios con contenido validado."
   );
 
   return (
@@ -84,13 +115,13 @@ export function BenefitsSection(): React.ReactElement | null {
             const IconComponent = iconMap[benefit.iconName] || Leaf;
             if (!iconMap[benefit.iconName]) {
               clientLogger.warn(
+                "[BenefitsSection]",
+                `Ícono '${benefit.iconName}' no encontrado. Usando fallback.`,
                 {
-                  ...baseContext,
                   benefitTitle: benefit.title,
                   iconName: benefit.iconName,
                   availableIcons: Object.keys(iconMap),
-                },
-                `Ícono '${benefit.iconName}' no encontrado. Usando fallback.`
+                }
               );
             }
             return (

@@ -2,11 +2,10 @@
 /**
  * @file src/components/ui/FormInput.tsx
  * @description Aparato de UI atómico (Molécula) de élite para campos de
- *              entrada de formulario. Nivelado para una observabilidad de
- *              interacción superior y una adherencia estricta a la API de
- *              logging unificada y tipo-segura.
- * @version 6.0.0
+ *              entrada de formulario. Nivelado a la arquitectura de logging de
+ *              ConvertiKit con observabilidad estructurada.
  * @author L.I.A. Legacy
+ * @version 6.1.0
  * @see .docs-espejo/components/ui/FormInput.tsx.md
  */
 "use client";
@@ -18,7 +17,6 @@ import { useCallback, useState } from "react";
 
 import { Label } from "@/components/ui/Label";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging";
 import { cn } from "@/lib/utils";
 
 export interface FormInputProps
@@ -33,20 +31,16 @@ const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
   ({ id, label, icon: Icon, error, className, ...props }, ref) => {
     const errorId = error ? `${id}-error` : undefined;
     const [isFocused, setIsFocused] = useState(false);
-    const baseContext: LogContext = { component: "FormInput", id };
 
     const handleFocus = useCallback(() => {
       setIsFocused(true);
-      clientLogger.trace({ ...baseContext, event: "focus" }, "Campo enfocado.");
-    }, [baseContext]);
+      clientLogger.trace("[FormInput]", "Campo enfocado.", { id });
+    }, [id]);
 
     const handleBlur = useCallback(() => {
       setIsFocused(false);
-      clientLogger.trace(
-        { ...baseContext, event: "blur" },
-        "Campo desenfocado."
-      );
-    }, [baseContext]);
+      clientLogger.trace("[FormInput]", "Campo desenfocado.", { id });
+    }, [id]);
 
     const currentState = error ? "error" : isFocused ? "focused" : "default";
 

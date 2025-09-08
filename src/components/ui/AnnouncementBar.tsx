@@ -2,10 +2,10 @@
 /**
  * @file src/components/ui/AnnouncementBar.tsx
  * @description Aparato de UI soberano, resiliente y accesible.
- *              Nivelado para una adherencia estricta a la API de logging del
- *              cliente unificada y un enriquecimiento de contexto de error superior.
- * @version 5.0.0
+ *              Nivelado a la arquitectura de logging de ConvertiKit, con
+ *              observabilidad estructurada de élite.
  * @author L.I.A. Legacy
+ * @version 5.1.0
  * @see .docs-espejo/components/ui/AnnouncementBar.tsx.md
  */
 "use client";
@@ -19,12 +19,10 @@ import {
   AnnouncementBarContentSchema,
   type AnnouncementBarContent,
 } from "@/lib/validators/i18n/AnnouncementBar.schema";
-import { type LogContext } from "@/lib/types/logging";
 
 export function AnnouncementBar(): React.ReactElement | null {
   const t = useTranslations("components.ui.AnnouncementBar");
   const titleId = useId();
-  const baseContext: LogContext = { component: "AnnouncementBar" };
   let content: AnnouncementBarContent;
 
   try {
@@ -35,28 +33,28 @@ export function AnnouncementBar(): React.ReactElement | null {
     const validation = AnnouncementBarContentSchema.safeParse(rawContent);
 
     if (!validation.success) {
-      // Se enriquece el contexto de error con los datos que fallaron.
       clientLogger.error(
+        "[AnnouncementBar]",
+        "Fallo en la validación de contenido. No se renderizará.",
         {
-          ...baseContext,
           error: validation.error.flatten(),
           rawContent,
-        },
-        "Fallo en la validación de contenido. No se renderizará."
+        }
       );
       return null;
     }
     content = validation.data;
   } catch (error) {
     clientLogger.error(
-      { ...baseContext, error },
-      "Error al obtener contenido. No se renderizará."
+      "[AnnouncementBar]",
+      "Error al obtener contenido. No se renderizará.",
+      { error }
     );
     return null;
   }
 
   clientLogger.trace(
-    baseContext,
+    "[AnnouncementBar]",
     "Renderizando componente soberano y validado."
   );
 

@@ -2,45 +2,39 @@
 /**
  * @file src/components/ui/PlaceholderSection.tsx
  * @description Aparato de UI de desarrollo. Renderiza un placeholder para
- *              secciones no implementadas. Refactorizado para recibir el logger
- *              transaccional opcionalmente vía props, alineándose con la
- *              arquitectura de Inyección de Dependencias.
- * @version 4.0.0
+ *              secciones no implementadas. Nivelado a la arquitectura de
+ *              logging de ConvertiKit, consumiendo el logger soberano.
+ * @version 4.1.0
  * @author L.I.A. Legacy
  * @see .docs-espejo/components/ui/PlaceholderSection.tsx.md
  */
 import "server-only";
 
 import { Construction } from "lucide-react";
-import type pino from "pino";
-import { logger as fallbackLogger } from "@/lib/logger";
-import { type ILogger } from "@/lib/types/logging";
+import { logger } from "@/lib/logger";
 
 interface PlaceholderSectionProps {
   title: string;
   description?: string;
   blueprintSection?: string;
-  logger?: ILogger | pino.Logger; // Acepta la interfaz o la instancia de pino.
 }
 
 export function PlaceholderSection({
   title,
   description,
   blueprintSection,
-  logger = fallbackLogger, // Utiliza el logger base como fallback.
 }: PlaceholderSectionProps): React.ReactElement | null {
   if (process.env.NODE_ENV === "production") {
     return null;
   }
 
-  const baseContext = {
-    component: "PlaceholderSection",
-    title,
-    blueprintSection,
-  };
-
+  // Firma de logging de ConvertiKit: contexto como objeto, mensaje separado.
   logger.warn(
-    baseContext,
+    {
+      component: "PlaceholderSection",
+      title,
+      blueprintSection,
+    },
     `Renderizando placeholder para la sección: "${title}"`
   );
 

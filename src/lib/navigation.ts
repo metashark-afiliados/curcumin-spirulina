@@ -1,22 +1,24 @@
 // src/lib/navigation.ts
 /**
  * @file src/lib/navigation.ts
- * @description Manifiesto de Enrutamiento y Única Fuente de Verdad (SSoT) para la Internacionalización.
- *              Define todos los locales soportados, el mapeo de rutas canónicas y exporta
- *              directamente los componentes y hooks de navegación de `next-intl`, garantizando
- *              una coherencia absoluta en todo el sistema de enrutamiento.
- * @author L.I.A. Legacy
- * @version 5.0.0
+ * @description Manifiesto de Enrutamiento y SSoT. Consume la configuración
+ *              canónica de locales desde `locales.config.ts` para inicializar
+ *              las utilidades de navegación de `next-intl`. Define los locales
+ *              activos para este proyecto específico.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 6.0.0
  * @see .docs-espejo/lib/navigation.ts.md
  */
 import { createLocalizedPathnamesNavigation } from "next-intl/navigation";
+import { DEFAULT_LOCALE } from "@/config/locales.config";
 
 /**
  * @public
  * @constant locales
- * @description SSoT para la lista de idiomas disponibles.
+ * @description SSoT para la lista de idiomas ACTIVOS en esta aplicación.
+ *              Es un subconjunto curado de la lista exhaustiva en `locales.config.ts`.
  */
-export const locales = ["it-IT", "en-US", "es-ES", "pt-BR"] as const;
+export const locales = ["it-IT", "pt-BR", "en-US", "es-ES"] as const;
 
 /**
  * @public
@@ -28,15 +30,14 @@ export type AppLocale = (typeof locales)[number];
 /**
  * @public
  * @constant defaultLocale
- * @description El `AppLocale` por defecto de la aplicación.
+ * @description El `AppLocale` por defecto de la aplicación, obtenido de la SSoT.
  */
-export const defaultLocale: AppLocale = "es-ES";
+export const defaultLocale: AppLocale = DEFAULT_LOCALE.code as AppLocale;
 
 /**
  * @public
  * @constant pathnames
- * @description SSoT para las rutas de navegación estáticas. Mapea rutas canónicas a sus
- *              equivalentes (no se usan URLs traducidas en esta implementación).
+ * @description SSoT para las rutas de navegación estáticas de la aplicación.
  */
 export const pathnames = {
   "/": "/",
@@ -56,7 +57,6 @@ export type Pathname = keyof typeof pathnames;
  * @public
  * @constant localePrefix
  * @description Define la estrategia para prefijar las rutas con el locale.
- *              'as-needed': no añade prefijo para el `defaultLocale`.
  */
 export const localePrefix = "as-needed";
 

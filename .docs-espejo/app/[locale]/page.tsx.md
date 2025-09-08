@@ -1,47 +1,47 @@
-<!-- .docs-espejo/app/[locale]/page.tsx.md -->
+// .docs-espejo/app/[locale]/page.tsx.md
 /**
  * @file .docs-espejo/app/[locale]/page.tsx.md
- * @description Documento Espejo y SSoT conceptual para la página principal.
- * @author L.I.A. Legacy
- * @version 7.0.0
+ * @description Documento Espejo y SSoT conceptual para la página principal (`HomePage`).
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `page.tsx` (HomePage)
+# Manifiesto Conceptual: `app/[locale]/page.tsx` (HomePage)
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **"Mega-Orquestador de Layout"** de la landing page. Su propósito es ensamblar todas las secciones soberanas de la UI y orquestar los datos necesarios, adhiriéndose a una arquitectura de Server Components resiliente y con observabilidad de élite.
+Este aparato es el **Orquestador de Conversión Principal**. Su rol estratégico es actuar como un Server Component de alto nivel que ensambla los diversos "organismos" de UI en la secuencia correcta para implementar el funnel de conversión definido en el `Blueprint` del proyecto.
 
-Sus responsabilidades son:
-1.  **Observabilidad Transaccional:** Envuelve su ciclo de vida (`generateMetadata`, `HomePage`) con `withCorrelationId` para garantizar una trazabilidad completa.
-2.  **Habilitar SSG:** Implementa `unstable_setRequestLocale(locale)` para permitir la Generación de Sitio Estático.
-3.  **Escudo de Resiliencia:** Obtiene datos de contenido complejo (testimonios) y los **valida rigurosamente contra un schema Zod** antes de pasarlos a los componentes hijos. Si la validación falla, la página se renderiza de forma segura sin la sección defectuosa.
-4.  **Composición de Componentes:** Orquesta el ensamblaje de todos los organismos de UI que conforman la landing page.
+Su propósito es ser una página de carga ultra-rápida, optimizada para SEO y Core Web Vitals, que delega toda la interactividad a los Client Components que renderiza.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Sigue el patrón canónico de "Orquestador de Servidor / Compositor de UI" blindado.
+Es un Server Component que sigue un patrón de "Composición de Organismos".
 
 ```mermaid
 graph TD
-    subgraph "Fase de Build (SSG) / Render"
-        A[Next.js invoca `HomePage`] -- "1. Envuelto por `withCorrelationId`" --> B[Contexto de Logging];
-        B --> C["2. Llama a `getTranslations` y `t.raw('testimonials')`"];
-        C --> D["3. Valida datos contra `TestimonialsSchema`"];
+    A[Petición de Ruta `/`] --> B{`page.tsx` (HomePage)};
+    B --> C[Carga datos de servidor (ej. testimonios)];
+    subgraph "Renderizado Secuencial"
+        C --> D(Renderiza `AnnouncementBar`);
+        D --> E(Renderiza `HeroSection`);
+        E --> F(Renderiza `InfoSection`);
+        F --> G(...)
+        G --> H[Pasa `TestimonialCard`s a `TestimonialsSection`];
+        H --> I(Inyecta `SchemaInjector` para SEO);
     end
-
-    subgraph "Fase de Renderizado Estático"
-        D -- Validación OK --> E["Renderiza `<TestimonialsSection>` con datos"];
-        D -- Validación Fallida --> F["`serverLogger.error()` y Renderiza sin sección"];
-        A -- "Renderiza directamente" --> G["...otras secciones soberanas"];
-        E & F & G --> H[HTML final pre-renderizado];
-    end
+    I --> J[Página HTML Final];
 3. Contrato de API
-Props de Entrada: params: { locale: string }.
-Salida: El JSX.Element que representa la página completa, pre-renderizada estáticamente.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Pruebas A/B Estáticas: Generar múltiples variantes de la página en el build (ej. /page-v1, /page-v2) y usar reescrituras a nivel de CDN o Edge para dirigir el tráfico a cada versión y probar diferentes ensamblajes de secciones.
-Carga Perezosa (Lazy Loading) de Secciones: Utilizar next/dynamic para cargar de forma perezosa los componentes de sección que están "below the fold", mejorando el FCP y el LCP.
-Componente MainLayout: Extraer la estructura repetitiva (AnnouncementBar, Header, main, Footer) a un componente MainLayout.tsx para mejorar la adherencia a DRY.
-SEO de Imágenes Avanzado: Implementar generateImageMetadata de Next.js para generar opengraph-image y twitter-image dinámicamente durante el build.
-Regeneración Estática Incremental (ISR): Si se pasa a una estrategia híbrida, configurar la opción revalidate en el fetch de datos (si se usa un CMS) para habilitar ISR.
-<!-- .docs-espejo/app/[locale]/page.tsx.md -->
+Entradas: Recibe params.locale del App Router.
+Salidas: La Promise<React.ReactElement> que resuelve al JSX de la página completa.
+4. Zona de Melhorias Futuras
+Carga de Contenido desde un CMS: Refactorizar la página para que la secuencia y el contenido de las secciones se carguen desde un CMS Headless.
+Pruebas A/B de Secciones: Integrar con un sistema de feature flags para renderizar diferentes versiones de una sección (ej. HeroSectionV2).
+Personalización Dinámica: Basándose en los datos de telemetría (ej. geo.country), la página podría reordenar o mostrar/ocultar secciones.
+Streaming de Componentes: Envolver secciones más lentas en <Suspense> para aprovechar el streaming de UI de React 18.
+Generación de Metadatos Dinámicos: Utilizar la función generateMetadata para obtener el título y la descripción de la página desde el sistema de i18n.
+Pruebas de Integración de Layout: Escribir una prueba que verifique que todas las secciones esperadas se renderizan en el orden correcto.
+Componente SectionWrapper: Crear un componente de layout SectionWrapper que encapsule los estilos comunes a todas las secciones.
+Gestión de Estado de Scroll: Implementar una lógica para cambiar el estado de la URL (#section-id) a medida que el usuario se desplaza.
+Mapa de Calor de Componentes: Integrar una herramienta de analíticas para rastrear qué secciones reciben más atención.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/app/[locale]/page.tsx.md

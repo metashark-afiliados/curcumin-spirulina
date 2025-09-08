@@ -1,35 +1,43 @@
-<!-- .docs-espejo/tsconfig.json.md -->
+// .docs-espejo/tsconfig.json.md
 /**
  * @file .docs-espejo/tsconfig.json.md
- * @description Documento Espejo y SSoT conceptual para la configuración de TypeScript.
- * @author L.I.A. Legacy
- * @version 2.0.0
+ * @description Documento Espejo y SSoT conceptual para el aparato `tsconfig.json`.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `tsconfig.json`
+# Manifiesto Conceptual: `tsconfig.json`
 
 ## 1. Rol Estratégico y Propósito
 
-El `tsconfig.json` es la **"Constitución" para el compilador de TypeScript**. Define las reglas del lenguaje, la resolución de módulos y qué archivos forman parte del programa de la aplicación. Su propósito es garantizar la máxima seguridad de tipos (`strict: true`), una configuración de módulos moderna (`moduleResolution: "bundler"`), una resolución de alias correcta (`paths`) y un build resiliente (`forceConsistentCasingInFileNames: true`).
+Este aparato es la **Constitución del Compilador de TypeScript**. Su única y crítica responsabilidad es definir las reglas y opciones con las que el compilador (`tsc`) y el servidor de lenguaje de TypeScript analizan, validan y compilan nuestro código fuente.
+
+Actúa como la SSoT para:
+*   **Seguridad de Tipos:** Define el nivel de rigurosidad del sistema de tipos (`strict: true`).
+*   **Resolución de Módulos:** Especifica cómo se deben resolver las importaciones y exportaciones.
+*   **Soporte de Sintaxis:** Habilita características del lenguaje como JSX.
+*   **Alcance del Proyecto:** Define qué archivos están incluidos y excluidos de la compilación.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Este archivo es consumido por varios procesos del ciclo de vida del desarrollo:
+Es un archivo de configuración estático. No tiene un flujo de ejecución, sino que es leído por múltiples herramientas del ecosistema en diferentes fases del ciclo de vida del desarrollo.
 
 ```mermaid
 graph TD
-    A[Editor de Código (VS Code)] --> B{tsconfig.json};
-    C[Next.js Build (`pnpm build`)] --> B;
-    D[Linter (`pnpm lint`)] --> B;
-    B -- Define Reglas --> E[Análisis Estático y Compilación];
-3. Contrato de API (Opciones Clave)
-strict: true: Habilita todas las opciones de verificación estricta de tipos. No negociable para un código de élite.
-forceConsistentCasingInFileNames: true: Añade una capa de resiliencia al build, previniendo errores de importación causados por inconsistencias de mayúsculas/minúsculas en los nombres de archivo.
-moduleResolution: "bundler": La estrategia de resolución de módulos recomendada para frameworks modernos como Next.js, que utilizan bundlers avanzados.
-paths: { "@/*": ["./src/*"] }: Define el alias de importación canónico, mejorando la legibilidad y mantenibilidad de las rutas de importación.
-include: Define explícitamente que solo el código en src y los tipos generados por Next.js pertenecen al programa de la aplicación.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Añadir alias @tests: Para simplificar las importaciones en la suite de pruebas.
-Habilitar noUnusedLocals y noUnusedParameters: Para una limpieza de código aún más estricta, forzando la eliminación de variables y parámetros no utilizados.
-Crear un tsconfig.test.json: Para configuraciones específicas de la suite de pruebas, que podría extender el tsconfig.json base y añadir los alias de prueba.
-Explorar composite y references: Para optimizar los tiempos de compilación en un futuro monorepo con múltiples paquetes.
-<!-- .docs-espejo/tsconfig.json.md -->
+    A["tsconfig.json <br> (SSoT de Configuración)"] --> B["Servidor de Lenguaje de VS Code <br> (Análisis en tiempo real)"];
+    A --> C["Compilador `tsc` <br> (Ejecutado por `next build`)"];
+    A --> D["Vitest <br> (Entorno de pruebas)"];
+3. Contrato de API
+Exportaciones: Ninguna. Su "API" es el conjunto de opciones de compilador que define.
+Herencia: Extiende la configuración base proporcionada por @tsconfig/next/tsconfig.json, que es la mejor práctica recomendada por Vercel.
+4. Zona de Melhorias Futuras
+Múltiples tsconfig.json: Para proyectos monorepo o con lógicas muy desacopladas (ej. scripts vs. app), se podrían crear múltiples tsconfig que hereden de una base común para una configuración más granular.
+paths Generado Automáticamente: Un script podría analizar la estructura de directorios y generar la sección paths para evitar desincronizaciones manuales.
+strict al Máximo: Habilitar todas las flags de strict individuales (noImplicitAny, strictNullChecks, etc.) explícitamente para una mayor claridad.
+noUncheckedIndexedAccess: Habilitar esta opción para añadir | undefined a los accesos de arrays y objetos, forzando un manejo de casos de borde más seguro.
+declaration y declarationMap: Habilitar estas opciones si el proyecto fuera a ser publicado como una librería de NPM, para generar los archivos de definición de tipos (.d.ts).
+plugins: Integrar plugins de TypeScript como typescript-plugin-css-modules para obtener tipado en las importaciones de CSS.
+composite y incremental: Habilitar estas opciones para optimizar los tiempos de compilación en proyectos muy grandes o monorepos.
+Auditoría de Configuración: Crear un script de CI que valide que el tsconfig.json cumple con los estándares de seguridad y calidad del equipo.
+Pruebas de Tipo (Type Tests): Utilizar una librería como tsd para escribir pruebas que validen que ciertos tipos complejos se comportan como se espera en tiempo de compilación.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/tsconfig.json.md

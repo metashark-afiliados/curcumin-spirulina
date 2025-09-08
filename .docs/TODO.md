@@ -1,56 +1,81 @@
-// .docs/TODO.md
+==================== INICIO DEL ARCHIVO [.docs/todo.md] ====================
+// .docs/todo.md
 /**
- * @file .docs/TODO.md
- * @description Manifiesto de Tareas Pendientes y Hoja de Ruta para la refactorización
- *              final de la Arquitectura de Observabilidad.
- * @author L.I.A. Legacy
- * @version 1.0.0
- * @date 2025-09-06
- */
-# Manifiesto de Tareas: Migración a Inyección de Dependencias Explícita
+@file .docs/todo.md
+@description Manifiesto de Tareas y Roadmap de Ejecución. Esta es la SSoT para la refactorización e implementación de la infraestructura base en el proyecto curcumin-complex.
+@author IA Ingeniera de Software Senior v2.0
+@version 1.0.0
+*/
+Manifiesto de Tareas: Implementación de Infraestructura Base
+1. Filosofía de Ejecución
+La misión es transferir la lógica de observabilidad e internacionalización del proyecto convertikit a curcuma-complex de la forma más simple, limpia y funcional posible. Se eliminará toda complejidad asociada a multi-tenancy y autenticación de usuarios. Cada paso se ejecutará de forma atómica para construir una base estable.
+2. Fases de Implementación
+Fase 1: Fundación de la Configuración y Observabilidad
+Objetivo: Establecer la configuración del proyecto y la infraestructura de logging, que es una dependencia para todos los demás módulos.
+Tarea 1.1: Configuración del Proyecto
+Prompt: "Inicia la refactorización configurando los archivos base del proyecto."
+Checklist:
 
-## 1. Misión
+Aparato next.config.mjs: Implementar la configuración base, incluyendo la integración con Sentry y una Política de Seguridad de Contenido (CSP) simplificada (sin dominios de auth).
 
-Resolver de forma definitiva el `TypeError: Invalid value used as weak map key` eliminando el uso de `AsyncLocalStorage` del ciclo de renderizado de Next.js y refactorizando la arquitectura de observabilidad a un patrón de **Inyección de Dependencias Explícita**.
+Aparato package.json: Añadir los scripts de dev:pretty, diag:* y gen:*.
+Tarea 1.2: Pilar de Observabilidad - Logging
+Prompt: "Implementa el pilar de Observabilidad, comenzando por el logger."
+Checklist:
 
-## 2. Contexto del Problema
+Aparato src/config/logger.config.ts: Crear el manifiesto de censura de datos sensibles.
 
-Nuestra arquitectura inicial basada en `AsyncLocalStorage` para la propagación implícita del `correlationId` ha demostrado ser incompatible con el funcionamiento interno de `next-intl` y el motor de renderizado de Next.js, causando un conflicto de contextos asíncronos que resulta en un error fatal.
+Aparato src/lib/helpers/correlation-id.helper.ts: Crear el helper para la gestión de IDs de correlación.
 
-## 3. Plan de Acción Atómico
+Aparato src/lib/logger.ts: Implementar la SSoT de logging con pino para el servidor.
 
-La ejecución se realizará en el siguiente orden estricto, refactorizando cada aparato para que se ajuste al nuevo paradigma.
+Aparato src/lib/client-logger.ts: Crear el logger de cliente (console wrapper).
+Fase 2: Construcción del Middleware y la Lógica de Negocio
+Objetivo: Implementar el pipeline de manejo de peticiones y la lógica de internacionalización detallada.
+Tarea 2.1: Orquestador de Middleware
+Prompt: "Construye el orquestador del middleware y su primer manejador: i18n."
+Checklist:
 
-### ✅ Fase 1: Cimentar la Nueva Arquitectura (Completada)
+Aparato src/lib/helpers/geoip.helper.ts: Crear helper de GeoIP.
 
-1.  **Aparato: `src/lib/logger.ts`**
-    *   **Acción:** Eliminar `AsyncLocalStorage` y el `Proxy`. Exportar una única instancia base de `pino`.
-    *   **Estado:** `((Completado))`
+Aparato src/lib/helpers/locale-detector.helper.ts: Crear helper de detección de locale.
 
-2.  **Aparato: `src/lib/helpers/correlation-id.helper.ts`**
-    *   **Acción:** Transformar el HOC `withCorrelationId` en `withLogger`. Su nueva responsabilidad es crear un `childLogger` e inyectarlo como primer argumento al handler envuelto. Eliminar `getCorrelationId`.
-    *   **Estado:** `((Completado))`
+Aparato src/middleware/handlers/i18n/index.ts: Crear el manejador de i18n que implementa el flujo Navegador -> GeoIP -> Redirección a /select-language.
 
-### ⏳ Fase 2: Adaptar los Consumidores (Pendiente)
+Aparato src/middleware.ts: Crear el orquestador principal del pipeline.
+Tarea 2.2: Página de Selección de Idioma
+Prompt: "Implementa la página de selección de idioma con el modal y el temporizador."
+Checklist:
 
-1.  **Aparato: `src/middleware.ts`**
-    *   **Aparatos Afectados:** `src/middleware.ts`, `src/middleware/handlers/i18n/index.ts`, `src/lib/helpers/geoip.helper.ts`.
-    *   **Acción:** Eliminar la dependencia de `withCorrelationId`. La función `middleware` generará el `correlationId` y lo pasará explícitamente a los manejadores.
-    *   **Estado:** `((Pendiente))`
+Aparato src/app/select-language/page.tsx: Crear la página que mostrará el selector de idioma.
 
-2.  **Aparato: `src/i18n.ts`**
-    *   **Acción:** Eliminar toda la lógica de logging y `withCorrelationId` para convertirlo en una función pura, tal como se determinó en la investigación del bug.
-    *   **Estado:** `((Pendiente))`
+Lógica de Cliente: Implementar en la página la lógica del modal que se muestra por 5 segundos y redirige al idioma por defecto si no hay interacción.
+Tarea 2.3: Pilar de Observabilidad - Telemetría
+Prompt: "Implementa el manejador de telemetría para el tracking de sesiones anónimas."
+Checklist:
 
-3.  **Aparatos de Página (Server Components)**
-    *   **Aparatos Afectados:** `src/app/[locale]/page.tsx`, `src/app/[locale]/blog/page.tsx`, `src/app/[locale]/blog/[slug]/page.tsx`, `src/app/not-found.tsx`.
-    *   **Acción:** Adaptar cada página para que utilice el HOC `withLogger`. La firma de sus funciones `generateMetadata` y del componente de página cambiará para aceptar `logger` como primer argumento. El logging se realizará a través de esta instancia inyectada.
-    *   **Estado:** `((Pendiente))`
+Aparato src/lib/actions/telemetry/logTelemetryEvent.action.ts: Crear la Server Action para registrar eventos.
 
-4.  **Aparatos de Lógica de Servidor**
-    *   **Aparatos Afectados:** `src/lib/blog.ts`, `src/lib/schema.ts`, `src/components/server-only/*`.
-    *   **Acción:** Refactorizar todas las funciones que actualmente usan el logger global para que acepten una instancia de `logger` como parámetro (Inyección de Dependencias).
-    *   **Estado:** `((Pendiente))`
+Aparato src/config/telemetry.config.ts: Crear el manifiesto de configuración de telemetría.
 
-Al completar esta hoja de ruta, el sistema será estable, observable y estará arquitectónicamente alineado para un build exitoso.
-// .docs/TODO.md
+Aparato src/middleware/handlers/telemetry/index.ts: Crear el manejador que inicia la sesión de telemetría en la primera visita.
+Fase 3: Integración Final y Fallbacks
+Objetivo: Integrar la nueva infraestructura con el resto de la aplicación y asegurar que los fallbacks de error estén correctamente instrumentados.
+Tarea 3.1: Layouts y Proveedores
+Prompt: "Crea e instrumenta los layouts raíz de la aplicación."
+Checklist:
+
+Aparato src/app/layout.tsx: Crear el layout raíz global.
+
+Aparato src/app/[locale]/layout.tsx: Crear el layout de locale, instrumentándolo con los proveedores de Telemetría.
+Tarea 3.2: Manejo de Errores Globales
+Prompt: "Implementa y refactoriza los manejadores de error globales."
+Checklist:
+
+Aparato src/app/not-found.tsx: Crear el manejador 404 a nivel raíz (para rutas sin locale).
+
+Aparato src/app/[locale]/not-found.tsx: Crear el manejador 404 a nivel de locale.
+
+Aparato src/app/global-error.tsx: Refactorizar el componente existente para que consuma el clientLogger y Sentry.
+// .docs/todo.md
+==================== FIN DEL ARCHIVO [.docs/todo.md] ====================

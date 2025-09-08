@@ -3,48 +3,56 @@
  * @file src/messages/manifest.ts
  * @description Manifiesto de Importación Dinámica y Única Fuente de Verdad (SSoT)
  *              para los módulos de mensajes de internacionalización (IMAS).
- *              Este archivo es el mapa maestro que el orquestador `i18n.ts` utiliza
- *              para descubrir y cargar de forma perezosa los archivos de traducción atómicos.
+ *              Esta versión ha sido auditada y corregida para resolver un error
+ *              crítico de módulo no encontrado, restaurando la integridad del
+ *              sistema de i18n.
  * @author L.I.A. Legacy
- * @version 3.0.0
+ * @version 6.0.2
  * @see .docs/I18N_MANIFESTO_V2.md
  * @see .docs-espejo/messages/manifest.ts.md
  */
 import { type AppLocale } from "@/lib/navigation";
+import { type ManifestModule } from "./types";
 
 /**
  * @public
  * @constant messagesManifest
  * @description Registro canónico de todos los namespaces de traducción. La clave
  *              es el namespace (derivado de la ruta del componente) y el valor
- *              es una función de importación dinámica. Se han eliminado las entradas
- *              para componentes que ya no existen para mantener la integridad.
+ *              es una función de importación dinámica.
  */
-export const messagesManifest: Record<
-  string,
-  () => Promise<{ default: Record<AppLocale, Record<string, any>> }>
-> = {
-  // --- Páginas de App ---
+export const messagesManifest: Record<string, ManifestModule> = {
+  // ============================================================================
+  // --- Páginas de App (app/) ---
+  // ============================================================================
+  "app.globalError": () => import("./app/global-error.json"),
   "app.notFound": () => import("./app/not-found.json"),
-  // "app.selectLanguage": () => import("./app/select-language.json"), // Eliminado
+  "app.selectLanguage": () => import("./app/select-language.json"),
 
-  // --- Componentes de Blog ---
+  // ============================================================================
+  // --- Componentes de Dominio (components/) ---
+  // ============================================================================
   "components.blog.ArticleCard": () =>
     import("./components/blog/ArticleCard.json"),
   "components.blog.CallToAction": () =>
     import("./components/blog/CallToAction.json"),
-
-  // --- Componentes de Layout ---
   "components.layout.Footer": () => import("./components/layout/Footer.json"),
   "components.layout.Header": () => import("./components/layout/Header.json"),
+  // MEJORA: Se registra el nuevo módulo de mensajes para ArticleLayout.
+  "components.layout.ArticleLayout": () =>
+    import("./components/layout/ArticleLayout.json"),
 
-  // --- Componentes de UI ---
+  // ============================================================================
+  // --- Componentes de UI Atómicos (components/ui/) ---
+  // ============================================================================
   "components.ui.AnnouncementBar": () =>
     import("./components/ui/AnnouncementBar.json"),
   "components.ui.BenefitsSection": () =>
     import("./components/ui/BenefitsSection.json"),
+  "components.ui.Button": () => import("./components/ui/Button.json"),
   "components.ui.HeroSection": () => import("./components/ui/HeroSection.json"),
   "components.ui.InfoSection": () => import("./components/ui/InfoSection.json"),
+  "components.ui.Label": () => import("./components/ui/Label.json"),
   "components.ui.OrderForm": () => import("./components/ui/OrderForm.json"),
   "components.ui.PriceDisplay": () =>
     import("./components/ui/PriceDisplay.json"),

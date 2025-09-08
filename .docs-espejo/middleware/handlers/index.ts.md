@@ -1,41 +1,41 @@
 // .docs-espejo/middleware/handlers/index.ts.md
-/\*\*
-
-- @file .docs-espejo/middleware/handlers/index.ts.md
-- @description Documento Espejo y SSoT conceptual para el manifiesto de manejadores.
-- @author RaZ Podestá - MetaShark Tech
-- @version 1.0.0
-  \*/
-
-# Manifiesto Conceptual: Aparato `middleware/handlers/index.ts`
+/**
+ * @file .docs-espejo/middleware/handlers/index.ts.md
+ * @description Documento Espejo y SSoT conceptual para el manifiesto (barrel file) de los manejadores de middleware.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
+ */
+# Manifiesto Conceptual: `middleware/handlers/index.ts`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **manifiesto de la API del middleware**. Su única responsabilidad es actuar como un "barrel file", ensamblando y exportando todos los manejadores de middleware atómicos desde un único punto de entrada.
+Este aparato es el **Manifiesto de la API del Sub-módulo de Manejadores**. No contiene lógica de negocio; su única y exclusiva responsabilidad es **ensamblar y exportar** todos los manejadores atómicos (`handleI18n`, `handleTelemetry`, etc.) desde una única interfaz pública.
 
-Proporciona una fachada limpia y cohesiva que el orquestador principal (`middleware.ts`) consume. Esto desacopla al orquestador de la estructura interna del directorio de manejadores, mejorando la mantenibilidad y la organización del código.
+Su propósito estratégico es aplicar el **Patrón de Fachada (Facade Pattern)**. Oculta la estructura interna del directorio `handlers` y proporciona un punto de entrada único y estable para el orquestador `middleware.ts`. Esto mejora la mantenibilidad, ya que la adición de nuevos manejadores solo requiere actualizar este manifiesto sin alterar al consumidor.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es un aparato de definición pura, sin flujo de ejecución. Actúa como un índice.
+Es un módulo estático que solo contiene sentencias `export`. Se resuelve en tiempo de compilación.
 
 ```mermaid
 graph TD
-    A["`handleI18n.ts`"] --> C["`handlers/index.ts`"];
-    B["`handleAuth.ts` (futuro)"] --> C;
-    C --> D["`middleware.ts` (Orquestador)"];
+    A["i18n/index.ts <br> (exporta handleI18n)"] --> C{handlers/index.ts};
+    B["telemetry/index.ts <br> (exporta handleTelemetry)"] --> C;
+    C -- "Exporta { handleI18n, handleTelemetry }" --> D["middleware.ts <br> (importa desde @/middleware/handlers)"];
 3. Contrato de API
-Exportaciones: Exporta todas las funciones de manejador de middleware (ej. export { handleI18n } from "./i18n").
-4. Zona de Mejoras Futuras
-Generación Automática: Crear un script que genere este archivo automáticamente escaneando el directorio, previniendo omisiones manuales.
-Documentación en Español: Traducir este documento espejo al español.
-Tipado de Manifiesto: Generar un tipo HandlerName que sea una unión de los nombres de todos los manejadores exportados.
-Exportación por Default: Considerar exportar un objeto por defecto (export default { handleI18n, handleAuth }) para un consumo con alias.
-Validación de Firmas: El script de generación podría validar que todos los archivos exportados cumplan con la firma de un MiddlewareHandler.
-Comentarios de Origen: El script podría añadir comentarios indicando la ruta del archivo original de cada exportación.
-Agrupación por Categoría: Si la cantidad de manejadores crece, se podrían agrupar por categoría dentro del barrel file (ej. // Security Handlers, // Content Handlers).
-Re-exportación Selectiva por Entorno: Implementar una lógica condicional que exporte manejadores diferentes según el NODE_ENV.
-Versión del Manifiesto: Incluir una constante con la versión del manifiesto para trazabilidad.
-Link a Documentación: El script de generación podría añadir un comentario con un enlace al documento espejo de cada manejador exportado.
+Exportaciones:
+handleI18n: (req, res) => Promise<NextResponse>
+handleTelemetry: (req, res) => Promise<void>
+... (futuros manejadores)
+4. Zona de Melhorias Futuras
+Generación Automática: Este tipo de "barrel file" es un candidato ideal para ser generado y mantenido por un script que lea la estructura del directorio, previniendo errores de omisión manual a medida que se añaden nuevos manejadores.
+Exportaciones Nombradas vs. por Defecto: Evaluar si una exportación por defecto (export default { handleI18n, ... }) sería más semántica para agrupar los manejadores bajo un namespace.
+División por Tipo de Manejador: Si el número de manejadores crece, se podrían crear sub-manifiestos (ej. security.handlers.ts, routing.handlers.ts) para una mayor organización.
+Pruebas de Integridad del Manifiesto: Escribir una prueba unitaria que verifique que todas las funciones exportadas por este manifiesto son efectivamente funciones.
+Documentación TSDoc en Exportaciones: Añadir comentarios TSDoc a cada export para documentar el propósito de cada manejador directamente en el manifiesto.
+Control de Versiones del Manifiesto: Utilizar un sistema de versionado en los comentarios del archivo para rastrear cuándo se añadieron o eliminaron manejadores.
+Alias de Exportación: Utilizar alias (export { handleI18n as i18nHandler }) si los nombres de los manejadores necesitan ser más descriptivos para el consumidor.
+Carga Condicional de Manejadores: Investigar patrones para exportar manejadores condicionalmente basados en variables de entorno, para deshabilitar funcionalidades a nivel de build.
+Tree Shaking: Asegurar que la configuración de build esté optimizada para el "tree shaking" de los manejadores que no se utilicen.
+Internacionalización de la Documentación: Traducir este documento espejo.
 // .docs-espejo/middleware/handlers/index.ts.md
-```

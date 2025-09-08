@@ -1,18 +1,28 @@
-// This file configures the initialization of Sentry on the server.
-// The config you add here will be used whenever the server handles a request.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
-
+// sentry.server.config.ts
+/**
+ * @file sentry.server.config.ts
+ * @description Configuración y SSoT para la inicialización de Sentry en el servidor.
+ *              Nivelado para alinearse con la API del SDK `@sentry/nextjs@8.x`,
+ *              eliminando propiedades obsoletas y obteniendo el DSN desde las
+ *              variables de entorno.
+ * @author L.I.A. Legacy
+ * @version 2.0.0
+ * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/
+ */
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://3b0ee8eeb3bcb81f57ea817b87867e16@o4509967263465472.ingest.de.sentry.io/4509967264776272",
+  // Obtiene el DSN desde las variables de entorno para mayor seguridad y flexibilidad.
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
+  // Define qué tan probable es que se muestreen las trazas.
+  // Ajustar este valor en producción o usar tracesSampler para un mayor control.
+  tracesSampleRate: 1.0,
 
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // La propiedad `enableLogs` ha sido deprecada en esta versión del SDK.
+  // La captura de logs se gestiona a través de integraciones o transportes, como `pino-sentry-transport`.
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
+  // Activar `debug: true` imprimirá información útil en la consola durante la configuración.
   debug: false,
 });
+// sentry.server.config.ts

@@ -1,0 +1,14 @@
+{
+  "it-IT": {
+    "loadingText": "Caricamento in corso..."
+  },
+  "en-US": {
+    "loadingText": "Loading..."
+  },
+  "es-ES": {
+    "loadingText": "Cargando..."
+  },
+  "pt-BR": {
+    "loadingText": "Carregando..."
+  }
+}

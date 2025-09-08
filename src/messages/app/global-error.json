@@ -1,0 +1,22 @@
+{
+  "it-IT": {
+    "title": "Si è Verificato un Errore",
+    "description": "Siamo spiacenti, qualcosa è andato storto. Il nostro team è stato notificato e sta lavorando per risolvere il problema.",
+    "backToHomeButton": "Torna alla Home"
+  },
+  "en-US": {
+    "title": "An Error Occurred",
+    "description": "We're sorry, something went wrong. Our team has been notified and is working to fix the issue.",
+    "backToHomeButton": "Back to Home"
+  },
+  "es-ES": {
+    "title": "Ha Ocurrido un Error",
+    "description": "Lo sentimos, algo ha salido mal. Nuestro equipo ha sido notificado y está trabajando para solucionar el problema.",
+    "backToHomeButton": "Volver al Inicio"
+  },
+  "pt-BR": {
+    "title": "Ocorreu um Erro",
+    "description": "Lamentamos, algo deu errado. Nossa equipe foi notificada e está trabalhando para corrigir o problema.",
+    "backToHomeButton": "Voltar para o Início"
+  }
+}

@@ -1,18 +1,11 @@
-
 {
   "it-IT": {
     "brandName": "Curcumin+",
     "brandDescription": "Un portale dedicato al benessere naturale, offrendo approfondimenti basati sulla scienza.",
     "legalTitle": "Informazioni",
     "legalLinks": [
-      {
-        "href": "/privacy-policy",
-        "label": "Politica de Privacy"
-      },
-      {
-        "href": "/terms-of-service",
-        "label": "Termini di Servizio"
-      }
+      { "href": "/privacy-policy", "label": "Politica de Privacy" },
+      { "href": "/terms-of-service", "label": "Termini di Servizio" }
     ],
     "disclaimerTitle": "Disclaimer",
     "affiliateDisclaimer": {
@@ -21,23 +14,28 @@
     },
     "scientificDisclaimer": "Questo prodotto non è destinato a diagnosticare, trattare, curare o prevenire alcuna malattia. I risultati possono variare.",
     "copyright": "© {year} Curcumin+. Tutti i diritti riservati.",
-    "contact": {
-      "email": "supporto@nossodominio.com"
-    }
+    "contact": { "email": "supporto@nossodominio.com" },
+    "socialLinks": [
+      {
+        "name": "Facebook",
+        "href": "https://facebook.com",
+        "icon": "facebook"
+      },
+      {
+        "name": "Instagram",
+        "href": "https://instagram.com",
+        "icon": "instagram"
+      },
+      { "name": "Twitter", "href": "https://twitter.com", "icon": "twitter" }
+    ]
   },
   "en-US": {
     "brandName": "Curcumin+",
     "brandDescription": "A portal dedicated to natural wellness, offering science-based insights.",
     "legalTitle": "Information",
     "legalLinks": [
-      {
-        "href": "/privacy-policy",
-        "label": "Privacy Policy"
-      },
-      {
-        "href": "/terms-of-service",
-        "label": "Terms of Service"
-      }
+      { "href": "/privacy-policy", "label": "Privacy Policy" },
+      { "href": "/terms-of-service", "label": "Terms of Service" }
     ],
     "disclaimerTitle": "Disclaimer",
     "affiliateDisclaimer": {
@@ -46,23 +44,28 @@
     },
     "scientificDisclaimer": "This product is not intended to diagnose, treat, cure, or prevent any disease. Results may vary.",
     "copyright": "© {year} Curcumin+. All rights reserved.",
-    "contact": {
-      "email": "support@ourdomain.com"
-    }
+    "contact": { "email": "support@ourdomain.com" },
+    "socialLinks": [
+      {
+        "name": "Facebook",
+        "href": "https://facebook.com",
+        "icon": "facebook"
+      },
+      {
+        "name": "Instagram",
+        "href": "https://instagram.com",
+        "icon": "instagram"
+      },
+      { "name": "Twitter", "href": "https://twitter.com", "icon": "twitter" }
+    ]
   },
   "es-ES": {
     "brandName": "Curcumin+",
     "brandDescription": "Un portal dedicado al bienestar natural, que ofrece información basada en la ciencia.",
     "legalTitle": "Información",
     "legalLinks": [
-      {
-        "href": "/privacy-policy",
-        "label": "Política de Privacidad"
-      },
-      {
-        "href": "/terms-of-service",
-        "label": "Términos de Servicio"
-      }
+      { "href": "/privacy-policy", "label": "Política de Privacidad" },
+      { "href": "/terms-of-service", "label": "Términos de Servicio" }
     ],
     "disclaimerTitle": "Descargo de Responsabilidad",
     "affiliateDisclaimer": {
@@ -71,23 +74,28 @@
     },
     "scientificDisclaimer": "Este producto no está destinado a diagnosticar, tratar, curar o prevenir ninguna enfermedad. Los resultados pueden variar.",
     "copyright": "© {year} Curcumin+. Todos los derechos reservados.",
-    "contact": {
-      "email": "soporte@nuestrodominio.com"
-    }
+    "contact": { "email": "soporte@nuestrodominio.com" },
+    "socialLinks": [
+      {
+        "name": "Facebook",
+        "href": "https://facebook.com",
+        "icon": "facebook"
+      },
+      {
+        "name": "Instagram",
+        "href": "https://instagram.com",
+        "icon": "instagram"
+      },
+      { "name": "Twitter", "href": "https://twitter.com", "icon": "twitter" }
+    ]
   },
   "pt-BR": {
     "brandName": "Curcumin+",
     "brandDescription": "Um portal dedicado ao bem-estar natural, oferecendo insights baseados na ciência.",
     "legalTitle": "Informações",
     "legalLinks": [
-      {
-        "href": "/privacy-policy",
-        "label": "Política de Privacidade"
-      },
-      {
-        "href": "/terms-of-service",
-        "label": "Termos de Serviço"
-      }
+      { "href": "/privacy-policy", "label": "Política de Privacidade" },
+      { "href": "/terms-of-service", "label": "Termos de Serviço" }
     ],
     "disclaimerTitle": "Aviso Legal",
     "affiliateDisclaimer": {
@@ -96,8 +104,19 @@
     },
     "scientificDisclaimer": "Este produto não se destina a diagnosticar, tratar, curar ou prevenir qualquer doença. Os resultados podem variar.",
     "copyright": "© {year} Curcumin+. Todos os direitos reservados.",
-    "contact": {
-      "email": "suporte@nosso-dominio.com"
-    }
+    "contact": { "email": "suporte@nosso-dominio.com" },
+    "socialLinks": [
+      {
+        "name": "Facebook",
+        "href": "https://facebook.com",
+        "icon": "facebook"
+      },
+      {
+        "name": "Instagram",
+        "href": "https://instagram.com",
+        "icon": "instagram"
+      },
+      { "name": "Twitter", "href": "https://twitter.com", "icon": "twitter" }
+    ]
   }
 }

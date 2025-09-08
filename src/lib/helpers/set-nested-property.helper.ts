@@ -2,10 +2,10 @@
 /**
  * @file set-nested-property.helper.ts
  * @description Helper atómico, puro y de propósito general para la asignación
- *              de propiedades anidadas. Es el motor de ensamblaje de la
- *              arquitectura de internacionalización IMAS.
- * @version 2.1.0
- * @author RaZ Podestá - MetaShark Tech
+ *              de propiedades anidadas. Corregido de forma exhaustiva para ser
+ *              tipo-seguro bajo la estricta directiva `noUncheckedIndexedAccess`.
+ * @version 2.3.0
+ * @author IA Ingeniera de Software Senior v2.0
  * @see src/i18n.ts (Consumidor Principal)
  * @see .docs-espejo/lib/helpers/set-nested-property.helper.ts.md
  */
@@ -26,20 +26,30 @@ export function setNestedProperty(
   path: string,
   value: any
 ): Record<string, any> {
+  if (!path) {
+    return obj;
+  }
+
   const keys = path.split(".");
   let current = obj;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
-    // Si la clave no existe o no es un objeto, se crea un objeto vacío.
-    // Esto sobrescribirá valores primitivos si un path entra en conflicto.
+    // CORRECCIÓN: Cláusula de guarda explícita para satisfacer a `noUncheckedIndexedAccess`.
+    if (key === undefined) continue;
+
     if (typeof current[key] !== "object" || current[key] === null) {
       current[key] = {};
     }
     current = current[key];
   }
 
-  current[keys[keys.length - 1]] = value;
+  const lastKey = keys[keys.length - 1];
+  // CORRECCIÓN: Cláusula de guarda explícita para la asignación final.
+  if (lastKey !== undefined) {
+    current[lastKey] = value;
+  }
+
   return obj;
 }
 // src/lib/helpers/set-nested-property.helper.ts

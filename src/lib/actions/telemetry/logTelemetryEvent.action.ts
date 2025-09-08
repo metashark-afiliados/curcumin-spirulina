@@ -2,35 +2,33 @@
 /**
  * @file logTelemetryEvent.action.ts
  * @description Server Action soberana y blindada para la persistencia de eventos
- *              de telemetría. Refactorizada para usar el HOC `withLogger`,
- *              asegurando que su ejecución sea una transacción observable y
- *              atómica.
+ *              de telemetría. Refactorizada para consumir el HOC genérico
+ *              `withCorrelationId`, resolviendo el error de tipo TS2345.
+ * @author IA Ingeniera de Software Senior v2.0
  * @version 2.0.0
- * @author L.I.A. Legacy
+ * @see .docs-espejo/lib/actions/telemetry/logTelemetryEvent.action.ts.md
  */
 "use server";
 
-import type pino from "pino";
-import { withLogger } from "@/lib/helpers/with-logger.helper";
+import { withCorrelationId } from "@/lib/helpers/correlation-id.helper";
+import { logger } from "@/lib/logger";
 import { type ActionResult } from "@/lib/types/actions";
-import {
-  TelemetryEventSchema,
-  type TelemetryEvent,
-} from "@/lib/validators/TelemetryEvent.schema";
+import { TelemetryEventSchema } from "@/lib/validators/TelemetryEvent.schema";
 
 /**
  * @private
+ * @async
  * @function logTelemetryEventHandler
- * @description Lógica interna de la Server Action. Recibe el logger inyectado.
- * @param {pino.Logger} logger - La instancia del logger transaccional.
- * @param {unknown} eventData - Los datos del evento crudos desde el cliente.
+ * @description Lógica interna de la Server Action. Valida y registra un
+ *              único evento de telemetría.
+ * @param {unknown} eventData - Los datos del evento crudos recibidos desde el cliente.
  * @returns {Promise<ActionResult<boolean>>} Un resultado simple de éxito/fracaso.
  */
 async function logTelemetryEventHandler(
-  logger: pino.Logger,
   eventData: unknown
 ): Promise<ActionResult<boolean>> {
   const baseContext = { component: "TelemetryAction" };
+
   const validation = TelemetryEventSchema.safeParse(eventData);
 
   if (!validation.success) {
@@ -40,16 +38,16 @@ async function logTelemetryEventHandler(
         error: validation.error.flatten(),
         receivedData: eventData,
       },
-      "Evento de telemetría inválido recibido."
+      "Evento de telemetría inválido recibido. La acción falló."
     );
     return { success: false, error: "generic.error_invalid_data" };
   }
 
-  const telemetryEvent = validation.data as TelemetryEvent;
+  const telemetryEvent = validation.data;
 
   logger.info(
     { ...baseContext, telemetryEvent },
-    `Evento '${telemetryEvent.eventName}' registrado.`
+    `Evento '${telemetryEvent.eventName}' registrado con éxito.`
   );
 
   return { success: true, data: true };
@@ -58,8 +56,9 @@ async function logTelemetryEventHandler(
 /**
  * @public
  * @action logTelemetryEvent
- * @description Server Action pública, envuelta por el HOC `withLogger` para
- *              garantizar una ejecución transaccional y observable.
+ * @description Server Action pública. Es la SSoT para registrar eventos de
+ *              telemetría desde el cliente. Envuelve la lógica de negocio con
+ *              un contexto de correlación.
  */
-export const logTelemetryEvent = withLogger(logTelemetryEventHandler);
+export const logTelemetryEvent = withCorrelationId(logTelemetryEventHandler);
 // src/lib/actions/telemetry/logTelemetryEvent.action.ts

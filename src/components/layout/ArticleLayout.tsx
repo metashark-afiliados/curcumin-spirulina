@@ -1,28 +1,25 @@
 // src/components/layout/ArticleLayout.tsx
 /**
  * @file ArticleLayout.tsx
- * @description Aparato de layout de presentación puro y de servidor. Su única
- *              responsabilidad es renderizar la estructura visual de un
- *              artículo de blog. Refactorizado para recibir el logger
- *              transaccional vía props y participar explícitamente en la
- *              observabilidad.
- * @version 6.0.0
+ * @description Aparato de layout de presentación puro y de servidor. Nivelado
+ *              para eliminar la última dependencia de tipo de logging obsoleta
+ *              y para implementar una internacionalización completa de sus
+ *              cadenas de texto internas.
  * @author L.I.A. Legacy
+ * @version 7.0.0
  * @see .docs-espejo/components/layout/ArticleLayout.tsx.md
  */
 import "server-only";
 
+import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import { Calendar, User } from "lucide-react";
-import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
-import type pino from "pino";
 
+import { logger } from "@/lib/logger";
 import { Link } from "@/lib/navigation";
 
-// La firma se actualiza para incluir el logger.
 export interface ArticleLayoutProps {
-  logger: pino.Logger;
   post: {
     title: string;
     tags: string[];
@@ -35,11 +32,20 @@ export interface ArticleLayoutProps {
   components: MDXRemoteProps["components"];
   t: {
     backToBlogLink: string;
+    imageAltText: string;
+    authorLabel: string;
   };
 }
 
+/**
+ * @component ArticleLayout
+ * @description Un componente de servidor de presentación puro que renderiza la
+ *              estructura completa de un artículo de blog. Recibe todos sus datos
+ *              y contenido de UI a través de props.
+ * @param {ArticleLayoutProps} props Las propiedades del componente.
+ * @returns {Promise<React.ReactElement>} El layout del artículo renderizado.
+ */
 export async function ArticleLayout({
-  logger, // El logger ahora es una dependencia explícita.
   post,
   source,
   components,
@@ -49,7 +55,6 @@ export async function ArticleLayout({
     component: "ArticleLayout",
     title: post.title,
   };
-  // Se elimina la llamada a `getCorrelationId()`.
   logger.trace(
     baseContext,
     "Renderizando layout de presentación de artículo en servidor."
@@ -70,10 +75,11 @@ export async function ArticleLayout({
         </h1>
         <div className="mt-6 flex items-center justify-center gap-6 text-sm text-white/70">
           <div className="flex items-center gap-2">
-            <User size={14} /> <span>{post.author}</span>
+            <User size={14} aria-hidden="true" />
+            <span aria-label={t.authorLabel}>{post.author}</span>
           </div>
           <div className="flex items-center gap-2">
-            <Calendar size={14} />{" "}
+            <Calendar size={14} aria-hidden="true" />
             <time dateTime={post.date}>{post.formattedDate}</time>
           </div>
         </div>
@@ -84,7 +90,7 @@ export async function ArticleLayout({
           <div className="relative h-64 w-full overflow-hidden rounded-lg shadow-2xl md:h-[500px]">
             <Image
               src={post.featuredImage}
-              alt={`Imagen de destaque para el artículo: ${post.title}`}
+              alt={t.imageAltText.replace("{title}", post.title)}
               fill
               className="object-cover"
               priority

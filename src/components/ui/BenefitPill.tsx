@@ -1,20 +1,21 @@
 // src/components/ui/BenefitPill.tsx
 /**
  * @file src/components/ui/BenefitPill.tsx
- * @description Aparato de UI atómico (Molécula) de presentación puro y accesible.
- *              Nivelado para una adherencia estricta a la API de logging del
- *              cliente unificada, garantizando una observabilidad consistente.
- * @version 4.0.0
+ * @description Aparato de UI atómico (Molécula). Nivelado para una observabilidad
+ *              de élite, integrando telemetría para rastrear el interés del
+ *              usuario (hover). Se mejora la accesibilidad del icono.
  * @author L.I.A. Legacy
+ * @version 5.0.0
  * @see .docs-espejo/components/ui/BenefitPill.tsx.md
  */
 "use client";
 
 import { motion } from "framer-motion";
 import { type LucideIcon } from "lucide-react";
-import React, { useId } from "react";
+import React, { useCallback, useId } from "react";
+
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging";
 
 export interface BenefitPillProps {
   icon: LucideIcon;
@@ -30,13 +31,29 @@ export function BenefitPill({
   index,
 }: BenefitPillProps): React.ReactElement {
   const titleId = useId();
-  const baseContext: LogContext = {
-    component: "BenefitPill",
+  const { trackEvent } = useTelemetry();
+
+  /**
+   * @private
+   * @function handleMouseEnter
+   * @description Registra un evento de telemetría y un log de información cuando
+   *              el usuario interactúa con la píldora, indicando interés.
+   */
+  const handleMouseEnter = useCallback(() => {
+    clientLogger.info(
+      "[BenefitPill]",
+      "Hover detectado en píldora de beneficio.",
+      {
+        title,
+      }
+    );
+    trackEvent("BENEFIT_HOVER", { benefitTitle: title });
+  }, [trackEvent, title]);
+
+  clientLogger.trace("[BenefitPill]", "Renderizando píldora de beneficio.", {
     title,
     index,
-  };
-
-  clientLogger.trace(baseContext, "Renderizando píldora de beneficio.");
+  });
 
   return (
     <motion.article
@@ -51,9 +68,11 @@ export function BenefitPill({
         scale: 1.03,
         boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
       }}
+      onMouseEnter={handleMouseEnter} // MEJORA: Se añade el tracker de telemetría.
     >
       <div className="mb-4 flex-shrink-0 rounded-full bg-brand-accent p-3 text-on_brand shadow-md">
-        <Icon size={28} />
+        {/* MEJORA: El icono es decorativo y se oculta a los lectores de pantalla. */}
+        <Icon size={28} aria-hidden="true" />
       </div>
       <h3 id={titleId} className="mb-2 text-lg font-bold text-white">
         {title}

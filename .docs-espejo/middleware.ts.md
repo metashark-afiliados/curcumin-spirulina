@@ -1,45 +1,50 @@
-<!-- .docs-espejo/middleware.ts.md -->
+// .docs-espejo/middleware.ts.md
 /**
  * @file .docs-espejo/middleware.ts.md
- * @description Documento Espejo y SSoT conceptual para el aparato `middleware`.
- * @author L.I.A. Legacy
- * @version 4.0.0
+ * @description Documento Espejo y SSoT conceptual para el orquestador de middleware.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 2.0.0
  */
-# Manifiesto Conceptual: Aparato `middleware.ts` (Orquestador del Edge)
+# Manifiesto Conceptual: `middleware.ts`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **guardián de entrada y el orquestador resiliente del pipeline de la aplicación**. Se ejecuta en el Edge Runtime para cada petición. Sus responsabilidades son:
+Este aparato es el **Punto de Entrada Unificado y el Guardián del Edge** de la aplicación. Su rol estratégico es orquestar la ejecución secuencial de una serie de manejadores atómicos que aplican lógica de negocio transversal (como i18n y telemetría) a cada petición entrante.
 
-1.  **Establecer la Trazabilidad:** Inicia la observabilidad transaccional generando un `correlationId` nativo del Edge (`crypto.randomUUID()`).
-2.  **Orquestar el Pipeline:** Invoca una secuencia de manejadores atómicos (`handleI18n`, etc.) de forma ordenada.
-3.  **Propagar el Contexto Explícitamente:** Pasa el `correlationId` como argumento a todos los sub-sistemas (manejadores, loggers), siguiendo el patrón de propagación de contexto canónico para el Edge Runtime.
-4.  **Garantizar la Resiliencia:** Implementa un "escudo de resiliencia" (`try/catch`) que previene fallos, asegurando que cada error sea capturado, logueado con su `correlationId`, y devuelto al cliente.
+Su propósito es implementar un pipeline de procesamiento de peticiones que sea observable, resiliente y mantenible, adhiriéndose al principio de "Configuración sobre Código" al definir la secuencia de lógica de forma declarativa.
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-El `middleware.ts` actúa como un orquestador que genera y propaga explícitamente el contexto de la petición.
+La arquitectura se basa en un patrón de "Pipeline Encadenado" envuelto en un contexto de observabilidad.
 
 ```mermaid
 graph TD
-    A[Petición del Usuario] --> B["`middleware` function"];
-    B -- "1. Genera `correlationId` con `crypto.randomUUID()`" --> C{Pipeline de Manejadores};
-    C -- "2. Llama a `handleI18n(request, correlationId)`" --> D[Respuesta de I18n];
-    D -- "3. Añade `x-correlation-id` a la cabecera de respuesta" --> E["`edgeLogger.info()` (Éxito)"];
-    E --> F[Respuesta Final al Cliente];
-    
-    subgraph "Escudo de Resiliencia"
-        C -- "Fallo en un manejador" --> G["Bloque `catch`"];
-        G -- "4. `edgeLogger.error()` con `correlationId`" --> H[Log Crítico];
-        H -- "5. Retorna `NextResponse(500)` con `x-correlation-id`" --> F;
+    A[Petición Entrante] --> B(HOC `withCorrelationId`);
+    subgraph "Contexto de Correlación"
+        B --> C{Pipeline de Middleware};
+        C --> D[1. `handleI18n`];
+        D --> E[2. `handleTelemetry`];
+        E --> F[... Futuros Manejadores];
+    end
+    F --> G[Respuesta Final al Cliente];
+
+    subgraph "Manejo de Errores"
+      C -- Falla Crítica --> H{`try/catch` Global};
+      H --> I[Log Error Crítico];
+      I --> J[Reescribe a Página de Error 500];
     end
 3. Contrato de API
-middleware(request: NextRequest): Promise<NextResponse>: La función principal que Next.js invoca.
-config: { matcher: string[] }: Define las rutas en las que se ejecutará el middleware.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Pipeline de Manejadores Dinámico: Implementar un sistema donde el orden de los manejadores pueda ser configurado a través de Vercel Edge Config.
-Manejador de Autenticación (JWT): Crear un handleAuth que valide un token JWT en el Edge, protegiendo las rutas de forma temprana.
-Manejador de A/B Testing: Crear un handleABTesting que asigne al usuario a un grupo de prueba y reescriba la URL a una variante de página.
-Manejador de Modo Mantenimiento: Crear un handleMaintenance que, si una variable en Edge Config está activa, redirija todas las peticiones a una página de mantenimiento estática.
-Manejador de Inyección de Headers de Seguridad: Crear un handleSecurityHeaders que añada automáticamente headers de seguridad estándar (CSP, XSS, etc.) a todas las respuestas.
-<!-- .docs-espejo/middleware.ts.md -->
+middleware: La función exportada por defecto, que cumple con la firma esperada por Next.js ((request: NextRequest) => Promise<NextResponse>).
+config: Un objeto exportado que define el matcher para especificar a qué rutas se aplica el middleware.
+4. Zona de Melhorias Futuras
+Pipeline Configurable: La lista de manejadores está codificada. Podría ser externalizada a un archivo de configuración (middleware.config.ts) para una mayor flexibilidad.
+Manejo de Errores por Etapa: Implementar try/catch individuales alrededor de cada llamada a un manejador dentro del pipeline para permitir que el sistema continúe incluso si un manejador no crítico (como la telemetría) falla.
+Bypass Dinámico de Middleware: Añadir una lógica que pueda deshabilitar manejadores específicos basándose en variables de entorno o en cabeceras de la petición, para facilitar la depuración.
+Métricas de Rendimiento por Manejador: Registrar la duración de la ejecución de cada manejador individualmente para identificar cuellos de botella en el Edge.
+Integración de handleMaintenance: Añadir el manejador de modo de mantenimiento al inicio del pipeline.
+Integración de handleRedirects: Añadir el manejador de redirecciones canónicas al pipeline.
+Inyección de Dependencias: Refactorizar el pipeline a una clase MiddlewarePipeline que pueda tener dependencias (como el logger) inyectadas para facilitar las pruebas.
+Pruebas de Integración del Pipeline: Escribir pruebas de integración que envíen peticiones mock y verifiquen que los manejadores son llamados en el orden correcto y que la respuesta final es la esperada.
+Soporte para Múltiples Pipelines: Implementar una lógica en el middleware principal que elija qué pipeline ejecutar basándose en la ruta de la petición (ej. un pipeline para /api y otro para el resto de la app).
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/middleware.ts.md

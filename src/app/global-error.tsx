@@ -1,36 +1,35 @@
 // src/app/global-error.tsx
 /**
  * @file src/app/global-error.tsx
- * @description Componente de error global de Next.js (Client Component).
- *              Este componente captura y gestiona los errores de nivel superior
- *              que ocurren en la aplicación del lado del cliente.
- *              Reporta estos errores a Sentry para monitoreo de producción
- *              y registra una copia en la consola del navegador utilizando `clientLogger`
- *              para una observabilidad local y de desarrollo.
- * @version 1.0.0
- * @author L.I.A. Legacy
+ * @description Componente de error global resiliente e internacionalizado.
+ *              Refactorizado para aceptar un nombre de ícono y consumir el
+ *              componente de UI `FullScreenError` como Client Component.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 7.0.0
  * @see .docs-espejo/app/global-error.tsx.md
- * @see https://nextjs.org/docs/app/api-reference/file-conventions/global-error
- * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
  */
-"use client"; // Es un Client Component para capturar errores del lado del cliente.
+"use client";
 
 import * as Sentry from "@sentry/nextjs";
-import NextError from "next/error";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
-// IMPORTACIÓN ADICIONAL: Integramos nuestro logger de cliente para observabilidad local.
+import { FullScreenError } from "@/components/shared/FullScreenError";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
+import { Link } from "@/lib/navigation";
+import {
+  type GlobalErrorContent,
+  GlobalErrorContentSchema,
+} from "@/lib/validators/i18n/GlobalError.schema";
 
 /**
+ * @public
  * @component GlobalError
  * @description Componente global para la captura y visualización de errores en el cliente.
- *              Garantiza que incluso los fallos críticos de UI sean reportados a Sentry
- *              y logueados localmente, manteniendo un "Escudo de Resiliencia" para la observabilidad.
+ *              Reporta a Sentry, registra localmente y delega la renderización de la
+ *              UI al componente `FullScreenError`.
  * @param {object} props - Propiedades del componente.
- * @param {Error & { digest?: string }} props.error - El objeto de error capturado por Next.js.
+ * @param {Error & { digest?: string }} props.error - El objeto de error capturado.
  * @returns {React.ReactElement}
  */
 export default function GlobalError({
@@ -38,33 +37,58 @@ export default function GlobalError({
 }: {
   error: Error & { digest?: string };
 }): React.ReactElement {
-  useEffect(() => {
-    // 1. Reportar el error a Sentry para monitoreo en producción.
-    Sentry.captureException(error);
+  const t = useTranslations("app.globalError");
 
-    // 2. Registrar el error en la consola del navegador usando nuestro `clientLogger`.
-    // Esto proporciona una capa adicional de observabilidad, especialmente en desarrollo,
-    // o si Sentry no se inicializa correctamente o es bloqueado por un ad-blocker.
+  useEffect(() => {
+    Sentry.captureException(error);
     clientLogger.error(
       {
         component: "GlobalError",
         errorName: error.name,
         errorDigest: error.digest,
         originalError: error,
-      } as LogContext, // Aserción de tipo
-      `[GlobalError] Se ha capturado un error global en el cliente: ${error.message}`
+      },
+      `Error global de cliente capturado: ${error.message}`
     );
   }, [error]);
 
+  const fallbackContent: GlobalErrorContent = {
+    title: "An Error Occurred",
+    description:
+      "We're sorry, something went wrong. Our team has been notified.",
+    backToHomeButton: "Back to Home",
+  };
+
+  let content: GlobalErrorContent;
+  try {
+    const rawContent = t.raw("");
+    const validation = GlobalErrorContentSchema.safeParse(rawContent);
+    if (!validation.success) throw validation.error;
+    content = validation.data;
+  } catch (err) {
+    clientLogger.error(
+      { component: "GlobalError", error: err },
+      "Fallo al validar contenido i18n para la página de error global."
+    );
+    content = fallbackContent;
+  }
+
   return (
     <html>
-      <body>
-        {/* `NextError` es el componente de página de error por defecto de Next.js.
-            Su definición de tipo requiere una prop `statusCode`. Sin embargo,
-            dado que el App Router no expone códigos de estado para los errores
-            capturados por `global-error.tsx`, simplemente pasamos `0` para
-            renderizar un mensaje de error genérico. */}
-        <NextError statusCode={0} />
+      <body className="bg-brand-background font-sans text-white">
+        <FullScreenError
+          iconName="ServerCrash"
+          title={content.title}
+          description={content.description}
+          actionSlot={
+            <Link
+              href="/"
+              className="inline-block rounded-md bg-white px-8 py-3 font-bold text-brand-base-green-dark shadow-lg transition-transform hover:scale-105"
+            >
+              {content.backToHomeButton}
+            </Link>
+          }
+        />
       </body>
     </html>
   );

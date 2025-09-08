@@ -3,10 +3,10 @@
  * @file src/config/telemetry.config.ts
  * @description Manifiesto de Configuración y Única Fuente de Verdad (SSoT) para
  *              el sistema de telemetría del cliente. Centraliza todas las constantes
- *              y valores de configuración para desacoplar el `TelemetryProvider`
- *              de su configuración.
- * @author L.I.A. Legacy
+ *              y valores de configuración.
+ * @author IA Ingeniera de Software Senior v2.0
  * @version 1.0.0
+ * @see .docs-espejo/config/telemetry.config.ts.md
  */
 "use client";
 
@@ -21,7 +21,7 @@ export const SESSION_COOKIE_NAME = "app_session_id";
  * @description El intervalo de tiempo (en milisegundos) que el sistema espera para
  *              enviar un lote de eventos de telemetría al servidor.
  */
-export const BATCH_INTERVAL_MS = 5000;
+export const BATCH_INTERVAL_MS = 5000; // 5 segundos
 
 /**
  * @constant MAX_BATCH_SIZE

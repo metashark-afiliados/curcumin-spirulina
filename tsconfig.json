@@ -1,59 +1,43 @@
-// tsconfig.json
-/**
- * @file tsconfig.json
- * @description Constitución del compilador de TypeScript y SSoT para las reglas del lenguaje.
- *              Nivelado para una inclusión de archivos más específica y una exclusión
- *              robusta, resolviendo errores de archivos no encontrados y optimizando
- *              el proceso de compilación.
- * @author L.I.A. Legacy
- * @version 3.0.0
- * @see .docs-espejo/tsconfig.json.md
- */
+
 {
   "compilerOptions": {
-    // --- Comportamiento del Lenguaje ---
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    /* Base Options */
     "esModuleInterop": true,
-
-    // --- Módulos ---
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "target": "ESNext",
+    "allowJs": true,
     "resolveJsonModule": true,
+    "moduleDetection": "force",
     "isolatedModules": true,
 
-    // --- Salida del Compilador ---
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "checkJs": true,
+
+    /* Bundled projects */
+    "lib": ["dom", "dom.iterable", "ESNext"],
     "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }],
     "incremental": true,
 
-    // --- Integración con Frameworks ---
-    "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-
-    // --- Resolución de Rutas ---
+    /* Path Aliases */
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-
-    // --- Misceláneo ---
-    "skipLibCheck": true
+    }
   },
-  // CORRECCIÓN: Se refina la inclusión de archivos para mayor precisión.
   "include": [
     "next-env.d.ts",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    ".next/types/**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/lib/types/database",
+    "src/lib/types/database/_shared.ts"
   ],
-  // CORRECCIÓN: Se añade una exclusión explícita para directorios que no
-  // deben ser parte del programa de compilación principal.
-  "exclude": ["node_modules", "tests"]
+  "exclude": ["node_modules"]
 }
-// tsconfig.json
+

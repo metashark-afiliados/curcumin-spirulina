@@ -1,32 +1,45 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+// src/instrumentation-client.ts
+/**
+ * @file src/instrumentation-client.ts
+ * @description Configuración y SSoT para la inicialización de Sentry en el cliente.
+ *              Nivelado para alinearse con la API del SDK `@sentry/nextjs@8.x`,
+ *              eliminando propiedades y exportaciones obsoletas para resolver
+ *              errores de tipo.
+ * @author L.I.A. Legacy
+ * @version 2.0.0
+ * @see https://docs.sentry.io/platforms/javascript/guides/nextjs/
+ */
 
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://3b0ee8eeb3bcb81f57ea817b87867e16@o4509967263465472.ingest.de.sentry.io/4509967264776272",
+  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Add optional integrations for additional features
+  // Integraciones para funcionalidades adicionales. `replayIntegration` ha sido reemplazado por `Replay`.
   integrations: [
-    Sentry.replayIntegration(),
+    Sentry.replayIntegration({
+      // Opciones adicionales de Replay si son necesarias.
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
   ],
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // La tasa de muestreo de trazas. Ajustar este valor en producción.
+  tracesSampleRate: 1.0,
 
-  // Define how likely Replay events are sampled.
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
+  // La propiedad `enableLogs` ha sido deprecada en esta versión del SDK.
+  // La captura de logs se gestiona a través de integraciones o transportes.
+
+  // Tasa de muestreo para eventos de Replay.
   replaysSessionSampleRate: 0.1,
 
-  // Define how likely Replay events are sampled when an error occurs.
+  // Tasa de muestreo para eventos de Replay cuando ocurre un error.
   replaysOnErrorSampleRate: 1.0,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
+  // Habilitar `debug: true` imprimirá información útil en la consola durante la configuración.
   debug: false,
 });
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+// La exportación `onRouterTransitionStart` ya no es necesaria ni está disponible.
+// El tracing de Sentry maneja las transiciones de ruta automáticamente.
+// src/instrumentation-client.ts

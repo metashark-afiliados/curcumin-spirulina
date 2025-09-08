@@ -1,42 +1,53 @@
-// .docs-espejo/app/layout.tsx.md
-/\*\*
-
-- @file .docs-espejo/app/layout.tsx.md
-- @description Documento Espejo y SSoT conceptual para el layout raíz.
-- @author RaZ Podestá - MetaShark Tech
-- @version 1.0.0
-  \*/
-
-# Manifiesto Conceptual: Aparato `app/layout.tsx`
+// .docs-espejo/app/[locale]/layout.tsx.md
+/**
+ * @file .docs-espejo/app/[locale]/layout.tsx.md
+ * @description Documento Espejo y SSoT conceptual para el aparato LocaleLayout.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
+ */
+# Manifiesto Conceptual: `app/[locale]/layout.tsx` (LocaleLayout)
 
 ## 1. Rol Estratégico y Propósito
 
-En la arquitectura de internacionalización de élite con el App Router de Next.js, el propósito de este aparato es la **abstracción y la delegación radical**. Su única responsabilidad es actuar como el punto de entrada raíz que Next.js requiere, y delegar inmediatamente el control total del renderizado a sus layouts hijos (específicamente, al layout de locale).
+Este aparato es el **Proveedor de Contexto Universal y el Orquestador de UI Global** de la aplicación. Su propósito estratégico es envolver todas las páginas en un conjunto consistente de proveedores de contexto y componentes de layout.
 
-No contiene lógica de UI, no define la estructura `<html>`/`<body>`, y no carga recursos globales. Es un componente "pass-through" puro, diseñado para permitir la máxima flexibilidad y el correcto manejo del `locale` en los layouts anidados.
+Actúa como la SSoT para:
+1.  **La estructura `<html>` y `<body>` de la página.**
+2.  **La provisión de traducciones** a través de `NextIntlClientProvider`.
+3.  **La inicialización de la telemetría del cliente** a través de `TelemetryProvider`.
+4.  **El renderizado de la UI persistente** (Header, Footer).
 
 ## 2. Arquitectura y Flujo de Ejecución
 
-Es el componente más simple de la aplicación.
+Es un Server Component que recibe el `locale` de la URL y lo utiliza para configurar los proveedores.
 
 ```mermaid
 graph TD
-    A[Petición a Next.js] --> B["`app/layout.tsx`"];
-    B -- "Simplemente renderiza" --> C["`children` (ej. `app/[locale]/layout.tsx`)"];
+    A[Renderizado de Página] --> B{`[locale]/layout.tsx`};
+    subgraph "Proveedores de Contexto"
+        B --> C[Obtiene mensajes para el `locale`];
+        C --> D(Renderiza `NextIntlClientProvider`);
+        D --> E(Renderiza `TelemetryProvider`);
+    end
+    subgraph "Composición de UI"
+        E --> F(Renderiza `Header`);
+        F --> G[Renderiza `children` (la página activa)];
+        G --> H(Renderiza `Footer`);
+    end
 3. Contrato de API
-Props de Entrada:
-children: React.ReactNode: El layout o página anidada que Next.js provee.
-Salida: El children renderizado sin ninguna envoltura adicional.
+Entradas:
+children: React.ReactNode. El contenido de la página actual.
+params.locale: string. El locale activo, inyectado por el App Router.
+Salidas: La estructura HTML completa de la página.
 4. Zona de Melhorias Futuras
-PROVEEDORES GLOBALES INDEPENDIENTES DE LOCALE: Si la aplicación necesitara un proveedor de contexto que deba envolver absolutamente todo y que no dependa del locale (ej. un proveedor de estado para un feature flag global cargado desde el Edge), este sería el único lugar canónico para colocarlo.
-INSTRUMENTACIÓN GLOBAL: Este es el punto más alto del árbol de componentes, haciéndolo un candidato para envolver children en instrumentación que no dependa de React (ej. Sentry.captureRequestError a través de un ErrorBoundary si no se usara el global-error.tsx).
-DOCUMENTACIÓN EN ESPAÑOL: Traducir este documento espejo al español para consistencia.
-LOGGING DE INICIO: Aunque simplificado, podría incluir un serverLogger.trace para marcar el inicio absoluto del proceso de renderizado del lado del servidor.
-COMENTARIOS DE ARQUITECTURA: Añadir comentarios más extensos en el propio código explicando por qué es un "pass-through" y dirigiendo a los desarrolladores al [locale]/layout.tsx como el verdadero layout raíz funcional.
-VALIDACIÓN DE children: En un escenario de depuración avanzada, se podría añadir una validación en desarrollo para asegurar que children sea un único elemento React válido.
-INTEGRACIÓN CON maintenance.tsx: Podría contener una lógica de alto nivel para renderizar un layout de mantenimiento si un feature flag está activo, bypassando toda la lógica de la aplicación.
-WRAPPER DE Suspense GLOBAL: Envolver children en un componente <Suspense> con un fallback de esqueleto de página completa muy genérico, como una red de seguridad final para la carga de datos.
-CONTEXTO DE nonce PARA CSP: Si se utiliza una Content Security Policy (CSP), este layout podría ser responsable de crear un contexto para propagar el nonce de la petición a todos los componentes que necesiten inyectar scripts o estilos.
-ANÁLISIS DE children: Podría usar React.Children.toArray para analizar sus hijos y aplicar props condicionales, aunque esto es un patrón avanzado y potencialmente frágil.
-// .docs-espejo/app/layout.tsx.md
-```
+Proveedor de Tema (Theme Provider): Añadir un proveedor para gestionar temas claro/oscuro (ej. next-themes).
+Proveedor de Notificaciones (Toasts): Integrar un proveedor para mostrar notificaciones globales (ej. react-hot-toast).
+Gestión de Consentimiento de Cookies (CMP): Envolver TelemetryProvider en un ConsentProvider que solo lo active si el usuario ha aceptado las cookies de seguimiento.
+Carga de Datos Globales: Este layout podría ser el lugar para cargar datos que son necesarios en todas las páginas (ej. información del usuario si hubiera autenticación).
+Pruebas de Integración de Proveedores: Escribir pruebas que verifiquen que los componentes anidados pueden acceder correctamente a los contextos de i18n y telemetry.
+Optimización de getMessages: Para aplicaciones con muchos mensajes, la función getMessages podría ser optimizada para cargar solo un subconjunto de mensajes globales.
+Soporte para Múltiples Layouts de Locale: Utilizar Route Groups para tener diferentes layouts para diferentes secciones de la aplicación.
+Inyección de nonce para CSP: Pasar el nonce generado en el middleware a este layout para ser inyectado en los scripts.
+Soporte para draftMode: Añadir lógica para que, si el modo borrador de Next.js está activo, se muestre un banner indicándolo.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/app/[locale]/layout.tsx.md

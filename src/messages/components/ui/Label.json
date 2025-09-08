@@ -1,0 +1,14 @@
+{
+  "it-IT": {
+    "requiredIndicatorAriaLabel": "Campo obbligatorio"
+  },
+  "en-US": {
+    "requiredIndicatorAriaLabel": "Required field"
+  },
+  "es-ES": {
+    "requiredIndicatorAriaLabel": "Campo obligatorio"
+  },
+  "pt-BR": {
+    "requiredIndicatorAriaLabel": "Campo obrigatório"
+  }
+}

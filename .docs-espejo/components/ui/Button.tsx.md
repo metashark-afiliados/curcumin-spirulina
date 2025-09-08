@@ -1,43 +1,44 @@
-<!-- .docs-espejo/components/ui/Button.tsx.md -->
+// .docs-espejo/components/ui/Button.tsx.md
 /**
  * @file .docs-espejo/components/ui/Button.tsx.md
- * @description Documento Espejo y SSoT conceptual para el aparato Button.
- * @author L.I.A. Legacy
- * @version 3.2.0
+ * @description Documento Espejo y SSoT conceptual para el aparato atómico `Button`.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `Button`
+# Manifiesto Conceptual: `Button.tsx`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **átomo de interacción primario** de la aplicación. Su propósito es proporcionar una SSoT única, consistente y de élite para todos los elementos clicables que disparan una acción, ya sea un envío de formulario, una navegación o una interacción de UI.
+O aparato `Button` é o **átomo fundamental da interactividade** na aplicación. O seu propósito estratéxico é proporcionar un compoñente de botón unificado, accesible e altamente personalizable que sirva como a Única Fonte de Verdade (SSoT) para todas as accións clicables.
 
-Centraliza la lógica de estilo, estados (normal, hover, disabled, loading), accesibilidad y animaciones, garantizando que la experiencia de usuario sea coherente y adhiriéndose estrictamente al principio DRY.
+Implementa un sistema de variantes robusto a través de `class-variance-authority` (cva) e está enriquecido con micro-interaccións de `framer-motion`, observabilidade e soberanía de contido.
 
-## 2. Arquitectura de Élite
+## 2. Arquitectura y Flujo de Ejecución
 
-Es un componente de cliente (`"use client"`) polimórfico y compuesto:
+É un Componente de Cliente (`"use client"`) que encapsula lóxica de presentación e estado interno (loading).
 
-*   **Polimorfismo:** Utiliza la primitiva `<Slot>` de Radix UI (a través de la prop `asChild`) para permitir que el botón se renderice como un componente hijo (ej. un `<Link>`), heredando los estilos y comportamientos.
-*   **Estilo Declarativo:** Utiliza `class-variance-authority` (`cva`) para gestionar un conjunto extendido de variantes de estilo semánticas (`variant`, `size`).
-*   **Estado de Carga Accesible:** Gestiona un estado `loading` que muestra un spinner, deshabilita el botón y notifica a los lectores de pantalla a través de atributos `aria-busy` y texto específico para lectores de pantalla.
-*   **Microinteracciones:** Integra `framer-motion` para proporcionar feedback táctil y visual (`whileHover`, `whileTap`) y efectos avanzados.
-*   **Observabilidad:** Utiliza `clientLogger` (de `src/lib/client-logger.ts` con la API unificada `(context, message)`) para registrar su propio flujo y estados, contribuyendo a la observabilidad del lado del cliente.
-
-## 3. Contrato de API
-
-### Props de Entrada (`ButtonProps`):
-*   Hereda todas las props de un `<button>` nativo de `framer-motion`.
-*   **`variant?`**: `"default" | "destructive" | "outline" | "secondary" | "ghost" | "link" | "subtle" | "accent"`: El estilo visual semántico.
-*   **`size?`**: `"default" | "sm" | "lg" | "icon" | "pill"`: El tamaño.
-*   **`asChild?: boolean`**: Si es `true`, se renderiza como su hijo directo.
-*   **`loading?: boolean`**: Si es `true`, muestra un spinner y se deshabilita.
-*   **`loadingText?: string`**: Texto opcional que se anuncia a los lectores de pantalla durante el estado de carga, proporcionando un feedback de accesibilidad superior.
-
-## 4. Zona de Mejoras Nuevas (Valor al Proyecto)
-
-*   **SOPORTE PARA ICONOS DECLARATIVOS:** Añadir props `iconLeft?: LucideIcon` y `iconRight?: LucideIcon` que rendericen iconos de forma automática junto al texto. Esto centralizaría la lógica de renderizado de iconos dentro del botón.
-*   **ESTADOS DE ÉXITO/ERROR VISUALES:** Añadir variantes visuales (ej. `variant: "success" | "error"`) que puedan ser activadas por un corto período tras una acción exitosa o fallida, para proporcionar feedback inmediato al usuario.
-*   **FEEDBACK AUDITIVO (Opcional):** Añadir una prop `playClickSound?: boolean` que, si es `true`, reproduzca un sonido sutil de clic (`onTap`) como feedback auditivo opcional, mejorando la experiencia para algunos usuarios.
-*   **GRUPO DE BOTONES (ButtonGroup):** Crear un componente `ButtonGroup` que envuelva múltiples `Button` y aplique estilos para que parezcan un único control segmentado, útil para grupos de acciones relacionadas.
-*   **TOOLTIP INTEGRADO:** Añadir una prop `tooltip?: string` que renderice un `Tooltip` de Radix al hacer `hover` sobre el botón, proporcionando información adicional sobre la acción sin ocupar espacio en la UI.
-<!-- .docs-espejo/components/ui/Button.tsx.md -->
+```mermaid
+graph TD
+    A[Componente Pai] --> B(Renderiza `<Button>`);
+    subgraph "Lóxica Interna do Botón"
+      B --> C[Obtén contido i18n con `useTranslations`];
+      B --> D[Calcula clases CSS con `cva`];
+      B --> E{Está en estado `loading`?};
+      E -- Si --> F[Renderiza `Loader2` e texto de carga];
+      E -- Non --> G[Renderiza `children`];
+      B --> H(Engade animacións con `framer-motion`);
+    end
+    H --> I[Renderiza `<button>` ou `<Slot>` final];
+3. Contrato de API
+Props Principais:
+variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'subtle' | 'accent' - Define o estilo visual.
+size: 'default' | 'sm' | 'lg' | 'icon' | 'pill' - Define as dimensións e o padding.
+loading: boolean - Mostra un indicador de carga e desactiva o botón.
+asChild: boolean - Permite que o botón delegue as súas propiedades e estilo a un compoñente fillo directo.
+4. Zona de Melhorias Futuras
+Icon Support Integrado: Engadir unha prop icon: LucideIcon e iconPosition: 'left' | 'right' para xestionar de forma nativa a colocación de iconas xunto ao texto, garantindo un espazado consistente.
+Variante de Carregamento Esquelético: Crear unha variante de loading que mostre unha animación de esqueleto do mesmo tamaño que o botón, en lugar de cambiar o seu contido, para evitar cambios de layout (CLS).
+Contador de Clics por Telemetría: Integrar o hook useTelemetry para que, opcionalmente, cada clic no botón poida ser rexistrado como un evento de telemetría, proporcionando datos sobre as interaccións máis comúns na UI.
+Extracción do Hook useButton: Para compoñentes máis complexos, a lóxica de estado e cva podería ser extraída a un hook useButton para unha maior reutilización e testeabilidade.
+Accesibilidade mellorada (Focus-visible): Aínda que xa está presente, auditar e mellorar os estilos de focus-visible para todas as variantes para garantir un alto contraste e unha clara indicación de foco para a navegación por teclado.
+// .docs-espejo/components/ui/Button.tsx.md

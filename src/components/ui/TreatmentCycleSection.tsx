@@ -2,16 +2,11 @@
 /**
  * @file src/components/ui/TreatmentCycleSection.tsx
  * @description Aparato soberano, resiliente y de cliente. Orquesta la exhibición
- *              de las fases del tratamiento, obteniendo y VALIDANDO su propio contenido
- *              de i18n contra un schema Zod antes de renderizar.
- *              Se adhiere a la API de logging del cliente unificada para una
- *              observabilidad completa de los ciclos de tratamiento.
- * @version 6.4.0
+ *              de las fases del tratamiento. Nivelado a la arquitectura de
+ *              logging de ConvertiKit con datos estructurados.
  * @author L.I.A. Legacy
+ * @version 8.1.0
  * @see .docs-espejo/components/ui/TreatmentCycleSection.tsx.md
- * @see src/lib/client-logger.ts (SSoT para el logger de cliente)
- * @see src/lib/types/logging.ts (SSoT para `LogContext`)
- * @see src/lib/validators/i18n/TreatmentCycleSection.schema.ts (SSoT para la validación del contenido)
  */
 "use client";
 
@@ -19,64 +14,43 @@ import { useTranslations } from "next-intl";
 import React, { useId } from "react";
 import { AnimationWrapper } from "@/components/ui/AnimationWrapper";
 import { TreatmentCycleCard } from "@/components/ui/TreatmentCycleCard";
-// IMPORTACIÓN CORREGIDA: Apunta a la nueva SSoT del clientLogger
 import { clientLogger } from "@/lib/client-logger";
 import {
   TreatmentCycleSectionContentSchema,
   type TreatmentCycleSectionContent,
 } from "@/lib/validators/i18n/TreatmentCycleSection.schema";
-import { type LogContext } from "@/lib/types/logging"; // Importar LogContext
 
-/**
- * @component TreatmentCycleSection
- * @description Muestra una sección que describe el ciclo de tratamiento del producto
- *              dividido en fases. Es un componente de cliente que obtiene y valida
- *              su propio contenido de i18n, y orquesta la renderización de las tarjetas
- *              de ciclo individual (`TreatmentCycleCard`).
- * @returns {React.ReactElement | null} La sección de ciclos de tratamiento renderizada
- *                                    o `null` si falla la validación del contenido.
- */
 export function TreatmentCycleSection(): React.ReactElement | null {
   const t = useTranslations("components.ui.TreatmentCycleSection");
   const titleId = useId();
   let content: TreatmentCycleSectionContent;
 
   try {
-    const rawContent = t.raw(""); // Obtenemos todo el namespace para validación.
+    const rawContent = t.raw("");
     const validation = TreatmentCycleSectionContentSchema.safeParse(rawContent);
     if (!validation.success) {
-      // USO DE CLIENTLOGGER CORREGIDO: (context, message)
       clientLogger.error(
-        {
-          component: "TreatmentCycleSection",
-          error: validation.error.flatten(),
-          rawContent,
-        },
-        "Validação de conteúdo de TreatmentCycleSection falhou."
+        "[TreatmentCycleSection]",
+        "Fallo en la validación de contenido. No se renderizará.",
+        { error: validation.error.flatten(), rawContent }
       );
-      throw new Error(
-        `Validação de conteúdo de TreatmentCycleSection falhou: ${JSON.stringify(
-          validation.error.flatten()
-        )}`
-      );
+      return null;
     }
     content = validation.data;
   } catch (error) {
-    // USO DE CLIENTLOGGER CORREGIDO: (context, message)
     clientLogger.error(
-      { error, component: "TreatmentCycleSection" } as LogContext, // Aserción de tipo para LogContext
-      "Erro ao obter ou validar conteúdo da TreatmentCycleSection. A seção não será renderizada."
+      "[TreatmentCycleSection]",
+      "Error al obtener contenido. No se renderizará.",
+      { error }
     );
     return null;
   }
 
-  // USO DE CLIENTLOGGER CORREGIDO: (context, message)
+  // Firma de logging de ConvertiKit: contexto estático, datos como objeto.
   clientLogger.trace(
-    {
-      component: "TreatmentCycleSection",
-      cycleCount: content.cycles.length,
-    },
-    "Renderizando seção de ciclos de tratamento soberana e validada."
+    "[TreatmentCycleSection]",
+    "Renderizando sección de ciclos de tratamiento soberana y validada.",
+    { cycleCount: content.cycles.length }
   );
 
   return (

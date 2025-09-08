@@ -1,34 +1,40 @@
-<!-- .docs-espejo/app/not-found.tsx.md -->
+// .docs-espejo/app/not-found.tsx.md
 /**
  * @file .docs-espejo/app/not-found.tsx.md
- * @description Documento Espejo y SSoT conceptual para la página 404 global.
- * @author L.I.A. Legacy
- * @version 7.0.0
+ * @description Documento Espejo y SSoT conceptual para el manejador de 404 global.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `not-found.tsx` (Página 404 Global)
+# Manifiesto Conceptual: `app/not-found.tsx` (Global Not Found)
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es la **red de seguridad soberana y observable** de la aplicación. Implementa el patrón de **"Aislamiento Contextual"** para garantizar una ejecución estable y trazable. Sus responsabilidades son:
-1.  **Aislar `next-intl`:** Ejecuta `getTranslations` en un entorno puro.
-2.  **Observabilidad Transaccional:** Establece un contexto de logging con `storage.run()` para el resto de la lógica.
-3.  **Resiliencia:** Usa `try/catch` y validación Zod para asegurar que siempre se renderice, incluso con contenido de i18n corrupto.
+Este aparato es el **Fallback de Enrutamiento de Último Recurso**. Su única responsabilidad es capturar y manejar peticiones a rutas que no coinciden con ningún patrón definido en la aplicación, **incluyendo la ausencia de un prefijo de `locale`**.
 
-## 2. Arquitectura de Flujo ("Aislamiento Contextual")
+Su propósito estratégico es proporcionar una experiencia de usuario controlada en un escenario de error de enrutamiento grave y registrar un log de alta severidad.
+
+## 2. Arquitectura y Flujo de Ejecución
+
+Es un Server Component que se renderiza directamente por el App Router de Next.js cuando ninguna otra ruta coincide.
 
 ```mermaid
 graph TD
-    A[Next.js invoca `NotFoundPage`] --> B["Fase 1: getTranslations (Pura)"];
-    B --> C["Fase 2: Inicia `storage.run()`"];
-    subgraph "Contexto Transaccional Activo"
-      C --> D[Lógica de App: Logging, Validación, Renderizado];
-    end
-    D --> E[HTML Final de la página 404];
+    A[Petición a `/ruta-invalida`] --> B{Next.js App Router};
+    B -- No encuentra coincidencia --> C[Renderiza `app/not-found.tsx`];
+    C --> D[Log de error crítico];
+    C --> E(Renderiza `FullScreenError` con texto estático);
 3. Contrato de API
-Props de Entrada: Ninguna. Es invocado por el framework.
-Salida: El JSX.Element que representa la página 404 completa.
-4. Zona de Mejoras Nuevas (Valor al Proyecto)
-Logging de 404 Persistente: Implementar una Server Action para registrar las URLs que generan errores 404 en una base de datos o sistema de analíticas, proveyendo datos valiosos para SEO.
-Campo de Búsqueda Interna: Añadir una barra de búsqueda a la página 404 para ayudar al usuario a encontrar lo que busca.
-Sugerencias de Páginas Inteligentes: Implementar una lógica que sugiera páginas relevantes basadas en la URL mal escrita.
-<!-- .docs-espejo/app/not-found.tsx.md -->
+Entradas: Ninguna.
+Salidas: La Promise<React.ReactElement> que resuelve al JSX de la página 404.
+4. Zona de Melhorias Futuras
+Redirección Inteligente: Añadir una lógica que intente adivinar la intención del usuario a partir de la URL incorrecta.
+Soporte i18n Básico: Intentar detectar el idioma desde la cabecera Accept-Language y mostrar un mensaje estático en ese idioma.
+Componente Link del Lado del Servidor: Investigar si se puede crear una versión de nuestro Link de navigation.ts que no dependa del locale.
+Integración con Sentry: Capturar un Sentry.captureMessage para que estos errores 404 sean visibles en Sentry.
+Página de Estado del Sistema: El enlace de acción podría dirigir a una página de estado del sistema (/status).
+Formulario de Feedback: Incluir un formulario para que los usuarios puedan reportar el enlace roto.
+Diseño Personalizado: Crear una ilustración personalizada para la página 404.
+Pruebas de Integración: Escribir una prueba de Playwright que verifique que esta página se renderiza correctamente.
+Análisis de 404s: Configurar un log drain para analizar patrones en las rutas no encontradas.
+Internacionalización de la Documentación: Traducir este documento espejo.
+// .docs-espejo/app/not-found.tsx.md

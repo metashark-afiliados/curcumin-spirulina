@@ -3,11 +3,11 @@
  * @file src/messages/types.ts
  * @description Contrato de datos de élite y SSoT para la arquitectura IMAS.
  *              Define los tipos para los módulos de mensajes, el manifiesto y la
- *              estructura recursiva `AbstractIntlMessages` esperada por `next-intl`.
- *              Esta versión simplifica y clarifica el tipo `AbstractIntlMessages`
- *              para una alineación estricta con las expectativas de `next-intl`.
+ *              estructura `AbstractIntlMessages`. Ha sido refactorizado para
+ *              permitir estructuras de datos complejas (arrays, objetos) que
+ *              serán validadas a nivel de componente con Zod.
  * @author L.I.A. Legacy
- * @version 3.0.0
+ * @version 4.0.0
  * @see .docs/I18N_MANIFESTO_V2.md
  * @see .docs-espejo/messages/types.ts.md
  */
@@ -16,14 +16,13 @@ import { type AppLocale } from "@/lib/navigation";
 /**
  * @public
  * @type AbstractIntlMessages
- * @description Representa la estructura recursiva que `next-intl` puede procesar
- *              directamente para interpolación. Un mensaje puede ser una `string` o
- *              un objeto anidado de más mensajes. Para tipos de datos complejos
- *              (arrays, números, booleanos), se debe usar `t.raw('namespace.key')`
- *              en el componente consumidor y validar su estructura con Zod.
+ * @description Representa la estructura recursiva que `next-intl` puede procesar.
+ *              Permite strings para interpolación directa (`t('key')`) y `any` para
+ *              estructuras complejas (`t.raw('key')`) que serán validadas con Zod
+ *              en el componente consumidor.
  */
 export type AbstractIntlMessages = {
-  [key: string]: string | AbstractIntlMessages;
+  [key: string]: string | any; // Permite arrays y objetos anidados
 };
 
 /**

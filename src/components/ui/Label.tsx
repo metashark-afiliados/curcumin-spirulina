@@ -2,11 +2,10 @@
 /**
  * @file src/components/ui/Label.tsx
  * @description Aparato de UI atómico y soberano para etiquetas de formulario.
- *              Nivelado para una adherencia estricta a la API de logging del
- *              cliente unificada, garantizando una observabilidad consistente
- *              y tipo-segura.
- * @version 6.0.0
+ *              Nivelado a la arquitectura de logging de ConvertiKit, garantizando
+ *              una observabilidad consistente y tipo-segura.
  * @author L.I.A. Legacy
+ * @version 6.1.0
  * @see .docs-espejo/components/ui/Label.tsx.md
  */
 "use client";
@@ -16,7 +15,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { useTranslations } from "next-intl";
 import * as React from "react";
 import { clientLogger } from "@/lib/client-logger";
-import { type LogContext } from "@/lib/types/logging";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
@@ -46,13 +44,11 @@ const Label = React.forwardRef<
 >(({ className, variant, required, children, ...props }, ref) => {
   const t = useTranslations("components.ui.Label");
 
-  const logContext: LogContext = {
-    component: "Label",
+  clientLogger.trace("[Label]", "Renderizando componente de etiqueta.", {
     htmlFor: props.htmlFor,
     variant,
     required,
-  };
-  clientLogger.trace(logContext, "Renderizando componente de etiqueta.");
+  });
 
   return (
     <LabelPrimitive.Root

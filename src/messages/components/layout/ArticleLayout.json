@@ -1,0 +1,22 @@
+{
+  "it-IT": {
+    "backToBlogLink": "Torna al Blog",
+    "authorLabel": "Autore dell'articolo",
+    "imageAltText": "Immagine di primo piano per l'articolo: {title}"
+  },
+  "en-US": {
+    "backToBlogLink": "Back to Blog",
+    "authorLabel": "Article author",
+    "imageAltText": "Featured image for the article: {title}"
+  },
+  "es-ES": {
+    "backToBlogLink": "Volver al Blog",
+    "authorLabel": "Autor del artículo",
+    "imageAltText": "Imagen destacada para el artículo: {title}"
+  },
+  "pt-BR": {
+    "backToBlogLink": "Voltar para o Blog",
+    "authorLabel": "Autor do artigo",
+    "imageAltText": "Imagem de destaque para o artigo: {title}"
+  }
+}

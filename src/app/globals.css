@@ -2,11 +2,12 @@
 /**
  * @file globals.css
  * @description Manifiesto de Estilo Global y Única Fuente de Verdad (SSoT)
- *              para los valores de los tokens de diseño. Inicializa las
- *              directivas de Tailwind CSS y define el sistema de diseño
- *              completo a través de variables CSS semánticas.
- * @version 2.1.0
+ *              para los valores de los tokens de diseño. Nivelado para
+ *              alinearse con la SSoT de branding, corrigiendo inconsistencias
+ *              semánticas y añadiendo los tokens faltantes.
+ * @version 3.0.0
  * @author L.I.A. Legacy
+ * @see .docs/BRANDING_SSOT.md (SSoT de la estrategia de branding)
  */
 
 @tailwind base;
@@ -17,31 +18,35 @@
  * =====================================================================
  *                          DESIGN TOKEN SSoT
  * =====================================================================
- * Define los valores HSL para todos los tokens de diseño.
- * Tailwind Config consume estos nombres, pero esta es la SSoT de los valores.
+ * Define los valores HSL para todos los tokens de diseño canónicos.
+ * tailwind.config.ts consume estos nombres, pero esta es la SSoT de los valores.
  * =====================================================================
  */
 @layer base {
   :root {
-    /* --- Tokens de Marca --- */
-    --brand-primary: 147 60% 20%; /* Verde Profundo */
-    --brand-primary-dark: 147 65% 15%; /* Verde Escuro (para fundos de header/footer) */
-    --brand-accent: 30 95% 55%; /* Laranja Vibrante (Cúrcuma) */
-    --brand-accent-hover: 30 95% 50%; /* Laranja Escuro (para interação) */
-    --brand-background: 240 10% 4%; /* Fundo Principal (Quase Preto) */
-    --brand-border: 240 5% 15%; /* Borda Sutil */
+    /* --- Tokens de Marca - Paleta Primaria (Naranja Vitalidad) --- */
+    --brand-primary-orange: 30 95% 55%;
+    --brand-primary-orange-hover: 30 95% 50%;
+
+    /* --- Tokens de Marca - Paleta Base (Verde Confianza) --- */
+    --brand-base-green: 147 60% 20%;
+    --brand-base-green-dark: 147 65% 15%;
+
+    /* --- Tokens de Marca - Paleta de Acentos --- */
+    --brand-accent-leaf-green: 85 50% 45%;
+
+    /* --- Tokens de Acción Semánticos --- */
+    --brand-cta-red: 0 72% 51%;
 
     /* --- Tokens de Feedback --- */
-    --feedback-error: 0 72% 51%; /* Vermelho para Erros */
-
-    /* --- Tokens de Conteúdo --- */
-    --on-brand: 0 0% 100%; /* Texto sobre fundos de marca (Branco) */
+    --feedback-error: 0 72% 51%; /* Mismo valor que CTA, pero con propósito distinto */
 
     /* --- Tokens de Layout (Default Dark Theme) --- */
-    --background: 240 10% 4%; /* Default background (Brand Background) */
-    --foreground: 0 0% 98%; /* Default text color (Branco Suave) */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --brand-border: 240 5% 15%;
 
-    /* --- Tokens de Geometria --- */
+    /* --- Tokens de Geometría --- */
     --radius: 0.75rem; /* 12px */
   }
 

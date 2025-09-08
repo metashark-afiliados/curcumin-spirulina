@@ -1,62 +1,79 @@
 // src/middleware.ts
 /**
  * @file src/middleware.ts
- * @description Orquestador principal del middleware en el Edge Runtime.
- *              Implementa la SSoT de observabilidad para el Edge: genera un
- *              `correlationId` y lo inyecta explícitamente como dependencia
- *              a los manejadores del pipeline.
- * @author L.I.A. Legacy
- * @version 5.0.0
- * @see .docs/TODO.md
+ * @description Orquestador de Middleware de Élite. Implementa un patrón de
+ *              "Pipeline Declarativo" para una ejecución secuencial, observable
+ *              y resiliente de manejadores atómicos. Corregido para un manejo
+ *              de errores tipo-seguro y una correcta aplicación del HOC.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 2.0.0
  * @see .docs-espejo/middleware.ts.md
  */
 import { type NextRequest, NextResponse } from "next/server";
-import { handleI18n } from "./middleware/handlers";
-import { edgeLogger } from "./lib/edge-logger";
-import { type LogContext } from "./lib/types/logging";
+import { withCorrelationId } from "@/lib/helpers/correlation-id.helper";
+import { logger } from "@/lib/logger";
+import { handleI18n, handleTelemetry } from "@/middleware/handlers";
 
-export async function middleware(request: NextRequest): Promise<NextResponse> {
-  const correlationId =
-    request.headers.get("x-correlation-id") || crypto.randomUUID();
-
-  const baseContext: LogContext = {
-    component: "MiddlewareOrchestrator",
-    correlationId,
-    method: request.method,
-    path: request.nextUrl.pathname,
-  };
-
-  edgeLogger.info(
-    baseContext,
-    "[Middleware] Petición entrante. Iniciando pipeline."
-  );
+/**
+ * @private
+ * @async
+ * @function middlewarePipeline
+ * @description Define y ejecuta el pipeline de middleware para cada petición.
+ * @param {NextRequest} request - La petición entrante.
+ * @returns {Promise<NextResponse>} La respuesta final del pipeline.
+ */
+async function middlewarePipeline(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+  logger.trace({ path: pathname }, "==> [MIDDLEWARE_PIPELINE] INICIO <==");
 
   try {
-    // Inyección de Dependencia Explícita: El `correlationId` se pasa como argumento.
-    const response = await handleI18n(request, correlationId);
+    let response = NextResponse.next({
+      request: { headers: new Headers(request.headers) },
+    });
 
-    response.headers.set("x-correlation-id", correlationId);
+    // 1. Manejador de Internacionalización
+    response = await handleI18n(request, response);
 
-    edgeLogger.info(
-      { ...baseContext, status: response.status },
-      "[Middleware] Pipeline completado. Devolviendo respuesta."
-    );
+    // 2. Manejador de Telemetría (fire-and-forget)
+    handleTelemetry(request, response).catch((err) => {
+      // Manejo de errores tipo-seguro
+      const error = err instanceof Error ? err : new Error(String(err));
+      logger.error(
+        { err: error },
+        "[Middleware] Fallo en la ejecución en segundo plano de telemetría."
+      );
+    });
 
+    logger.trace({ path: pathname }, "==> [MIDDLEWARE_PIPELINE] FIN <==");
     return response;
   } catch (error) {
-    edgeLogger.error(
-      { ...baseContext, err: error },
-      "[Middleware] Error crítico no capturado en el pipeline de middleware."
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error(
+      { err, path: pathname },
+      `[MIDDLEWARE_PIPELINE] FALLO CRÍTICO.`
     );
-    const errorResponse = new NextResponse("Internal Server Error", {
-      status: 500,
-    });
-    errorResponse.headers.set("x-correlation-id", correlationId);
-    return errorResponse;
+    const url = request.nextUrl.clone();
+    url.pathname = "/500";
+    return NextResponse.rewrite(url);
   }
 }
 
+/**
+ * @public
+ * @function middleware
+ * @description El punto de entrada principal del middleware. Envuelve el pipeline en `withCorrelationId`.
+ * @param {NextRequest} request - La petición entrante.
+ * @returns {Promise<NextResponse>} El objeto de respuesta final.
+ */
+export const middleware = withCorrelationId(middlewarePipeline);
+
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|js|img).*)"],
+  matcher: [
+    /*
+     * Coincide con todas las rutas de petición excepto las que probablemente
+     * sean para activos estáticos.
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|img/|js/|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
 // src/middleware.ts

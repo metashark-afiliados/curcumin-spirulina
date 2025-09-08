@@ -1,95 +1,104 @@
 // src/lib/helpers/geoip.helper.ts
 /**
  * @file src/lib/helpers/geoip.helper.ts
- * @description Aparato de infraestructura atómico y SSoT para la lógica de
- *              detección de GeoIP en el Edge Runtime. Su única responsabilidad
- *              es extraer la información de geolocalización de una petición y
- *              mapearla a un `locale`, utilizando `edgeLogger` y un `correlationId`
- *              propagado explícitamente para una observabilidad completa.
- * @author L.I.A. Legacy
- * @version 4.0.0
+ * @description Aparato de infraestructura atómico para la lógica de
+ *              detección de GeoIP. Implementa una lógica pura, resiliente y
+ *              simplificada para determinar la ubicación geográfica de un
+ *              visitante a través de su IP.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  * @see .docs-espejo/lib/helpers/geoip.helper.ts.md
  */
+import "server-only";
+
 import { type NextRequest } from "next/server";
 import { COUNTRY_TO_LOCALE_MAP } from "@/config/geoip.config";
-import { edgeLogger } from "@/lib/edge-logger";
-import { type LogContext } from "@/lib/types/logging";
-import { type AppLocale } from "@/lib/navigation";
+import { logger } from "@/lib/logger";
 
 /**
- * @public
- * @function lookupCountryFromRequest
- * @description Extrae el código de país (ISO 3166-1 Alpha-2) de la cabecera
- *              `x-vercel-ip-country` inyectada por Vercel. Es resiliente a fallos.
- * @param {NextRequest} request - El objeto de la petición entrante.
- * @param {string} correlationId - El ID de correlación para el logging.
- * @returns {string | null} El código del país o `null` si no se encuentra o hay un error.
+ * @private
+ * @function isPrivateIpAddress
+ * @description Verifica si una dirección IP es privada (LAN).
+ * @param {string} ip - La dirección IP a verificar.
+ * @returns {boolean} `true` si la IP es privada.
  */
-export function lookupCountryFromRequest(
-  request: NextRequest,
-  correlationId: string
-): string | null {
-  const baseContext: LogContext = { component: "GeoIPHelper", correlationId };
-  try {
-    const country = request.headers.get("x-vercel-ip-country");
-    if (country) {
-      edgeLogger.trace(
-        { ...baseContext, country },
-        "[GeoIPHelper] País detectado vía Vercel header."
-      );
-      return country;
-    }
-    edgeLogger.trace(
-      baseContext,
-      "[GeoIPHelper] Header de Vercel no encontrado."
-    );
-    return null;
-  } catch (error) {
-    edgeLogger.error(
-      { ...baseContext, err: error },
-      "[GeoIPHelper] Error al intentar leer headers para detectar el país."
-    );
-    return null;
-  }
+function isPrivateIpAddress(ip: string): boolean {
+  const privateIpRegex =
+    /^(10\.\d{1,3}\.\d{1,3}\.\d{1,3})|(172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})|(192\.168\.\d{1,3}\.\d{1,3})|(127\.0\.0\.1)$/;
+  return privateIpRegex.test(ip);
 }
 
 /**
  * @public
- * @function mapCountryToLocale
- * @description Mapea un código de país a un `AppLocale` soportado, consumiendo
- *              la SSoT desde `geoip.config.ts`.
- * @param {string | null} countryCode - El código del país a mapear.
- * @param {string} correlationId - El ID de correlación para el logging.
- * @returns {AppLocale | undefined} El `AppLocale` correspondiente o `undefined` si
- *          no hay un mapeo definido.
+ * @async
+ * @function getLocaleFromGeoIP
+ * @description Determina un locale de la aplicación a partir de los datos
+ *              geográficos de la dirección IP de la petición.
+ * @param {NextRequest} request - El objeto de la petición entrante de Next.js.
+ * @returns {Promise<string | undefined>} El locale mapeado (ej. "it-IT") o undefined
+ *          si la detección falla o la IP no es relevante.
  */
-export function mapCountryToLocale(
-  countryCode: string | null,
-  correlationId: string
-): AppLocale | undefined {
-  const baseContext: LogContext = {
-    component: "GeoIPHelper",
-    countryCode,
-    correlationId,
-  };
+export async function getLocaleFromGeoIP(
+  request: NextRequest
+): Promise<string | undefined> {
+  const ip = request.ip;
+  const context = { ip };
 
-  if (!countryCode) {
+  if (!ip || isPrivateIpAddress(ip)) {
+    logger.trace(
+      context,
+      "[GeoIPHelper] IP privada o inválida. Saltando lookup."
+    );
     return undefined;
   }
 
-  const locale = COUNTRY_TO_LOCALE_MAP[countryCode.toUpperCase()];
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1500); // Timeout agresivo
 
-  if (locale) {
-    edgeLogger.trace(
-      { ...baseContext, locale },
-      `[GeoIPHelper] País '${countryCode}' mapeado a locale '${locale}'.`
+    const response = await fetch(
+      `http://ip-api.com/json/${ip}?fields=countryCode`,
+      {
+        signal: controller.signal,
+      }
     );
-  } else {
-    edgeLogger.trace(
-      baseContext,
-      `[GeoIPHelper] No se encontró mapeo de locale para el país '${countryCode}'.`
-    );
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`API response status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.status === "fail" || !data.countryCode) {
+      logger.warn(
+        { ...context, reason: data.message },
+        "[GeoIPHelper] API de GeoIP devolvió un fallo."
+      );
+      return undefined;
+    }
+
+    const countryCode = data.countryCode.toUpperCase();
+    const locale = COUNTRY_TO_LOCALE_MAP[countryCode];
+
+    if (locale) {
+      logger.trace(
+        { ...context, countryCode, detectedLocale: locale },
+        "[GeoIPHelper] Locale detectado por GeoIP."
+      );
+    }
+
+    return locale;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      logger.warn(context, "[GeoIPHelper] Lookup abortado por timeout.");
+    } else {
+      logger.error(
+        { err: error, ...context },
+        "[GeoIPHelper] Error de red en lookup."
+      );
+    }
+    return undefined;
   }
-  return locale;
 }
 // src/lib/helpers/geoip.helper.ts

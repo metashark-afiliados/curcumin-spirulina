@@ -1,52 +1,50 @@
-<!-- .docs-espejo/package.json.md -->
+// .docs-espejo/package.json.md
 /**
  * @file .docs-espejo/package.json.md
- * @description Documento Espejo y SSoT conceptual para el manifiesto del proyecto, package.json.
- * @author L.I.A. Legacy
- * @version 2.3.0
+ * @description Documento Espejo y SSoT conceptual para el aparato `package.json`.
+ * @author IA Ingeniera de Software Senior v2.0
+ * @version 1.0.0
  */
-# Manifiesto Conceptual: Aparato `package.json`
+# Manifiesto Conceptual: `package.json`
 
 ## 1. Rol Estratégico y Propósito
 
-Este aparato es el **corazón del proyecto y la Única Fuente de Verdad (SSoT) para sus dependencias, metadatos y scripts de tareas**. Su propósito es definir de forma declarativa el ecosistema de herramientas y librerías sobre el que se construye la aplicación, y proporcionar una interfaz de línea de comandos (`pnpm run <script>`) consistente y de alto nivel para todas las operaciones de desarrollo, calidad y build.
+El aparato `package.json` es el **manifiesto fundamental del proyecto**. Actúa como la Única Fuente de Verdad (SSoT) para tres dominios críticos:
 
-Estratégicamente, un `package.json` bien estructurado y mantenido es fundamental para:
-*   **Estabilidad:** Garantiza builds reproducibles.
-*   **Mantenibilidad:** Centraliza la gestión de versiones de dependencias.
-*   **Eficiencia (DX):** Automatiza tareas complejas a través de scripts simples.
-*   **Observabilidad:** Configura scripts de desarrollo para mejorar la legibilidad de los logs sin comprometer el rendimiento del `runtime`.
+1.  **Identidad:** Define los metadatos del proyecto (`name`, `version`, `description`).
+2.  **Dependencias:** Lista explícitamente todas las librerías de terceros necesarias para construir y ejecutar la aplicación, garantizando builds reproducibles a través del `pnpm-lock.yaml`.
+3.  **Operaciones:** Proporciona una API de línea de comandos a través de la sección `scripts`, que encapsula tareas complejas de desarrollo, testing, build y mantenimiento en comandos simples y predecibles.
 
-## 2. Arquitectura de la Configuración
+## 2. Arquitectura y Flujo de Ejecución
 
-La estructura del archivo se organiza en tres secciones principales:
+La arquitectura del `package.json` sigue el estándar de NPM. Su flujo de ejecución principal es a través del gestor de paquetes `pnpm`, que interpreta las secciones para orquestar acciones:
 
-*   **Metadatos:** Define la identidad del proyecto (`name`, `version`, `description`, etc.).
-*   **Scripts:** Es la API de línea de comandos del proyecto. Los scripts están diseñados para ser atómicos y componibles. Por ejemplo, `quality:check` compone otros scripts atómicos (`format:check`, `lint`, `typecheck`) para crear una puerta de calidad robusta. El script `dev` ha sido modificado para integrarse con `pino-pretty` a través de un pipe externo, resolviendo problemas de compatibilidad del logger en el entorno de Next.js.
-*   **Dependencias:**
-    *   `dependencies`: Librerías necesarias para que la aplicación se ejecute en producción.
-    *   `devDependencies`: Herramientas utilizadas únicamente durante el desarrollo, pruebas y build (ej. ESLint, Vitest, TypeScript, pino-pretty).
+*   **`pnpm install`:** Lee `dependencies` y `devDependencies` para construir el directorio `node_modules`.
+*   **`pnpm run <script>`:** Ejecuta el comando asociado a una clave en la sección `scripts`.
 
-## 3. Contrato de API (Scripts)
+El script `prepare` está configurado para ejecutar `husky`, instalando los hooks de Git (`pre-commit`) que actúan como una puerta de calidad automatizada, ejecutando `quality:check` antes de cada commit.
 
-La "API" de este aparato es el conjunto de comandos ejecutables vía `pnpm run`:
+## 3. Contrato de API (`scripts`)
 
-*   **Desarrollo:**
-    *   `dev`: Inicia el servidor de desarrollo de Next.js y pipea sus logs a `pino-pretty` para una salida legible.
-    *   `dev:pretty`: Alias para `dev`.
-*   **Build & Producción:** `build`, `start`
-*   **Calidad de Código:** `lint`, `lint:fix`, `format`, `format:check`, `typecheck`, `quality:check`
-*   **Pruebas:** `test`, `test:watch`, `test:unit`, `test:integration`, `test:coverage`
-*   **Generación de Artefactos:** `gen:i18n`, `gen:i18n:manifest`, `gen:i18n:types`
+La sección `scripts` define la interfaz pública para interactuar con el proyecto desde la línea de comandos:
 
-## 4. Zona de Mejoras Nuevas (Valor al Proyecto)
+*   **Desarrollo:** `pnpm dev`
+*   **Build:** `pnpm build`
+*   **Calidad:** `pnpm quality:check` (agrupa `format:check`, `lint`, `typecheck`)
+*   **Pruebas:** `pnpm test` (y sus variantes `:unit`, `:integration`)
+*   **Diagnóstico:** `pnpm diag:all` (audita la infraestructura de logging)
+*   **Generación de Código:** `pnpm gen:all` (automatiza la i18n)
 
-*   **Pruebas End-to-End (Playwright):** Integrar Playwright para pruebas E2E y añadir los scripts correspondientes (`e2e`, `e2e:ui`). Esto completaría el blindaje del proyecto con pruebas en todos los niveles.
-*   **Análisis de Bundle Interactivo:** Integrar `@next/bundle-analyzer` y un script (`analyze`) para visualizar el tamaño de los paquetes de JavaScript. Esto permitiría identificar y optimizar proactivamente los componentes que están añadiendo más peso al bundle.
-*   **Generación Automática de Changelog:** Integrar una herramienta como `standard-version` para automatizar la generación del `CHANGELOG.md` basada en los commits, siguiendo convenciones de commit semántico. Esto mejoraría la comunicación sobre las versiones y cambios del proyecto.
-*   **Hooks de Git Avanzados (`pre-push`):** Añadir un hook `pre-push` en Husky que ejecute `pnpm quality:check` para prevenir que se envíe código de baja calidad al repositorio antes de una revisión de código.
-*   **Auditoría de Dependencias Automatizada:** Añadir un script `audit:check` que ejecute `pnpm audit` con un umbral de severidad definido para detectar vulnerabilidades en las dependencias de forma temprana en el ciclo de desarrollo.
-*   **Pruebas de Regresión Visual (con `lost-pixel`):** Integrar una herramienta de pruebas de regresión visual (ej. `lost-pixel`) para detectar cambios inesperados en la UI entre diferentes entornos o versiones del código.
-*   **Integración con Storybook:** Añadir Storybook para el desarrollo y documentación aislada de componentes de UI, mejorando la coherencia y facilitando la colaboración en el diseño.
-*   **Generador de Manifiestos de Módulo (`Barrel Files`) Automatizado:** Crear un script que genere automáticamente los archivos `index.ts` para una exportación de módulos consistente en directorios como `src/middleware/handlers`, reduciendo el mantenimiento manual.
-<!-- .docs-espejo/package.json.md -->
+## 4. Zona de Melhorias Futuras
+
+1.  **Versionado y Changelog Automatizado:** Integrar `release-it` y `commitlint` para automatizar el versionado semántico y la generación de `CHANGELOG.md` basados en la convención de commits.
+2.  **Ejecución de Scripts en Paralelo:** Utilizar `npm-run-all` para ejecutar tareas de calidad en paralelo (`pnpm quality:check:parallel`), acelerando el pipeline de CI.
+3.  **Análisis de Dependencias:** Añadir un script `deps:audit` que utilice `pnpm audit` o `depcheck` para identificar vulnerabilidades de seguridad y dependencias no utilizadas.
+4.  **Generación de Documentación:** Implementar un script `docs:generate` que utilice `typedoc` para generar automáticamente documentación HTML a partir de los comentarios TSDoc.
+5.  **Mocking de API Centralizado:** Añadir un script `mock:server` que inicie un servidor MSW (Mock Service Worker) para el desarrollo de UI desacoplado de APIs externas.
+6.  **Tipado de Variables de Entorno:** Integrar `t3-env` para proporcionar validación y autocompletado tipo-seguro para las variables de entorno.
+7.  **Limpieza de Build Cache:** Añadir un script `clean` que elimine los directorios `.next` y `.turbo` para forzar una reconstrucción limpia del proyecto.
+8.  **Gestión de Migraciones de Base de Datos:** Para proyectos con esquemas más complejos, integrar una herramienta como `node-pg-migrate` y añadir scripts `db:migrate` y `db:rollback`.
+9.  **Pruebas E2E (Playwright):** Añadir scripts `e2e` y `e2e:ui` para ejecutar la suite de pruebas End-to-End.
+10. **Internacionalización de la Documentación:** Traducir este documento espejo a otros idiomas para facilitar el onboarding de equipos multilingües.
+// .docs-espejo/package.json.md
